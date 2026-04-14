@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MallMaze - Verify Receipt</title>
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+    <link rel="stylesheet" href="assets/css/react-styles.css">
+    <style>
+      .vr-video { width: 100%; max-height: 55vh; border-radius: 16px; background: #0b1020; }
+    </style>
+  </head>
+  <body class="bg-white">
+    <nav></nav>
+    <main class="container mx-auto px-4 py-10">
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold">Staff Receipt Verify</h1>
+        <p class="text-sm text-muted-foreground">Scan QR or paste token.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <div class="text-sm font-semibold">QR Scanner</div>
+            <button id="vr-start" class="rounded-lg bg-primary px-4 py-2 text-white text-sm font-semibold">Start</button>
+          </div>
+          <video id="vr-video" class="vr-video" autoplay playsinline muted></video>
+          <p id="vr-status" class="text-xs text-muted-foreground mt-3">Tip: Mobile Chrome works best.</p>
+        </section>
+
+        <section class="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <div class="text-sm font-semibold mb-2">Manual verify</div>
+          <div class="flex gap-2">
+            <input id="vr-token" class="rounded-lg border px-3 py-2 flex-1" placeholder="Paste receipt token" />
+            <button id="vr-verify" class="rounded-lg bg-primary px-4 py-2 text-white font-semibold">Verify</button>
+          </div>
+          <div id="vr-result" class="mt-4"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16 py-12">
+      <div class="container mx-auto px-4">
+        <div class="border-t border-gray-700 pt-8 text-center text-sm"><p>&copy; 2026 MallMaze. All rights reserved.</p></div>
+      </div>
+    </footer>
+
+    <script src="assets/js/config.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+    <script src="assets/js/supabase-client.js" defer></script>
+    <script src="assets/js/runtime-guard.js" defer></script>
+    <script src="assets/js/main.js" defer></script>
+  </body>
+</html>
+

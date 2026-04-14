@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MallMaze - Feedback</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-default-view="feedback">
+    <div id="location-modal" class="modal-backdrop">
+      <div class="modal">
+        <h2>Select Your Location</h2>
+        <p>All shopping data will be shown for your selected city.</p>
+        <select id="location-select"></select>
+        <button id="location-save" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">MallMaze</div>
+      <div class="topbar-right">
+        <div id="location-badge" class="pill"></div>
+        <div id="queue-badge" class="pill"></div>
+        <button id="auth-toggle" class="btn btn-soft">Login</button>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <aside class="sidebar">
+        <button class="nav-link active" data-view="dashboard">Dashboard</button>
+        <button class="nav-link" data-view="auth">Authentication</button>
+        <button class="nav-link" data-view="catalog">Categories & Stores</button>
+        <button class="nav-link" data-view="products">Products</button>
+        <button class="nav-link" data-view="cart">Cart & Checkout</button>
+        <button class="nav-link" data-view="payment">Payment</button>
+        <button class="nav-link" data-view="queue">Queue</button>
+        <button class="nav-link" data-view="rewards">Rewards</button>
+        <button class="nav-link" data-view="events">Events & Offers</button>
+        <button class="nav-link" data-view="feedback">Feedback</button>
+        <button class="nav-link" data-view="profile">Profile</button>
+        <button class="nav-link" data-view="admin">Admin</button>
+      </aside>
+
+      <main class="content">
+        <section id="dashboard" class="view active"></section>
+        <section id="auth" class="view"></section>
+        <section id="catalog" class="view"></section>
+        <section id="products" class="view"></section>
+        <section id="cart" class="view"></section>
+        <section id="payment" class="view"></section>
+        <section id="queue" class="view"></section>
+        <section id="rewards" class="view"></section>
+        <section id="events" class="view"></section>
+        <section id="feedback" class="view"></section>
+        <section id="profile" class="view"></section>
+        <section id="admin" class="view"></section>
+      </main>
+    </div>
+
+    <script src="./assets/js/main.js"></script>
+  </body>
+</html>
+

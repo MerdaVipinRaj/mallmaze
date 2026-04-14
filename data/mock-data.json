@@ -1,0 +1,99 @@
+{
+  "malls": [
+    {
+      "id": "1",
+      "name": "Grand Luxe Mall",
+      "location": "Connaught Place, New Delhi",
+      "image": "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=800",
+      "rating": 4.6,
+      "storeCount": 142,
+      "openHours": "10:00 AM - 10:00 PM",
+      "description": "Premium shopping destination with luxury brands and fine dining.",
+      "floors": 5,
+      "deliveryTime": "30 min"
+    },
+    {
+      "id": "2",
+      "name": "Phoenix Galleria",
+      "location": "Whitefield, Bangalore",
+      "image": "https://images.unsplash.com/photo-1567449303078-57ad995bd329?w=800",
+      "rating": 4.8,
+      "storeCount": 210,
+      "openHours": "10:00 AM - 11:00 PM",
+      "description": "The city's largest mall with international brands.",
+      "floors": 7,
+      "deliveryTime": "25 min"
+    },
+    {
+      "id": "3",
+      "name": "Royal Arcade",
+      "location": "Bandra West, Mumbai",
+      "image": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800",
+      "rating": 4.5,
+      "storeCount": 98,
+      "openHours": "11:00 AM - 9:00 PM",
+      "description": "Boutique mall featuring curated designer collections.",
+      "floors": 3,
+      "deliveryTime": "40 min"
+    },
+    {
+      "id": "4",
+      "name": "Metro Central Hub",
+      "location": "Anna Nagar, Chennai",
+      "image": "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800",
+      "rating": 4.3,
+      "storeCount": 175,
+      "openHours": "10:00 AM - 10:00 PM",
+      "description": "Family-friendly shopping and entertainment complex.",
+      "floors": 6,
+      "deliveryTime": "35 min"
+    }
+  ],
+  "stores": [
+    { "id": "s1", "mallId": "1", "name": "Luxe Fashion House", "category": "Fashion", "image": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=600", "rating": 4.7, "floor": "2nd Floor", "isOpen": true, "productCount": 350 },
+    { "id": "s2", "mallId": "1", "name": "TechZone Electronics", "category": "Electronics", "image": "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=600", "rating": 4.5, "floor": "3rd Floor", "isOpen": true, "productCount": 520 },
+    { "id": "s3", "mallId": "1", "name": "Gourmet Kitchen", "category": "Food & Dining", "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600", "rating": 4.8, "floor": "Ground Floor", "isOpen": true, "productCount": 85 },
+    { "id": "s4", "mallId": "2", "name": "SportX Arena", "category": "Sports", "image": "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=600", "rating": 4.4, "floor": "1st Floor", "isOpen": false, "productCount": 290 },
+    { "id": "s5", "mallId": "2", "name": "Beauty Boulevard", "category": "Beauty", "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600", "rating": 4.6, "floor": "2nd Floor", "isOpen": true, "productCount": 180 },
+    { "id": "s6", "mallId": "3", "name": "BookWorm Haven", "category": "Books", "image": "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=600", "rating": 4.9, "floor": "1st Floor", "isOpen": true, "productCount": 1200 },
+    { "id": "s7", "mallId": "1", "name": "Home Elegance", "category": "Home & Living", "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600", "rating": 4.3, "floor": "4th Floor", "isOpen": true, "productCount": 210 },
+    { "id": "s8", "mallId": "2", "name": "Kids Paradise", "category": "Kids", "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=600", "rating": 4.5, "floor": "3rd Floor", "isOpen": true, "productCount": 430 }
+  ],
+  "products": [
+    { "id": "p1", "storeId": "s1", "mallId": "1", "name": "Premium Silk Blazer", "price": 12999, "originalPrice": 18999, "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500", "category": "Fashion", "rating": 4.6, "reviews": 128, "inStock": true, "stockCount": 15, "variants": ["S", "M", "L", "XL"], "storeName": "Luxe Fashion House", "mallName": "Grand Luxe Mall", "deliveryTime": "2 hrs", "badge": "Bestseller" },
+    { "id": "p2", "storeId": "s2", "mallId": "1", "name": "Wireless Noise-Cancel Headphones", "price": 7499, "originalPrice": 9999, "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500", "category": "Electronics", "rating": 4.8, "reviews": 342, "inStock": true, "stockCount": 45, "variants": ["Black", "White", "Silver"], "storeName": "TechZone Electronics", "mallName": "Grand Luxe Mall", "deliveryTime": "1 hr", "badge": "Bestseller" },
+    { "id": "p3", "storeId": "s1", "mallId": "1", "name": "Italian Leather Handbag", "price": 8999, "originalPrice": 14999, "image": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500", "category": "Fashion", "rating": 4.5, "reviews": 89, "inStock": true, "stockCount": 8, "variants": ["Brown", "Black", "Tan"], "storeName": "Luxe Fashion House", "mallName": "Grand Luxe Mall", "deliveryTime": "2 hrs", "badge": "40% Off" },
+    { "id": "p4", "storeId": "s2", "mallId": "1", "name": "Smart Watch Pro X", "price": 24999, "originalPrice": 29999, "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500", "category": "Electronics", "rating": 4.7, "reviews": 567, "inStock": true, "stockCount": 22, "variants": ["42mm", "46mm"], "storeName": "TechZone Electronics", "mallName": "Grand Luxe Mall", "deliveryTime": "1 hr", "badge": "Trending" },
+    { "id": "p5", "storeId": "s5", "mallId": "2", "name": "Luxury Perfume Collection", "price": 5999, "originalPrice": 7999, "image": "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500", "category": "Beauty", "rating": 4.9, "reviews": 234, "inStock": true, "stockCount": 30, "variants": ["50ml", "100ml"], "storeName": "Beauty Boulevard", "mallName": "Phoenix Galleria", "deliveryTime": "25 min", "badge": "Top Rated" },
+    { "id": "p6", "storeId": "s4", "mallId": "2", "name": "Running Shoes Ultra Boost", "price": 11999, "originalPrice": 15999, "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500", "category": "Sports", "rating": 4.6, "reviews": 198, "inStock": true, "stockCount": 18, "variants": ["7", "8", "9", "10", "11"], "storeName": "SportX Arena", "mallName": "Phoenix Galleria", "deliveryTime": "25 min", "badge": "Popular" },
+    { "id": "p7", "storeId": "s1", "mallId": "1", "name": "Cashmere Overcoat", "price": 19999, "originalPrice": 29999, "image": "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=500", "category": "Fashion", "rating": 4.8, "reviews": 56, "inStock": true, "stockCount": 5, "variants": ["M", "L", "XL"], "storeName": "Luxe Fashion House", "mallName": "Grand Luxe Mall", "deliveryTime": "2 hrs", "badge": "Premium" },
+    { "id": "p8", "storeId": "s1", "mallId": "1", "name": "Denim Jacket Classic", "price": 3999, "originalPrice": 5999, "image": "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500", "category": "Fashion", "rating": 4.3, "reviews": 312, "inStock": true, "stockCount": 42, "variants": ["S", "M", "L", "XL", "XXL"], "storeName": "Luxe Fashion House", "mallName": "Grand Luxe Mall", "deliveryTime": "2 hrs", "badge": "" },
+    { "id": "p9", "storeId": "s2", "mallId": "1", "name": "4K Ultra HD Monitor 27\"", "price": 34999, "originalPrice": 44999, "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=500", "category": "Electronics", "rating": 4.6, "reviews": 189, "inStock": true, "stockCount": 12, "variants": ["27 inch", "32 inch"], "storeName": "TechZone Electronics", "mallName": "Grand Luxe Mall", "deliveryTime": "1 hr", "badge": "Flash Deal" },
+    { "id": "p10", "storeId": "s2", "mallId": "1", "name": "Wireless Earbuds Pro", "price": 4999, "originalPrice": 7999, "image": "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=500", "category": "Electronics", "rating": 4.5, "reviews": 892, "inStock": true, "stockCount": 100, "variants": ["White", "Black"], "storeName": "TechZone Electronics", "mallName": "Grand Luxe Mall", "deliveryTime": "1 hr", "badge": "37% Off" },
+    { "id": "p11", "storeId": "s5", "mallId": "2", "name": "Skincare Serum Set", "price": 3499, "originalPrice": 4999, "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=500", "category": "Beauty", "rating": 4.7, "reviews": 456, "inStock": true, "stockCount": 35, "variants": ["Vitamin C", "Retinol", "Hyaluronic"], "storeName": "Beauty Boulevard", "mallName": "Phoenix Galleria", "deliveryTime": "25 min", "badge": "Bestseller" },
+    { "id": "p12", "storeId": "s4", "mallId": "2", "name": "Yoga Mat Premium", "price": 1999, "originalPrice": 2999, "image": "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=500", "category": "Sports", "rating": 4.3, "reviews": 312, "inStock": true, "stockCount": 80, "variants": ["Purple", "Blue", "Green"], "storeName": "SportX Arena", "mallName": "Phoenix Galleria", "deliveryTime": "25 min", "badge": "" },
+    { "id": "p13", "storeId": "s7", "mallId": "1", "name": "Scented Candle Set (6 Pack)", "price": 1499, "originalPrice": 2499, "image": "https://images.unsplash.com/photo-1602028915047-37269d1a73f7?w=500", "category": "Home & Living", "rating": 4.5, "reviews": 234, "inStock": true, "stockCount": 50, "variants": ["Lavender", "Vanilla", "Ocean"], "storeName": "Home Elegance", "mallName": "Grand Luxe Mall", "deliveryTime": "2 hrs", "badge": "40% Off" },
+    { "id": "p14", "storeId": "s1", "mallId": "1", "name": "Formal Cotton Shirt", "price": 2499, "originalPrice": 3499, "image": "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500", "category": "Fashion", "rating": 4.4, "reviews": 445, "inStock": true, "stockCount": 60, "variants": ["S", "M", "L", "XL"], "storeName": "Luxe Fashion House", "mallName": "Grand Luxe Mall", "deliveryTime": "2 hrs", "badge": "" },
+    { "id": "p15", "storeId": "s2", "mallId": "1", "name": "Mechanical Gaming Keyboard", "price": 8999, "originalPrice": 11999, "image": "https://images.unsplash.com/photo-1595225476474-87563907a212?w=500", "category": "Electronics", "rating": 4.7, "reviews": 234, "inStock": true, "stockCount": 28, "variants": ["Red Switch", "Blue Switch", "Brown Switch"], "storeName": "TechZone Electronics", "mallName": "Grand Luxe Mall", "deliveryTime": "1 hr", "badge": "" },
+    { "id": "p16", "storeId": "s2", "mallId": "1", "name": "Portable Bluetooth Speaker", "price": 3499, "originalPrice": 4999, "image": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500", "category": "Electronics", "rating": 4.4, "reviews": 567, "inStock": true, "stockCount": 55, "variants": ["Black", "Blue", "Red"], "storeName": "TechZone Electronics", "mallName": "Grand Luxe Mall", "deliveryTime": "1 hr", "badge": "" },
+    { "id": "p17", "storeId": "s5", "mallId": "2", "name": "Premium Makeup Kit", "price": 6999, "originalPrice": 9999, "image": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500", "category": "Beauty", "rating": 4.6, "reviews": 178, "inStock": true, "stockCount": 20, "variants": ["Natural", "Glam", "Bridal"], "storeName": "Beauty Boulevard", "mallName": "Phoenix Galleria", "deliveryTime": "25 min", "badge": "30% Off" },
+    { "id": "p18", "storeId": "s7", "mallId": "1", "name": "Throw Pillow Set (4 Pack)", "price": 2999, "originalPrice": 4499, "image": "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=500", "category": "Home & Living", "rating": 4.4, "reviews": 167, "inStock": true, "stockCount": 30, "variants": ["Beige", "Gray", "Navy"], "storeName": "Home Elegance", "mallName": "Grand Luxe Mall", "deliveryTime": "2 hrs", "badge": "" },
+    { "id": "p19", "storeId": "s6", "mallId": "3", "name": "Bestseller Fiction Bundle", "price": 999, "originalPrice": 1599, "image": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500", "category": "Books", "rating": 4.8, "reviews": 1023, "inStock": true, "stockCount": 200, "variants": ["Paperback", "Hardcover"], "storeName": "BookWorm Haven", "mallName": "Royal Arcade", "deliveryTime": "40 min", "badge": "Bestseller" },
+    { "id": "p20", "storeId": "s8", "mallId": "2", "name": "Educational Toy Robot", "price": 4999, "originalPrice": 6999, "image": "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=500", "category": "Kids", "rating": 4.7, "reviews": 156, "inStock": true, "stockCount": 25, "variants": ["Blue", "Red", "Green"], "storeName": "Kids Paradise", "mallName": "Phoenix Galleria", "deliveryTime": "25 min", "badge": "New" }
+  ],
+  "categories": [
+    { "name": "Fashion", "count": 1240 },
+    { "name": "Electronics", "count": 890 },
+    { "name": "Beauty", "count": 320 },
+    { "name": "Sports", "count": 275 },
+    { "name": "Home & Living", "count": 450 },
+    { "name": "Books", "count": 180 },
+    { "name": "Kids", "count": 310 },
+    { "name": "Food & Dining", "count": 450 }
+  ],
+  "flashDeals": [
+    { "id": "fd1", "title": "Electronics Fest", "subtitle": "Up to 60% Off on Gadgets", "image": "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800", "endsIn": "02:45:30" },
+    { "id": "fd2", "title": "Fashion Friday", "subtitle": "Flat ₹500 Off on ₹2000+", "image": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800", "endsIn": "05:12:00" },
+    { "id": "fd3", "title": "Beauty Bonanza", "subtitle": "Buy 2 Get 1 Free", "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800", "endsIn": "08:30:15" }
+  ]
+}

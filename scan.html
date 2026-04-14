@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MallMaze - Scan &amp; Go</title>
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+    <link rel="stylesheet" href="assets/css/react-styles.css">
+    <style>
+      .scan-video { width: 100%; max-height: 60vh; border-radius: 16px; background: #0b1020; }
+      .scan-kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    </style>
+  </head>
+  <body class="bg-white">
+    <nav></nav>
+    <main class="container mx-auto px-4 py-10">
+      <div class="flex flex-col gap-2 mb-6">
+        <h1 class="text-4xl font-bold">Scan &amp; Go</h1>
+        <p class="text-sm text-muted-foreground">Scan products in-store, pay instantly, and show your digital receipt.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <div class="text-sm font-semibold">Camera Scanner</div>
+            <button id="scan-start" class="rounded-lg bg-primary px-4 py-2 text-white text-sm font-semibold">Start</button>
+          </div>
+          <video id="scan-video" class="scan-video" autoplay playsinline muted></video>
+          <p id="scan-status" class="text-xs text-muted-foreground mt-3">Allow camera permission to scan.</p>
+          <div class="mt-4">
+            <label class="text-xs font-semibold text-slate-700">Manual code entry (fallback)</label>
+            <div class="flex gap-2 mt-2">
+              <input id="scan-manual" class="rounded-lg border px-3 py-2 flex-1" placeholder="Enter barcode / SKU" />
+              <button id="scan-add-manual" class="rounded-lg border px-4 py-2 text-sm font-semibold">Add</button>
+            </div>
+            <p class="text-xs text-muted-foreground mt-2">Tip: you can also add a product below (priced).</p>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-xs font-semibold text-slate-700">Quick add product (recommended)</label>
+            <div class="flex gap-2 mt-2">
+              <input id="scan-pick" list="scan-products" class="rounded-lg border px-3 py-2 flex-1" placeholder="Search product name (e.g., Headphones)" />
+              <datalist id="scan-products"></datalist>
+              <button id="scan-add-picked" class="rounded-lg bg-primary px-4 py-2 text-white text-sm font-semibold">Add</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <div class="flex items-center justify-between mb-3">
+            <div class="text-sm font-semibold">In-store Cart</div>
+            <a href="cart.html" class="text-sm font-semibold text-blue-600">Go to delivery cart →</a>
+          </div>
+          <div id="scan-cart" class="space-y-3"></div>
+          <div class="mt-4 rounded-xl border border-border bg-muted p-4">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold">Total</span>
+              <span id="scan-total" class="text-lg font-extrabold">Rs 0</span>
+            </div>
+            <button id="scan-pay" class="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-white font-semibold">Pay &amp; Get Receipt</button>
+            <p class="text-xs text-muted-foreground mt-2">Payment + receipt will be wired to Stripe/Supabase in the next step.</p>
+          </div>
+          <div id="scan-receipt" class="mt-4"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16 py-12">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div><h3 class="font-bold mb-4">MallMaze</h3><p class="text-sm">Your ultimate shopping destination</p></div>
+          <div><h4 class="font-semibold mb-4">Quick Links</h4><ul class="space-y-2 text-sm"><li><a href="index.html">Home</a></li><li><a href="malls.html">Malls</a></li><li><a href="products.html">Products</a></li></ul></div>
+          <div><h4 class="font-semibold mb-4">Support</h4><ul class="space-y-2 text-sm"><li><a href="feedback.html">Feedback</a></li><li><a href="login.html">Contact Us</a></li></ul></div>
+          <div><h4 class="font-semibold mb-4">Legal</h4><ul class="space-y-2 text-sm"><li><a href="login.html">Terms</a></li><li><a href="login.html">Privacy</a></li></ul></div>
+        </div>
+        <div class="border-t border-gray-700 pt-8 text-center text-sm"><p>&copy; 2026 MallMaze. All rights reserved.</p></div>
+      </div>
+    </footer>
+
+    <script src="assets/js/config.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+    <script src="assets/js/supabase-client.js" defer></script>
+    <script src="assets/js/runtime-guard.js" defer></script>
+    <script src="https://js.stripe.com/v3/" defer></script>
+    <script src="assets/js/main.js" defer></script>
+    <script>
+      // Scan&Go: local-first cart with optional Supabase sync.
+      (function () {
+        const $ = (id) => document.getElementById(id);
+        const money = (n) => `Rs ${Math.round(Number(n || 0)).toLocaleString('en-IN')}`;
+        const cartKey = 'mm_scan_cart';
+        const read = () => { try { return JSON.parse(localStorage.getItem(cartKey) || '[]'); } catch { return []; } };
+        const write = (v) => localStorage.setItem(cartKey, JSON.stringify(v));
+        const status = (t) => { const s = $('scan-status'); if (s) s.textContent = t; };
+        const supa = () => window.MM_SUPABASE?.getClient?.() || null;
+        const toast = (m, o) => (window.toast ? window.toast(m, o) : alert(String(m || '')));
+
+        let stream = null;
+        let sessionId = '';
+        let catalog = { products: [] };
+
+        const loadCatalog = async () => {
+          // Local-first catalog for scan mapping (works without Supabase).
+          try {
+            const r = await fetch('data/mock-data.json', { cache: 'no-cache' });
+            const j = await r.json();
+            catalog.products = Array.isArray(j?.products) ? j.products : [];
+          } catch {
+            catalog.products = [];
+          }
+          // Populate datalist for quick add.
+          const dl = $('scan-products');
+          if (dl) dl.innerHTML = (catalog.products || []).slice(0, 200).map((p) => `<option value="${String(p.name || '').replace(/"/g, '&quot;')}"></option>`).join('');
+        };
+
+        const findProductByCodeOrName = (q) => {
+          const query = String(q || '').trim().toLowerCase();
+          if (!query) return null;
+          const list = catalog.products || [];
+          // 1) exact id match (p1 style) or full code match
+          let hit = list.find((p) => String(p.id || '').toLowerCase() === query);
+          if (hit) return hit;
+          // 2) exact name match
+          hit = list.find((p) => String(p.name || '').trim().toLowerCase() === query);
+          if (hit) return hit;
+          // 3) contains match (best-effort)
+          hit = list.find((p) => String(p.name || '').toLowerCase().includes(query));
+          return hit || null;
+        };
+
+        const ensureScanSession = async () => {
+          const client = supa();
+          if (!client) return '';
+          const { data } = await client.auth.getUser();
+          const user = data?.user;
+          if (!user) return '';
+          if (sessionId) return sessionId;
+          const created = await client.from('scan_sessions').insert({ user_id: user.id, status: 'open' }).select('id').single();
+          sessionId = created?.data?.id || '';
+          return sessionId;
+        };
+
+        const syncItemToDb = async (item) => {
+          const client = supa();
+          if (!client) return;
+          const sid = await ensureScanSession();
+          if (!sid) return;
+          await client.from('scan_items').insert({
+            session_id: sid,
+            product_id: item.product_id || null,
+            code: item.code,
+            name: item.name,
+            unit_price_inr: Math.round(Number(item.price || 0)),
+            qty: Math.max(1, Number(item.qty || 1))
+          });
+        };
+        const render = () => {
+          const items = read();
+          const wrap = $('scan-cart');
+          const total = items.reduce((sum, x) => sum + (x.price || 0) * (x.qty || 1), 0);
+          if (wrap) {
+            wrap.innerHTML = items.length ? items.map((x, i) => `
+              <div class="flex items-center justify-between gap-3 rounded-xl border border-border p-3">
+                <div class="min-w-0">
+                  <div class="font-semibold truncate">${x.name || x.code}</div>
+                  <div class="text-xs text-muted-foreground scan-kbd">${x.code}</div>
+                </div>
+                <div class="text-right">
+                  <div class="font-bold">${money(x.price || 0)}</div>
+                  <div class="flex items-center gap-2 mt-1 justify-end">
+                    <button data-dec="${i}" class="rounded-md border px-2 py-1 text-xs">-</button>
+                    <span class="text-xs font-semibold">${x.qty || 1}</span>
+                    <button data-inc="${i}" class="rounded-md border px-2 py-1 text-xs">+</button>
+                    <button data-rm="${i}" class="rounded-md border px-2 py-1 text-xs">Remove</button>
+                  </div>
+                </div>
+              </div>
+            `).join('') : '<div class="text-sm text-muted-foreground">Scan an item to start.</div>';
+          }
+          const totalNode = $('scan-total');
+          if (totalNode) totalNode.textContent = money(total);
+        };
+
+        const addCode = (code) => {
+          const clean = String(code || '').trim();
+          if (!clean) return;
+          const items = read();
+          const existing = items.find((x) => x.code === clean);
+          if (existing) existing.qty = (existing.qty || 1) + 1;
+          else {
+            const p = findProductByCodeOrName(clean);
+            if (p) {
+              items.unshift({ code: clean, name: p.name, price: Number(p.price || 0), qty: 1, product_id: p.id || null });
+              status(`Added: ${p.name}`);
+            } else {
+              items.unshift({ code: clean, name: `Unknown item`, price: 0, qty: 1, product_id: null });
+              status('Unknown code. Use “Quick add product” to add a priced item.');
+            }
+          }
+          write(items);
+          render();
+          syncItemToDb(existing || items[0]).catch(() => {});
+        };
+
+        const addPicked = () => {
+          const q = $('scan-pick')?.value || '';
+          const p = findProductByCodeOrName(q);
+          if (!p) return toast('Pick a valid product name.', { type: 'bad', title: 'Scan&Go' });
+          const code = String(p.id || p.name || '').trim();
+          const items = read();
+          const existing = items.find((x) => x.product_id === p.id);
+          if (existing) existing.qty = (existing.qty || 1) + 1;
+          else items.unshift({ code, name: p.name, price: Number(p.price || 0), qty: 1, product_id: p.id || null });
+          write(items);
+          render();
+          syncItemToDb(existing || items[0]).catch(() => {});
+          if ($('scan-pick')) $('scan-pick').value = '';
+          toast('Added to Scan cart', { type: 'ok', title: 'Scan&Go', ms: 1200 });
+        };
+
+        document.addEventListener('click', (e) => {
+          const t = e.target;
+          const items = read();
+          if (t && t.dataset && t.dataset.inc != null) { const i = Number(t.dataset.inc); items[i].qty = (items[i].qty || 1) + 1; write(items); render(); }
+          if (t && t.dataset && t.dataset.dec != null) { const i = Number(t.dataset.dec); items[i].qty = Math.max(1, (items[i].qty || 1) - 1); write(items); render(); }
+          if (t && t.dataset && t.dataset.rm != null) { const i = Number(t.dataset.rm); items.splice(i, 1); write(items); render(); }
+        });
+
+        $('scan-add-manual')?.addEventListener('click', () => { addCode($('scan-manual')?.value); if ($('scan-manual')) $('scan-manual').value = ''; });
+        $('scan-manual')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('scan-add-manual')?.click(); } });
+        $('scan-add-picked')?.addEventListener('click', addPicked);
+        $('scan-pick')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addPicked(); } });
+
+        $('scan-start')?.addEventListener('click', async () => {
+          if (!navigator.mediaDevices?.getUserMedia) {
+            status('Camera not supported in this browser. Use manual entry.');
+            return;
+          }
+          try {
+            if (stream) stream.getTracks().forEach((t) => t.stop());
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+            const vid = $('scan-video');
+            if (vid) vid.srcObject = stream;
+            status('Camera started. Scanning support will be enabled next (BarcodeDetector).');
+
+            if ('BarcodeDetector' in window) {
+              const detector = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_39', 'codabar', 'itf'] });
+              const loop = async () => {
+                if (!stream) return;
+                try {
+                  const barcodes = await detector.detect(vid);
+                  if (barcodes && barcodes.length) {
+                    addCode(barcodes[0].rawValue || barcodes[0].value || '');
+                    status(`Added: ${barcodes[0].rawValue || ''}`);
+                    await new Promise((r) => setTimeout(r, 1200));
+                  }
+                } catch {}
+                requestAnimationFrame(loop);
+              };
+              requestAnimationFrame(loop);
+              status('Scanning enabled. Point the camera at a barcode/QR.');
+            } else {
+              status('BarcodeDetector not available. Use manual entry for now.');
+            }
+          } catch (err) {
+            status('Could not start camera. Check permissions and try again.');
+          }
+        });
+
+        $('scan-pay')?.addEventListener('click', async () => {
+          const items = read();
+          if (!items.length) return toast('Scan at least one item first.', { type: 'bad', title: 'Scan&Go' });
+
+          const client = supa();
+          const functionsBase = window.MM_SUPABASE?.functionsBaseUrl?.() || '';
+          const stripeKey = String((window.MM_CONFIG || {}).STRIPE_PUBLISHABLE_KEY || '').trim();
+          if (!client || !functionsBase || !stripeKey || !window.Stripe) {
+            return toast('Configure Supabase + Stripe to enable Scan&Go payments.', { type: 'bad', title: 'Scan&Go' });
+          }
+
+          // Require priced items (Stripe session builds from DB scan_items)
+          const unpriced = items.some((x) => Number(x.price || 0) <= 0);
+          if (unpriced) return toast('Some items have Rs 0 price. Add real products (priced) before paying.', { type: 'bad', title: 'Scan&Go' });
+
+          const { data } = await client.auth.getSession();
+          const token = data?.session?.access_token || '';
+          if (!token) return (window.location.href = 'login.html');
+
+          const sid = await ensureScanSession();
+          if (!sid) return toast('Could not create scan session. Login required.', { type: 'bad', title: 'Scan&Go' });
+
+          toast('Redirecting to payment…', { type: 'ok', title: 'Scan&Go', ms: 1600 });
+          const resp = await fetch(`${functionsBase}/create-scan-checkout-session`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+            body: JSON.stringify({ scan_session_id: sid, success_path: '/scan-receipt.html', cancel_path: '/scan.html' })
+          });
+          const json = await resp.json().catch(() => ({}));
+          if (!resp.ok) return toast(json?.error || 'Payment init failed.', { type: 'bad', title: 'Scan&Go' });
+          if (json?.url) window.location.href = json.url;
+          else toast('Missing Stripe session URL.', { type: 'bad', title: 'Scan&Go' });
+        });
+
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
+        ensureScanSession().catch(() => {});
+        loadCatalog().catch(() => {});
+        render();
+      })();
+    </script>
+  </body>
+</html>
+
