@@ -1,10 +1,26 @@
-const CACHE = 'mallmaze-static-v1';
+const CACHE = 'mallmaze-static-v3';
 
 const ASSETS = [
   '/',
   '/index.html',
+  '/malls.html',
+  '/mall.html',
+  '/products.html',
+  '/product.html',
+  '/compare.html',
+  '/store.html',
+  '/cart.html',
+  '/orders.html',
+  '/order.html',
+  '/checkout-success.html',
+  '/notifications.html',
+  '/support.html',
   '/scan.html',
+  '/scan-receipt.html',
+  '/verify-receipt.html',
+  '/offline.html',
   '/assets/js/main.js',
+  '/assets/js/qr.js',
   '/assets/css/tailwind.css',
   '/assets/css/react-styles.css'
 ];
@@ -25,12 +41,27 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  const isSameOrigin = url.origin === self.location.origin;
   event.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
-      return res;
-    }).catch(() => cached))
+    caches.match(req).then((cached) => {
+      if (cached) return cached;
+      return fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          // Only cache same-origin GETs to avoid caching opaque cross-origin responses.
+          if (isSameOrigin) caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(async () => {
+          // Offline fallback for navigations
+          if (req.mode === 'navigate') {
+            const offline = await caches.match('/offline.html');
+            if (offline) return offline;
+          }
+          return cached;
+        });
+    })
   );
 });
 

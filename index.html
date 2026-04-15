@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="India's #1 Smart Mall Platform - Shop from real malls online with real-time inventory, price matching, and express delivery." />
     <title>MallMaze - India's #1 Smart Mall Platform</title>
+    <meta property="og:title" content="MallMaze - Your City's Malls, One Platform" />
+    <meta property="og:description" content="Browse malls, compare prices, reserve items, and get fast delivery. Scan&Go in-store with QR receipts." />
+    <meta property="og:type" content="website" />
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <link rel="stylesheet" href="assets/css/react-styles.css">
   </head>
@@ -34,7 +37,85 @@
     </section>
 
     <main class="bg-white">
+      <section class="container mx-auto px-4 -mt-10 md:-mt-12 relative z-10">
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <a href="products.html" class="mm-card mm-card-pad group flex items-start gap-4 hover:shadow-card-hover">
+            <div class="h-12 w-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18H3V5a2 2 0 0 1 2-2h9v13"/><path d="M16 18h2a2 2 0 0 0 2-2v-5l-3-5h-3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+            </div>
+            <div class="min-w-0">
+              <p class="font-extrabold">Fast delivery</p>
+              <p class="text-sm text-muted-foreground mt-1">From nearby malls with live tracking.</p>
+              <p class="text-sm font-semibold text-primary mt-2">Shop now →</p>
+            </div>
+          </a>
+
+          <a href="reservations.html" class="mm-card mm-card-pad group flex items-start gap-4 hover:shadow-card-hover">
+            <div class="h-12 w-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div class="min-w-0">
+              <p class="font-extrabold">Reserve &amp; try</p>
+              <p class="text-sm text-muted-foreground mt-1">Hold items before visiting the store.</p>
+              <p class="text-sm font-semibold text-primary mt-2">Reserve →</p>
+            </div>
+          </a>
+
+          <a href="scan.html" class="mm-card mm-card-pad group flex items-start gap-4 hover:shadow-card-hover">
+            <div class="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V6a2 2 0 0 1 2-2h2"/><path d="M20 7V6a2 2 0 0 0-2-2h-2"/><path d="M4 17v1a2 2 0 0 0 2 2h2"/><path d="M20 17v1a2 2 0 0 1-2 2h-2"/><path d="M7 12h10"/></svg>
+            </div>
+            <div class="min-w-0">
+              <p class="font-extrabold">Scan&amp;Go</p>
+              <p class="text-sm text-muted-foreground mt-1">Scan, pay, show QR receipt at exit.</p>
+              <p class="text-sm font-semibold text-primary mt-2">Start scanning →</p>
+            </div>
+          </a>
+
+          <a href="compare.html" class="mm-card mm-card-pad group flex items-start gap-4 hover:shadow-card-hover">
+            <div class="h-12 w-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 5-6"/></svg>
+            </div>
+            <div class="min-w-0">
+              <p class="font-extrabold">Compare prices</p>
+              <p class="text-sm text-muted-foreground mt-1">Find the best value across stores.</p>
+              <p class="text-sm font-semibold text-primary mt-2">Compare →</p>
+            </div>
+          </a>
+        </div>
+      </section>
+
       <section class="container mx-auto px-4 py-10" id="compare">
+        <div class="mb-7">
+          <div class="flex items-end justify-between gap-4">
+            <div>
+              <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Trending now</h2>
+              <p class="section-subheading mt-1">Quick picks that open filtered results.</p>
+            </div>
+            <a href="products.html" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-amber-600 hover:underline">All products <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="mt-4 flex gap-2 overflow-x-auto pb-1">
+            <a href="products.html?category=Fashion" class="shrink-0 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">Fashion</a>
+            <a href="products.html?category=Electronics" class="shrink-0 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">Electronics</a>
+            <a href="products.html?category=Beauty" class="shrink-0 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">Beauty</a>
+            <a href="products.html?category=Sports" class="shrink-0 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">Sports</a>
+            <a href="products.html?category=Home%20%26%20Living" class="shrink-0 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">Home</a>
+            <a href="products.html?category=Kids" class="shrink-0 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">Kids</a>
+            <a href="products.html?category=Food%20%26%20Dining" class="shrink-0 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">Food</a>
+          </div>
+        </div>
+
+        <section class="mb-10">
+          <div class="flex items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Top malls</h2>
+              <p class="section-subheading mt-1">Tap to explore stores and deals.</p>
+            </div>
+            <a href="malls.html" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-amber-600 hover:underline">View all <span aria-hidden="true">→</span></a>
+          </div>
+          <div id="top-malls-rail" class="flex gap-4 overflow-x-auto pb-2"></div>
+        </section>
+
         <div class="flex items-center justify-between mb-6">
           <div>
             <h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900">Malls Near You</h2>
@@ -59,6 +140,17 @@
       </section>
 
       <section class="container mx-auto px-4 py-10">
+        <div class="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Top deals</h2>
+            <p class="section-subheading mt-1">Best discounts across stores.</p>
+          </div>
+          <a href="deals.html" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">View all <span aria-hidden="true">→</span></a>
+        </div>
+        <div id="top-deals-rail" class="flex gap-4 overflow-x-auto pb-2"></div>
+      </section>
+
+      <section class="container mx-auto px-4 py-10">
         <div class="mb-8 flex items-end justify-between">
           <div>
             <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Shop by Category</h2>
@@ -76,6 +168,17 @@
           <a href="products.html" class="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600">View All -></a>
         </div>
         <div id="products-list" class="product-grid"></div>
+      </section>
+
+      <section class="container mx-auto px-4 pb-14">
+        <div class="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Recently viewed</h2>
+            <p class="section-subheading mt-1">Pick up where you left off.</p>
+          </div>
+          <a href="products.html" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">Browse <span aria-hidden="true">→</span></a>
+        </div>
+        <div id="rv-rail" class="flex gap-4 overflow-x-auto pb-2"></div>
       </section>
 
       <section class="container mx-auto px-4 pb-14">

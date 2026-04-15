@@ -1035,6 +1035,14 @@ nav.sm-header .sm-location-panel::-webkit-scrollbar-thumb {
 .mm-icon-btn:hover{background:#fff;border-color:rgba(15,23,42,.18)}
 .mm-icon-btn.active{border-color:rgba(245,158,11,.6);box-shadow:0 10px 22px rgba(245,158,11,.18)}
 
+/* Smaller overlays on very small screens to prevent collisions */
+@media (max-width: 380px){
+  .mm-badges{left:8px;top:8px;gap:5px}
+  .mm-card-actions{right:8px;top:8px}
+  .mm-badge{font-size:9px;padding:3px 7px}
+  .mm-icon-btn{width:30px;height:30px}
+}
+
 .mm-pdp{display:grid;grid-template-columns:1.15fr 0.85fr;gap:22px}
 .mm-pdp-media{border:1px solid hsl(var(--border));border-radius:18px;overflow:hidden;background:hsl(var(--muted));box-shadow:var(--shadow-card)}
 .mm-pdp-media img{width:100%;height:auto}
@@ -1050,6 +1058,62 @@ nav.sm-header .sm-location-panel::-webkit-scrollbar-thumb {
 .mm-btn.outline{border:1px solid rgba(15,23,42,.14);background:#fff;color:#0f172a}
 .mm-btn.outline:hover{background:#f8fafc}
 @media (max-width: 900px){.mm-pdp{grid-template-columns:1fr}.mm-toasts{top:70px}}
+
+/* ===== High-quality buttons (site-wide) ===== */
+.mm-action{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+  border-radius:0.95rem;
+  padding:0.72rem 1rem;
+  font-weight:800;
+  font-size:0.92rem;
+  line-height:1;
+  letter-spacing:-0.01em;
+  user-select:none;
+  transform:translateY(0);
+  transition:transform .12s ease, box-shadow .12s ease, background-color .12s ease, border-color .12s ease, opacity .12s ease;
+}
+.mm-action:active{transform:translateY(0.5px)}
+.mm-action:focus{outline:none}
+.mm-action:focus-visible{
+  box-shadow:0 0 0 3px rgba(244,161,26,.28), 0 10px 22px rgba(15,23,42,.10);
+}
+
+/* Make non-mm-action buttons accessible too */
+button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(244,161,26,.22);
+  border-radius: 0.75rem;
+}
+.mm-action[aria-disabled="true"], .mm-action:disabled{
+  opacity:.62;
+  cursor:not-allowed;
+  transform:none;
+}
+.mm-action-primary{
+  background:linear-gradient(135deg, #f59e0b, #fbbf24);
+  color:#0b1220;
+  border:1px solid rgba(245,158,11,.25);
+  box-shadow:0 10px 22px rgba(245,158,11,.22);
+}
+.mm-action-primary:hover{box-shadow:0 14px 28px rgba(245,158,11,.26)}
+.mm-action-outline{
+  background:#ffffff;
+  color:#0f172a;
+  border:1px solid rgba(15,23,42,.14);
+  box-shadow:0 8px 18px rgba(15,23,42,.06);
+}
+.mm-action-outline:hover{background:#f8fafc;box-shadow:0 12px 24px rgba(15,23,42,.08)}
+.mm-action-ghost{
+  background:transparent;
+  color:#0f172a;
+  border:1px solid rgba(15,23,42,.12);
+}
+.mm-action-ghost:hover{background:#f8fafc}
+.mm-action-sm{padding:0.55rem 0.75rem;border-radius:0.85rem;font-size:0.82rem}
+.mm-action-icon{padding:0.55rem 0.65rem;border-radius:9999px}
 
 /* ===== Comfort + anti-overlap (global) ===== */
 main{overflow-x:hidden}
@@ -1097,3 +1161,84 @@ main{overflow-x:hidden}
 
 /* <details>/<summary> polish */
 summary::-webkit-details-marker{display:none}
+
+/* ===== Typography scale helpers ===== */
+.mm-page-title{font-family:"Playfair Display",serif;font-weight:800;letter-spacing:-.02em;color:#0f172a;font-size:1.9rem;line-height:1.1}
+.mm-page-sub{color:#64748b;font-weight:500;font-size:.95rem;line-height:1.35;margin-top:.35rem}
+.mm-section-title{font-family:"Playfair Display",serif;font-weight:800;letter-spacing:-.015em;color:#0f172a;font-size:1.35rem;line-height:1.15}
+.mm-muted{color:#64748b}
+@media (min-width:768px){.mm-page-title{font-size:2.3rem}.mm-section-title{font-size:1.55rem}}
+
+/* ===== Spacing system helpers ===== */
+.mm-page{padding-top:2.25rem;padding-bottom:2.75rem}
+.mm-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}
+.mm-card{border:1px solid hsl(var(--border));background:hsl(var(--card));border-radius:1rem;box-shadow:var(--shadow-card)}
+.mm-card-pad{padding:1rem}
+.mm-stack{display:flex;flex-direction:column;gap:1rem}
+@media (min-width:768px){
+  .mm-page{padding-top:2.5rem;padding-bottom:3rem}
+  .mm-page-head{margin-bottom:1.5rem}
+  .mm-card-pad{padding:1.25rem}
+}
+
+/* ===== Form controls consistency ===== */
+input, select, textarea {
+  border-radius: 0.85rem;
+  border: 1px solid hsl(var(--border));
+  background: #fff;
+  color: #0f172a;
+}
+input, select { min-height: 44px; }
+textarea { min-height: 120px; }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #F4A11A;
+  box-shadow: 0 0 0 2px rgba(244, 161, 26, 0.22);
+}
+button:disabled, .disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Micro-interactions */
+a, button { transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease }
+a:active, button:active { transform: translateY(0.5px) }
+
+/* ===== Footer shell parity across pages ===== */
+.mm-footer{
+  background:#0f172a;
+  color:#ffffff;
+  padding:2.5rem 0;
+  border-top:1px solid rgba(30,41,59,.9);
+  margin-top:3.5rem;
+}
+.mm-footer .mm-footer-row{
+  display:flex;
+  flex-direction:column;
+  gap:1.25rem;
+}
+.mm-footer .mm-footer-brand{min-width:0}
+.mm-footer .mm-footer-logo{
+  font-family:"Playfair Display",serif;
+  font-weight:800;
+  font-size:1.05rem;
+  letter-spacing:-.01em;
+}
+.mm-footer .mm-footer-sub{
+  margin-top:.25rem;
+  font-size:.85rem;
+  color:rgba(148,163,184,.9);
+}
+.mm-footer .mm-footer-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.75rem;
+  font-size:.9rem;
+}
+.mm-footer .mm-footer-links a{
+  color:rgba(203,213,225,.95);
+}
+.mm-footer .mm-footer-links a:hover{color:#ffffff}
+@media (min-width: 768px){
+  .mm-footer .mm-footer-row{flex-direction:row;align-items:center;justify-content:space-between}
+}

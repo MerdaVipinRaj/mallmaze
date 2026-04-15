@@ -4,24 +4,61 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>MallMaze - Products</title>
+    <meta name="description" content="Browse products from nearby malls and stores. Filter by category, price, and best deals." />
+    <meta property="og:title" content="MallMaze - Products" />
+    <meta property="og:description" content="Browse products from nearby malls and stores. Find the best deals fast." />
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <link rel="stylesheet" href="assets/css/react-styles.css">
   </head>
   <body class="bg-white">
     <nav></nav>
-    <main class="container mx-auto px-4 py-10">
+    <main class="container mx-auto px-4 mm-page">
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
         <div>
           <h1 class="text-3xl md:text-4xl font-bold">Products</h1>
           <p class="text-sm text-muted-foreground mt-1">Browse products.</p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:w-[56%] md:max-w-2xl">
-          <input id="search-input" type="search" placeholder="Search products..." class="rounded-xl border px-3.5 py-2.5" />
-          <select id="category-filter" class="rounded-xl border px-3.5 py-2.5">
-            <option value="">All Categories</option>
-          </select>
-        </div>
       </div>
+
+      <section class="sticky top-0 z-20 -mx-4 px-4 py-3 bg-white/90 backdrop-blur border-y border-border mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <div class="md:col-span-5">
+            <label class="sr-only" for="search-input">Search</label>
+            <input id="search-input" type="search" placeholder="Search products..." class="w-full rounded-xl border px-3.5 py-2.5" />
+          </div>
+          <div class="md:col-span-3">
+            <label class="sr-only" for="category-filter">Category</label>
+            <select id="category-filter" class="w-full rounded-xl border px-3.5 py-2.5">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="sr-only" for="sort-filter">Sort</label>
+            <select id="sort-filter" class="w-full rounded-xl border px-3.5 py-2.5">
+              <option value="reco">Recommended</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="discount">Best Discount</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="sr-only" for="price-filter">Price</label>
+            <select id="price-filter" class="w-full rounded-xl border px-3.5 py-2.5">
+              <option value="">Any price</option>
+              <option value="0-499">Under Rs 500</option>
+              <option value="500-999">Rs 500–999</option>
+              <option value="1000-1999">Rs 1000–1999</option>
+              <option value="2000-999999">Rs 2000+</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-3 flex gap-2 overflow-x-auto pb-1">
+          <button type="button" class="mm-chip shrink-0 rounded-full border px-4 py-2 text-sm font-semibold hover:bg-muted" data-q="new">New</button>
+          <button type="button" class="mm-chip shrink-0 rounded-full border px-4 py-2 text-sm font-semibold hover:bg-muted" data-q="best">Best sellers</button>
+          <button type="button" class="mm-chip shrink-0 rounded-full border px-4 py-2 text-sm font-semibold hover:bg-muted" data-q="discount">Discount</button>
+          <button type="button" class="mm-chip shrink-0 rounded-full border px-4 py-2 text-sm font-semibold hover:bg-muted" data-q="fast">Fast delivery</button>
+        </div>
+      </section>
 
       <details class="mb-8 rounded-2xl border border-border bg-card p-4 md:p-5 shadow-card" open>
         <summary class="flex items-center justify-between cursor-pointer list-none select-none">
@@ -51,16 +88,31 @@
       </details>
 
       <div id="products-list" class="product-grid"></div>
-    </main>
-    <footer class="bg-gray-900 text-white mt-16 py-12">
-      <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div><h3 class="font-bold mb-4">MallMaze</h3><p class="text-sm">Your ultimate shopping destination</p></div>
-          <div><h4 class="font-semibold mb-4">Quick Links</h4><ul class="space-y-2 text-sm"><li><a href="index.html">Home</a></li><li><a href="malls.html">Malls</a></li><li><a href="products.html">Products</a></li></ul></div>
-          <div><h4 class="font-semibold mb-4">Support</h4><ul class="space-y-2 text-sm"><li><a href="feedback.html">Feedback</a></li><li><a href="login.html">Contact Us</a></li></ul></div>
-          <div><h4 class="font-semibold mb-4">Legal</h4><ul class="space-y-2 text-sm"><li><a href="login.html">Terms</a></li><li><a href="login.html">Privacy</a></li></ul></div>
+      <section class="mt-10">
+        <div class="mb-4 flex items-end justify-between gap-4">
+          <div>
+            <h2 class="mm-section-title">Recently viewed</h2>
+            <p class="mm-page-sub">Items you looked at recently.</p>
+          </div>
+          <a href="compare.html" class="text-sm font-semibold text-primary hover:underline">Compare →</a>
         </div>
-        <div class="border-t border-gray-700 pt-8 text-center text-sm"><p>&copy; 2026 MallMaze. All rights reserved.</p></div>
+        <div id="rv-rail" class="flex gap-4 overflow-x-auto pb-2"></div>
+      </section>
+    </main>
+    <footer class="bg-slate-900 text-white py-10 border-t border-slate-800 mt-14">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 class="font-display text-lg font-bold text-white">MallMaze</h3>
+            <p class="text-sm text-slate-400 mt-1">Find the best offer.</p>
+          </div>
+          <div class="flex flex-wrap gap-3 text-sm">
+            <a href="index.html" class="text-slate-300 hover:text-white">Home</a>
+            <a href="malls.html" class="text-slate-300 hover:text-white">Malls</a>
+            <a href="cart.html" class="text-slate-300 hover:text-white">Cart</a>
+          </div>
+        </div>
+        <div class="border-t border-slate-800 pt-6 mt-6"><p class="text-sm text-slate-500">© 2026 MallMaze. All rights reserved.</p></div>
       </div>
     </footer>
     <script src="assets/js/config.js" defer></script>

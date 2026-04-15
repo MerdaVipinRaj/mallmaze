@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -12,15 +12,20 @@
     <main class="container mx-auto px-4 py-12">
       <h1 class="text-4xl font-bold mb-8">Admin Dashboard</h1><div id="dashboard-container"></div>
     </main>
-    <footer class="bg-gray-900 text-white mt-16 py-12">
+    <footer class="bg-slate-900 text-white py-10 border-t border-slate-800 mt-14">
       <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div><h3 class="font-bold mb-4">MallMaze</h3><p class="text-sm">Your ultimate shopping destination</p></div>
-          <div><h4 class="font-semibold mb-4">Quick Links</h4><ul class="space-y-2 text-sm"><li><a href="index.html">Home</a></li><li><a href="malls.html">Malls</a></li><li><a href="products.html">Products</a></li></ul></div>
-          <div><h4 class="font-semibold mb-4">Support</h4><ul class="space-y-2 text-sm"><li><a href="#">Help Center</a></li><li><a href="#">Contact Us</a></li><li><a href="#">FAQs</a></li></ul></div>
-          <div><h4 class="font-semibold mb-4">Legal</h4><ul class="space-y-2 text-sm"><li><a href="#">Terms</a></li><li><a href="#">Privacy</a></li><li><a href="#">Cookies</a></li></ul></div>
+        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 class="font-display text-lg font-bold text-white">MallMaze</h3>
+            <p class="text-sm text-slate-400 mt-1">Admin tools: refunds, tickets, and delivery events.</p>
+          </div>
+          <div class="flex flex-wrap gap-3 text-sm">
+            <a href="support.html" class="text-slate-300 hover:text-white">Support</a>
+            <a href="notifications.html" class="text-slate-300 hover:text-white">Updates</a>
+            <a href="orders.html" class="text-slate-300 hover:text-white">Orders</a>
+          </div>
         </div>
-        <div class="border-t border-gray-700 pt-8 text-center text-sm"><p>&copy; 2026 MallMaze. All rights reserved.</p></div>
+        <div class="border-t border-slate-800 pt-6 mt-6"><p class="text-sm text-slate-500">© 2026 MallMaze. All rights reserved.</p></div>
       </div>
     </footer>
     <script src="assets/js/config.js" defer></script>

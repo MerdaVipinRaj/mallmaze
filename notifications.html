@@ -3,41 +3,43 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>MallMaze - Mall</title>
-    <meta name="description" content="Explore a mall’s stores, deals, and Scan&Go options. Shop products with fast delivery." />
-    <meta property="og:title" content="MallMaze - Mall details" />
-    <meta property="og:description" content="Explore a mall’s stores, deals, and Scan&Go options. Shop products with fast delivery." />
-    <link rel="stylesheet" href="assets/css/tailwind.css">
-    <link rel="stylesheet" href="assets/css/react-styles.css">
+    <title>MallMaze - Notifications</title>
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="stylesheet" href="assets/css/tailwind.css" />
+    <link rel="stylesheet" href="assets/css/react-styles.css" />
   </head>
   <body class="bg-white">
     <nav></nav>
+
     <main class="container mx-auto px-4 mm-page">
       <div class="mm-page-head">
         <div>
-          <a href="malls.html" class="text-sm font-semibold text-primary hover:underline">&larr; Back to Malls</a>
-          <h1 class="mm-page-title mt-2">Mall</h1>
-          <p class="mm-page-sub">Explore stores and shop faster.</p>
+          <h1 class="mm-page-title">Notifications</h1>
+          <p class="mm-page-sub">Order updates, receipts, and important alerts.</p>
         </div>
+        <a href="orders.html" class="rounded-xl border px-4 py-2 font-semibold hover:bg-muted">Orders</a>
       </div>
-      <div id="mall-detail"></div>
+
+      <div id="notif-container"></div>
     </main>
+
     <footer class="mm-footer">
       <div class="container mx-auto px-4">
         <div class="mm-footer-row">
           <div class="mm-footer-brand">
             <div class="mm-footer-logo">MallMaze</div>
-            <div class="mm-footer-sub">Explore malls and stores.</div>
+            <div class="mm-footer-sub">Stay updated.</div>
           </div>
           <div class="mm-footer-links">
-            <a href="malls.html">Malls</a>
-            <a href="products.html">Products</a>
+            <a href="products.html">Shop</a>
             <a href="orders.html">Orders</a>
             <a href="support.html">Support</a>
+            <a href="scan.html">Scan&Go</a>
           </div>
         </div>
       </div>
     </footer>
+
     <script src="assets/js/config.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
     <script src="assets/js/supabase-client.js" defer></script>
@@ -45,3 +47,4 @@
     <script src="assets/js/main.js" defer></script>
   </body>
 </html>
+

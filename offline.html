@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MallMaze - Offline</title>
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="stylesheet" href="assets/css/tailwind.css" />
+    <link rel="stylesheet" href="assets/css/react-styles.css" />
+  </head>
+  <body class="bg-white">
+    <main class="container mx-auto px-4 mm-page">
+      <div class="mm-card mm-card-pad max-w-2xl mx-auto">
+        <h1 class="text-2xl font-extrabold">You’re offline</h1>
+        <p class="mm-page-sub">MallMaze can’t reach the network right now. Some pages still work from cache.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a href="index.html" class="rounded-xl bg-primary px-5 py-3 text-white font-semibold">Home</a>
+          <a href="scan.html" class="rounded-xl border px-5 py-3 font-semibold hover:bg-muted">Scan&Go</a>
+          <button type="button" class="rounded-xl border px-5 py-3 font-semibold hover:bg-muted" onclick="location.reload()">Retry</button>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+

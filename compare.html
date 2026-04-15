@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MallMaze - Compare</title>
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="Compare prices across stores and malls. Pin items and pick the best value." />
+    <meta property="og:title" content="MallMaze - Compare prices" />
+    <meta property="og:description" content="Pin items and compare prices across stores and malls to find the best value." />
+    <link rel="stylesheet" href="assets/css/tailwind.css" />
+    <link rel="stylesheet" href="assets/css/react-styles.css" />
+  </head>
+  <body class="bg-white">
+    <nav></nav>
+
+    <main class="container mx-auto px-4 mm-page">
+      <div class="mm-page-head">
+        <div>
+          <h1 class="mm-page-title">Compare</h1>
+          <p class="mm-page-sub">Pin items and see the best value across stores.</p>
+        </div>
+        <a href="products.html" class="rounded-xl border px-4 py-2 font-semibold hover:bg-muted">Browse</a>
+      </div>
+
+      <div class="mm-card mm-card-pad mb-6">
+        <form id="cmp-form" class="grid grid-cols-1 md:grid-cols-12 gap-3" role="search">
+          <div class="md:col-span-9">
+            <label class="sr-only" for="cmp-input">Product</label>
+            <input id="cmp-input" list="cmp-products" type="text" placeholder="Type a product name to compare…" class="w-full rounded-xl border px-3.5 py-2.5" />
+            <datalist id="cmp-products"></datalist>
+          </div>
+          <div class="md:col-span-3">
+            <button type="submit" class="w-full rounded-xl bg-primary px-4 py-2.5 text-white font-semibold">Add to compare</button>
+          </div>
+        </form>
+        <p class="text-xs text-muted-foreground mt-3">Tip: You can pin multiple items and switch between them.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <aside class="lg:col-span-4">
+          <div class="mm-card mm-card-pad">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <p class="font-extrabold">Pinned items</p>
+              <button id="cmp-clear" type="button" class="text-sm font-semibold text-primary hover:underline">Clear</button>
+            </div>
+            <div id="cmp-list" class="space-y-2"></div>
+          </div>
+        </aside>
+        <section class="lg:col-span-8">
+          <div id="cmp-results"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="mm-footer">
+      <div class="container mx-auto px-4">
+        <div class="mm-footer-row">
+          <div class="mm-footer-brand">
+            <div class="mm-footer-logo">MallMaze</div>
+            <div class="mm-footer-sub">Best value, instantly.</div>
+          </div>
+          <div class="mm-footer-links">
+            <a href="products.html">Products</a>
+            <a href="deals.html">Deals</a>
+            <a href="scan.html">Scan&Go</a>
+            <a href="support.html">Support</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="assets/js/config.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+    <script src="assets/js/supabase-client.js" defer></script>
+    <script src="assets/js/runtime-guard.js" defer></script>
+    <script src="assets/js/main.js" defer></script>
+  </body>
+</html>
+
