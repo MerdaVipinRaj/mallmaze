@@ -1,3 +1,23 @@
+(function () {
+  function getCfg() {
+    return window.MM_API?.getConfig?.() || window.MM_CONFIG || {};
+  }
+
+  async function apiHealth() {
+    const hasBase = String(getCfg().API_BASE_URL || '').trim();
+    if (!hasBase || !window.MM_API?.health) return { ok: false, reason: 'missing_api_config' };
+    try {
+      return await window.MM_API.health();
+    } catch (e) {
+      return { ok: false, reason: String(e?.message || e || 'unknown_error') };
+    }
+  }
+
+  window.MM_RUNTIME_GUARD = {
+    getCfg,
+    apiHealth
+  };
+})();
 // Lightweight crash guard so UI doesn't silently fail.
 // Shows a banner when a JS error occurs.
 (function () {

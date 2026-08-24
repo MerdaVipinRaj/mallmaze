@@ -1,0 +1,14 @@
+{
+  "name": "mallmaze-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MallMaze backend API for OTP auth, Razorpay orders, catalog data, and delivery handoff.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

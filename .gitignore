@@ -1,0 +1,10 @@
+node_modules/
+backend/data/
+uploads/*
+!uploads/.gitkeep
+scripts/__pycache__/
+.env
+.env.*
+!.env.example
+!backend/.env.example
+.qa-screens/

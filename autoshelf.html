@@ -1,0 +1,2609 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MallMaze - Local Stores</title>
+    <meta name="description" content="Create local store websites for nearby shops and manage each store banner, QR, verification, and products manually." />
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+    <link rel="stylesheet" href="assets/css/react-styles.css">
+
+    <!--
+      Old Connect OS kept for later use. These are intentionally commented out.
+      <body class="bg-white connect-os-body">
+        <main class="connect-os-page">
+          <div id="autoshelf-root"></div>
+        </main>
+      </body>
+      <script src="assets/js/config.js" defer></script>
+      <script src="assets/js/api-client.js" defer></script>
+      <script src="assets/js/runtime-guard.js" defer></script>
+      <script src="assets/js/qr.js" defer></script>
+      <script src="assets/js/main.js?v=connect-os-20260519-2" defer></script>
+    -->
+    <style>
+      .vs-hero {
+        background:
+          linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.68)),
+          url("assets/media/hero-mall.jpg");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .vs-input {
+        width: 100%;
+        max-width: 100%;
+        border: 1px solid hsl(var(--border));
+        border-radius: 0.65rem;
+        background: #ffffff;
+        padding: 0.7rem 0.85rem;
+        font-size: 0.95rem;
+        outline: none;
+      }
+
+      .vs-input:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16);
+      }
+
+      .vs-input[type="file"] {
+        padding: 0.65rem 0.8rem;
+      }
+
+      .vs-label {
+        display: grid;
+        gap: 0.45rem;
+        min-width: 0;
+        color: #334155;
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .vs-compact-form {
+        max-width: 780px;
+      }
+
+      .vs-field-row {
+        display: grid;
+        gap: 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .vs-field-row {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .vs-field-wide {
+        max-width: 780px;
+      }
+
+      .vs-search-panel {
+        display: grid;
+        gap: 0.75rem;
+        width: min(100%, 720px);
+        margin-top: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.12);
+        padding: 0.85rem;
+        backdrop-filter: blur(14px);
+      }
+
+      .vs-search-grid {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      @media (min-width: 640px) {
+        .vs-search-grid {
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: end;
+        }
+      }
+
+      .vs-search-label {
+        display: grid;
+        gap: 0.35rem;
+        min-width: 0;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .vs-search-input {
+        width: min(100%, 520px);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 0.75rem;
+        background: rgba(255, 255, 255, 0.94);
+        color: #0f172a;
+        padding: 0.78rem 0.95rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        outline: none;
+      }
+
+      .vs-search-input::placeholder,
+      .vs-input::placeholder {
+        color: #94a3b8;
+        font-weight: 600;
+      }
+
+      .vs-search-input:focus {
+        border-color: #fbbf24;
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.22);
+      }
+
+      .vs-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.95rem;
+        background: #f8fafc;
+        padding: 0.85rem;
+      }
+
+      .vs-filter-bar .vs-input {
+        width: min(100%, 340px);
+        background: #ffffff;
+      }
+
+      .vs-search-empty {
+        border: 1px dashed #cbd5e1;
+        border-radius: 0.95rem;
+        background: #f8fafc;
+        padding: 1rem;
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      .vs-store-grid .vs-search-empty {
+        grid-column: 1 / -1;
+      }
+
+      .vs-form-panel {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .vs-form-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 6px;
+        background: linear-gradient(90deg, #f59e0b, #0f766e);
+      }
+
+      .vs-admin-note {
+        border: 1px solid #fed7aa;
+        border-radius: 0.9rem;
+        background: #fff7ed;
+        color: #9a3412;
+        padding: 0.9rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        line-height: 1.45;
+      }
+
+      .vs-hero-stats {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 1.75rem;
+      }
+
+      @media (min-width: 640px) {
+        .vs-hero-stats {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .vs-hero-stat {
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        color: #ffffff;
+        backdrop-filter: blur(12px);
+      }
+
+      .vs-hero-stat strong {
+        display: block;
+        font-size: 1.45rem;
+        line-height: 1;
+      }
+
+      .vs-hero-stat span {
+        display: block;
+        margin-top: 0.4rem;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.78rem;
+        font-weight: 800;
+      }
+
+      .vs-setup-flow {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+
+      .vs-setup-flow article {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.95rem;
+        background: #ffffff;
+        padding: 0.95rem;
+      }
+
+      .vs-setup-flow span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 999px;
+        background: #0f766e;
+        color: #ffffff;
+        font-size: 0.8rem;
+        font-weight: 900;
+      }
+
+      .vs-setup-flow strong {
+        display: block;
+        margin-top: 0.6rem;
+        color: #0f172a;
+        font-size: 0.92rem;
+      }
+
+      .vs-setup-flow p {
+        margin-top: 0.25rem;
+        color: #64748b;
+        font-size: 0.8rem;
+        line-height: 1.45;
+      }
+
+      @media (min-width: 768px) {
+        .vs-setup-flow {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+
+      .vs-panel-title {
+        display: flex;
+        min-width: 0;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .vs-section-kicker {
+        color: #d97706;
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .vs-store-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.15rem;
+        justify-content: start;
+      }
+
+      .vs-store-layout {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .vs-count-pill {
+        display: inline-flex;
+        width: fit-content;
+        min-width: max-content;
+        align-self: flex-start;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #fde68a;
+        border-radius: 999px;
+        background: #fffbeb;
+        padding: 0.35rem 0.8rem;
+        color: #92400e;
+        font-size: 0.75rem;
+        font-weight: 900;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .vs-store-card {
+        display: flex;
+        min-width: 0;
+        min-height: 100%;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid hsl(var(--border));
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: var(--shadow-card);
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+
+      .vs-store-card:hover {
+        transform: translateY(-2px);
+      }
+
+      .vs-store-cover {
+        min-height: 150px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+      }
+
+      .vs-store-cover::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.08), rgba(15, 23, 42, 0.64));
+      }
+
+      .vs-store-cover-content {
+        position: absolute;
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        z-index: 1;
+        color: #ffffff;
+      }
+
+      .vs-store-body {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        gap: 0.95rem;
+        padding: 1rem;
+      }
+
+      .vs-store-body > .mb-3.flex {
+        margin-bottom: 0 !important;
+        align-items: center;
+        justify-content: flex-start;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.9rem;
+        background: #f8fafc;
+        padding: 0.75rem;
+      }
+
+      .vs-store-body > .mb-3.flex .min-w-0 {
+        text-align: left !important;
+      }
+
+      .vs-mini-list {
+        display: grid;
+        gap: 0.65rem;
+        margin-top: 0;
+      }
+
+      .vs-mini-list p {
+        display: grid;
+        grid-template-columns: minmax(82px, 0.32fr) minmax(0, 1fr);
+        align-items: start;
+        gap: 0.75rem;
+        border: 1px solid #eef2f7;
+        border-radius: 0.8rem;
+        background: #ffffff;
+        padding: 0.7rem 0.75rem;
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      .vs-mini-list strong {
+        min-width: 0;
+        color: #0f172a;
+        text-align: left;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+
+      .vs-store-body > .mt-3.flex {
+        margin-top: auto !important;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+
+      @media (min-width: 820px) {
+        .vs-store-card {
+          display: grid;
+          grid-template-columns: 210px minmax(0, 1fr);
+          align-items: stretch;
+        }
+
+        .vs-store-cover {
+          min-height: 100%;
+          height: auto;
+        }
+
+        .vs-store-cover-content {
+          left: 0.9rem;
+          right: 0.9rem;
+          bottom: 0.9rem;
+        }
+
+        .vs-store-body {
+          padding: 1rem 1.1rem;
+        }
+
+        .vs-store-body > .mb-3.flex {
+          display: grid !important;
+          grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .vs-mini-list {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .vs-mini-list p {
+          grid-template-columns: minmax(76px, 0.38fr) minmax(0, 1fr);
+        }
+      }
+
+      .vs-status {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        border-radius: 999px;
+        padding: 0.25rem 0.7rem;
+        font-size: 0.7rem;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .vs-status.pending {
+        border: 1px solid #fed7aa;
+        background: #fff7ed;
+        color: #c2410c;
+      }
+
+      .vs-status.verified {
+        border: 1px solid #a7f3d0;
+        background: #ecfdf5;
+        color: #047857;
+      }
+
+      .vs-status.rejected {
+        border: 1px solid #fecaca;
+        background: #fff1f2;
+        color: #be123c;
+      }
+
+      .vs-upload-preview {
+        display: none;
+        width: 100%;
+        max-height: 220px;
+        object-fit: contain;
+        border: 1px solid hsl(var(--border));
+        border-radius: 0.9rem;
+        background: #f8fafc;
+        padding: 0.5rem;
+      }
+
+      .vs-upload-preview.show {
+        display: block;
+      }
+
+      .vs-upload-options {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      @media (min-width: 640px) {
+        .vs-upload-options {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .vs-admin-shell .vs-upload-options {
+          grid-template-columns: 1fr;
+        }
+
+        .vs-manage-row {
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+        }
+      }
+
+      .vs-upload-control {
+        display: grid;
+        gap: 0.45rem;
+        border: 1px solid hsl(var(--border));
+        border-radius: 0.9rem;
+        background: #f8fafc;
+        padding: 0.85rem;
+        color: #334155;
+        font-size: 0.82rem;
+        font-weight: 900;
+      }
+
+      .vs-upload-control input {
+        width: 100%;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      .vs-upload-control small {
+        color: #64748b;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .vs-admin-shell {
+        border: 1px solid #e2e8f0;
+        border-radius: 1.25rem;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        box-shadow: var(--shadow-card);
+      }
+
+      .vs-admin-shell-head {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem;
+      }
+
+      .vs-admin-shell-body {
+        display: grid;
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+      .vs-manage-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      @media (min-width: 768px) {
+        .vs-manage-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .vs-banner {
+        min-height: 310px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+      }
+
+      .vs-banner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(15, 23, 42, 0.84), rgba(15, 23, 42, 0.24));
+      }
+
+      .vs-banner-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .vs-product-img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        background: #f1f5f9;
+      }
+
+      .vs-product-list {
+        display: grid;
+        gap: 0.9rem;
+      }
+
+      .vs-product-row {
+        display: grid;
+        grid-template-columns: 116px minmax(0, 1fr);
+        align-items: stretch;
+        min-width: 0;
+      }
+
+      .vs-product-media {
+        display: block;
+        min-height: 100%;
+        overflow: hidden;
+        background: #f1f5f9;
+      }
+
+      .vs-product-row .vs-product-img {
+        height: 100%;
+        min-height: 132px;
+        aspect-ratio: auto;
+      }
+
+      .vs-product-row-body {
+        display: grid;
+        gap: 0.85rem;
+        padding: 0.9rem;
+      }
+
+      .vs-product-name {
+        color: #0f172a;
+        font-size: 1rem;
+        font-weight: 950;
+        line-height: 1.25;
+      }
+
+      .vs-product-meta,
+      .vs-product-address {
+        margin-top: 0.25rem;
+        color: #64748b;
+        font-size: 0.8rem;
+        font-weight: 750;
+        line-height: 1.35;
+      }
+
+      .vs-product-address {
+        color: #94a3b8;
+      }
+
+      .vs-product-commerce {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.55rem;
+      }
+
+      .vs-product-commerce strong {
+        color: #0f172a;
+        font-size: 1.1rem;
+        font-weight: 950;
+      }
+
+      .vs-product-commerce > span {
+        border-radius: 999px;
+        background: #ecfdf5;
+        padding: 0.35rem 0.65rem;
+        color: #047857;
+        font-size: 0.72rem;
+        font-weight: 900;
+      }
+
+      @media (min-width: 860px) {
+        .vs-product-row {
+          grid-template-columns: 150px minmax(0, 1fr);
+        }
+
+        .vs-product-row-body {
+          grid-template-columns: minmax(0, 1fr) minmax(260px, 0.46fr);
+          align-items: center;
+          padding: 1rem 1.1rem;
+        }
+
+        .vs-product-commerce {
+          justify-content: flex-end;
+          text-align: right;
+        }
+      }
+
+      .vs-info-grid {
+        display: grid;
+        gap: 1rem;
+        margin-top: -2.5rem;
+        position: relative;
+        z-index: 2;
+      }
+
+      @media (min-width: 768px) {
+        .vs-info-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .vs-store-layout {
+          grid-template-columns: minmax(0, 1fr) 360px;
+          align-items: start;
+        }
+      }
+
+      .vs-info-tile {
+        border: 1px solid hsl(var(--border));
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: var(--shadow-card);
+        padding: 1rem;
+      }
+
+      .vs-info-tile span {
+        display: block;
+        color: #64748b;
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .vs-info-tile strong {
+        display: block;
+        margin-top: 0.35rem;
+        color: #0f172a;
+        font-size: 0.95rem;
+        line-height: 1.25;
+      }
+
+      .vs-map-frame {
+        width: 100%;
+        min-height: 230px;
+        border: 0;
+        border-radius: 1rem;
+        background: #f1f5f9;
+      }
+
+      .vs-admin-divider {
+        margin: 1.25rem 0;
+        height: 1px;
+        background: #e2e8f0;
+      }
+
+      .vs-action-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+      }
+
+      .vs-product-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.55rem;
+        margin-top: 0.85rem;
+      }
+
+      .vs-product-row .vs-product-actions {
+        flex: 1 1 100%;
+        width: 100%;
+        margin-top: 0.1rem;
+      }
+
+      .vs-product-actions button,
+      .vs-product-actions a,
+      .vs-manage-row button {
+        border-radius: 0.75rem;
+        padding: 0.7rem 0.8rem;
+        font-size: 0.78rem;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .vs-buy-btn {
+        background: #f59e0b;
+        color: #0f172a;
+      }
+
+      .vs-wish-btn {
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #334155;
+      }
+
+      .vs-wish-btn.active {
+        border-color: #fecdd3;
+        background: #fff1f2;
+        color: #be123c;
+      }
+
+      .vs-pay-btn {
+        border: 1px solid #bbf7d0;
+        background: #ecfdf5;
+        color: #047857;
+      }
+
+      .vs-qr-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.85rem;
+      }
+
+      .vs-qr-actions button,
+      .vs-qr-actions a {
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        padding: 0.55rem 0.8rem;
+        color: #334155;
+        font-size: 0.72rem;
+        font-weight: 900;
+      }
+
+      .vs-payment-result {
+        display: none;
+        gap: 0.85rem;
+        margin-top: 0.9rem;
+        border: 1px solid #bbf7d0;
+        border-radius: 0.9rem;
+        background: #f0fdf4;
+        padding: 0.85rem;
+      }
+
+      .vs-payment-result.show {
+        display: grid;
+      }
+
+      .vs-payment-result img {
+        width: 132px;
+        height: 132px;
+        border-radius: 0.8rem;
+        border: 1px solid #d1fae5;
+        background: #ffffff;
+        object-fit: contain;
+      }
+
+      .vs-payment-result iframe {
+        width: 132px;
+        height: 132px;
+        border: 1px solid #d1fae5;
+        border-radius: 0.8rem;
+        background: #ffffff;
+      }
+
+      @media (max-width: 480px) {
+        .vs-product-actions {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .vs-manage-list {
+        display: grid;
+        gap: 0.65rem;
+        margin-top: 0.9rem;
+      }
+
+      .vs-manage-row {
+        display: grid;
+        gap: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.9rem;
+        background: #ffffff;
+        padding: 0.8rem;
+      }
+
+      .vs-manage-row-main {
+        min-width: 0;
+      }
+
+      .vs-manage-row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .vs-manage-row-actions button {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #334155;
+      }
+
+      .vs-manage-row-actions button[data-delete-product] {
+        border-color: #fecaca;
+        background: #fff1f2;
+        color: #be123c;
+      }
+
+      .vs-toast {
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        z-index: 80;
+        max-width: min(360px, calc(100vw - 2rem));
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 0.9rem;
+        background: #0f172a;
+        color: #ffffff;
+        padding: 0.85rem 1rem;
+        font-size: 0.88rem;
+        font-weight: 800;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+        transform: translateY(16px);
+        opacity: 0;
+        transition: opacity 160ms ease, transform 160ms ease;
+      }
+
+      .vs-toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .vs-qr {
+        display: grid;
+        width: 96px;
+        height: 96px;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+        padding: 8px;
+        border-radius: 0.9rem;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+      }
+
+      .vs-qr i {
+        border-radius: 2px;
+        background: #0f172a;
+      }
+
+      .vs-qr i:nth-child(2n) { opacity: 0.32; }
+      .vs-qr i:nth-child(5n) { opacity: 0.7; }
+
+      .vs-qr-canvas {
+        width: 112px;
+        height: 112px;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.9rem;
+        background: #ffffff;
+        padding: 0.35rem;
+      }
+
+      /* Professional Local Stores pass */
+      #app {
+        background:
+          linear-gradient(180deg, #ffffff 0, #f8fafc 34rem),
+          #f8fafc;
+      }
+
+      .vs-hero {
+        position: relative;
+        min-height: 620px;
+        display: flex;
+        align-items: center;
+        background:
+          linear-gradient(110deg, rgba(15, 23, 42, 0.93) 0%, rgba(15, 23, 42, 0.78) 42%, rgba(15, 118, 110, 0.4) 100%),
+          url("assets/media/hero-mall.jpg");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .vs-hero::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 120px;
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0), #f8fafc);
+        pointer-events: none;
+      }
+
+      .vs-hero .container {
+        position: relative;
+        z-index: 1;
+      }
+
+      .vs-hero h1,
+      .vs-banner h1 {
+        font-family: Inter, sans-serif;
+        letter-spacing: 0;
+      }
+
+      .vs-hero h1 {
+        max-width: 780px;
+        font-size: clamp(3rem, 7vw, 6.4rem);
+        line-height: 0.95;
+      }
+
+      .vs-hero p {
+        max-width: 620px;
+        line-height: 1.6;
+      }
+
+      .vs-form-panel,
+      .vs-admin-shell,
+      .vs-store-card,
+      .vs-info-tile,
+      .vs-map-frame,
+      .vs-upload-control {
+        border-color: rgba(148, 163, 184, 0.32) !important;
+        box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+      }
+
+      .vs-form-panel {
+        border-radius: 1.2rem;
+        background: rgba(255, 255, 255, 0.98) !important;
+      }
+
+      .vs-form-panel::before {
+        height: 5px;
+        background: linear-gradient(90deg, #f59e0b, #0f766e, #2563eb);
+      }
+
+      .vs-admin-note {
+        border-color: #fed7aa;
+        background: linear-gradient(135deg, #fff7ed, #fffbeb);
+      }
+
+      .vs-hero-stat {
+        border-radius: 0.95rem;
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      }
+
+      .vs-section-kicker {
+        color: #0f766e;
+        letter-spacing: 0;
+      }
+
+      .vs-store-grid {
+        grid-template-columns: minmax(0, 1fr);
+        justify-content: start;
+      }
+
+      .vs-store-card {
+        border-radius: 1rem;
+      }
+
+      .vs-store-cover {
+        min-height: 178px;
+      }
+
+      .vs-store-cover::after,
+      .vs-banner::after {
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.08), rgba(15, 23, 42, 0.72));
+      }
+
+      .vs-store-body {
+        padding: 1.15rem;
+      }
+
+      @media (min-width: 820px) {
+        .vs-store-card {
+          grid-template-columns: 220px minmax(0, 1fr);
+        }
+
+        .vs-store-cover {
+          min-height: 100%;
+        }
+
+        .vs-store-body {
+          padding: 1rem 1.15rem;
+        }
+      }
+
+      .vs-info-grid {
+        gap: 0.9rem;
+      }
+
+      .vs-info-tile {
+        border-radius: 0.95rem;
+      }
+
+      .vs-banner {
+        min-height: 460px;
+      }
+
+      .vs-banner-content {
+        min-height: 460px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .vs-product-img {
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .vs-admin-shell {
+        position: sticky;
+        top: 96px;
+        overflow: hidden;
+      }
+
+      .vs-admin-shell-head {
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+      }
+
+      .vs-upload-control {
+        background: #ffffff;
+      }
+
+      @media (max-width: 767px) {
+        .vs-hero {
+          min-height: auto;
+          padding: 4.5rem 0 5rem;
+        }
+
+        .vs-hero h1 {
+          font-size: clamp(2.75rem, 13vw, 4.8rem);
+        }
+
+        .vs-banner,
+        .vs-banner-content {
+          min-height: 390px;
+        }
+
+        .vs-info-grid {
+          margin-top: -1.25rem;
+        }
+
+        .vs-admin-shell {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="bg-white">
+    <nav class="sm-header">
+      <div class="container mx-auto flex min-h-16 items-center justify-between gap-4 px-4 py-2">
+        <div class="sm-left flex items-center gap-3 min-w-0">
+          <a href="index.html" class="sm-logo font-extrabold text-lg whitespace-nowrap">SmartMall India</a>
+          <div class="sm-location-wrap">
+            <button type="button" class="sm-location-btn" aria-label="Selected city">
+              <span class="sm-location-main">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-5.2 7-12a7 7 0 1 0-14 0c0 6.8 7 12 7 12Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg>
+                <span>Hyderabad</span>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sm-nav hidden md:flex items-center gap-2">
+          <a href="index.html" class="sm-nav-link rounded-full px-4 py-2 text-sm font-medium transition">Home</a>
+          <a href="malls.html" class="sm-nav-link rounded-full px-4 py-2 text-sm font-medium transition">Malls</a>
+          <a href="products.html" class="sm-nav-link rounded-full px-4 py-2 text-sm font-medium transition">Products</a>
+          <a href="deals.html" class="sm-nav-link rounded-full px-4 py-2 text-sm font-medium transition">Deals</a>
+          <a href="compare.html" class="sm-nav-link rounded-full px-4 py-2 text-sm font-medium transition">Compare</a>
+          <a href="scan.html" class="sm-nav-link rounded-full px-4 py-2 text-sm font-medium transition">Scan&Go</a>
+          <a href="autoshelf.html" class="sm-nav-link active rounded-full px-4 py-2 text-sm font-medium transition" aria-current="page">Local Stores</a>
+        </div>
+
+        <div class="sm-right flex items-center gap-2">
+          <a href="autoshelf.html#stores" data-focus-local-search class="sm-icon-btn rounded-full p-2 text-slate-700 hover:bg-slate-100" aria-label="Search local stores">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </a>
+          <a href="wishlist.html" class="sm-icon-btn rounded-full p-2 text-slate-700 hover:bg-slate-100 relative" aria-label="Wishlist">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.8 5.6a5.3 5.3 0 0 0-7.5 0L12 6.9l-1.3-1.3a5.3 5.3 0 1 0-7.5 7.5L12 22l8.8-8.9a5.3 5.3 0 0 0 0-7.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span class="sm-count absolute -right-1 -top-1 rounded-full px-1.5 text-[10px] font-semibold text-white">0</span>
+          </a>
+          <a href="cart.html" class="sm-icon-btn rounded-full p-2 text-slate-700 hover:bg-slate-100 relative" aria-label="Cart">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6h15l-2 9H8L6 6ZM6 6 5 3H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.5" fill="currentColor"/><circle cx="18" cy="20" r="1.5" fill="currentColor"/></svg>
+            <span class="sm-count absolute -right-1 -top-1 rounded-full px-1.5 text-[10px] font-semibold text-white">0</span>
+          </a>
+          <a href="orders.html" class="sm-icon-btn rounded-full p-2 text-slate-700 hover:bg-slate-100" aria-label="Orders">Orders</a>
+          <a href="notifications.html" class="sm-icon-btn rounded-full p-2 text-slate-700 hover:bg-slate-100" aria-label="Notifications">Updates</a>
+          <a href="support.html" class="sm-icon-btn rounded-full p-2 text-slate-700 hover:bg-slate-100" aria-label="Support">Support</a>
+          <a href="login.html" class="sm-sign-btn rounded-full px-4 py-2 text-sm font-semibold text-white">Sign In</a>
+        </div>
+      </div>
+    </nav>
+
+    <main id="app"></main>
+
+    <footer class="mm-footer">
+      <div class="container mx-auto px-4">
+        <div class="mm-footer-row">
+          <div class="mm-footer-brand">
+            <div class="mm-footer-logo">MallMaze</div>
+            <p class="mm-footer-sub">Create local store websites and manage their products, QR, and banners.</p>
+          </div>
+          <div class="mm-footer-links">
+            <a href="autoshelf.html#all-products">Products</a>
+            <a href="autoshelf.html#stores">Stores</a>
+            <a href="autoshelf.html">Local Stores</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api-client.js"></script>
+    <script src="assets/js/runtime-guard.js"></script>
+    <script src="assets/js/qr.js"></script>
+    <script>
+      const STORAGE_KEY = "mm_virtual_stores_v1";
+      const APP_MALLS_KEY = "mm_custom_malls";
+      const APP_STORES_KEY = "mm_custom_stores";
+      const APP_PRODUCTS_KEY = "mm_custom_products";
+      const APP_STOCK_KEY = "mm_stock";
+      const CART_KEY = "mm_cart";
+      const WISHLIST_KEY = "mm_wishlist";
+      const VIRTUAL_MALL_ID = "smartmall-local-stores";
+      const fallbackBanner = "assets/media/hero-mall.jpg";
+      const fallbackProduct = "assets/media/hero-mall.jpg";
+
+      const app = document.getElementById("app");
+      let pendingProductImage = "";
+      let pendingBannerImage = "";
+      let pendingVerificationImage = "";
+
+      function readStores() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        } catch {
+          return [];
+        }
+      }
+
+      function writeStores(stores) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stores));
+        syncSmartMallData(stores);
+      }
+
+      function readJson(key, fallback) {
+        try {
+          return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+        } catch {
+          return fallback;
+        }
+      }
+
+      function writeJson(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+
+      function supa() {
+        return null;
+      }
+
+      function backendConfigured() {
+        return Boolean(window.MM_API?.hasApi?.());
+      }
+
+      function dataUrlToBlob(dataUrl) {
+        const [meta, data] = String(dataUrl || "").split(",");
+        const mime = /data:([^;]+)/.exec(meta || "")?.[1] || "image/jpeg";
+        const binary = atob(data || "");
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+        return new Blob([bytes], { type: mime });
+      }
+
+      async function uploadAutoshelfAsset(path, dataUrl) {
+        if (!dataUrl) return "";
+        if (!window.MM_API?.uploadImage) return dataUrl;
+        try {
+          const parts = String(path || "").split("/");
+          const storeId = parts[1] || "general";
+          const kind = parts[2] || "products";
+          const uploaded = await window.MM_API.uploadImage({ data_url: dataUrl, store_id: storeId, kind });
+          return uploaded.url || dataUrl;
+        } catch {
+          return dataUrl;
+        }
+      }
+
+      function backendStoreToLocal(row) {
+        const products = Array.isArray(row.products) ? row.products : Array.isArray(row.autoshelf_products) ? row.autoshelf_products : [];
+        return {
+          id: row.id,
+          name: row.name,
+          category: row.category,
+          owner: row.owner_name,
+          phone: row.phone || "",
+          address: row.address,
+          hours: row.hours || "",
+          banner: row.banner_url || fallbackBanner,
+          status: row.verification_status || "pending",
+          verificationDoc: row.verification_doc || "",
+          verificationPhoto: row.verification_photo_url || "",
+          verifiedAt: row.verified_at || "",
+          rejectedAt: row.rejected_at || "",
+          products: products
+            .filter((product) => product.is_active !== false)
+            .map((product) => ({
+              id: product.id,
+              name: product.name,
+              category: product.category || "",
+              price: String(product.price_inr || 0),
+              stock: String(product.stock_qty || 0),
+              image: product.image_url || fallbackProduct,
+              enhanced: Boolean(product.enhanced),
+              uploadedAt: product.created_at || ""
+            }))
+        };
+      }
+
+      function storeToBackendPayload(store) {
+        return {
+          id: store.id,
+          name: store.name,
+          category: store.category || "Local Store",
+          owner_name: store.owner || "Store owner",
+          phone: store.phone || null,
+          address: store.address || "",
+          city: store.city || "Hyderabad",
+          state: store.state || "Telangana",
+          hours: store.hours || null,
+          banner_url: store.banner || fallbackBanner,
+          verification_status: statusLabel(store.status),
+          verification_doc: store.verificationDoc || null,
+          verification_photo_url: store.verificationPhoto || null,
+          verified_at: store.verifiedAt || null,
+          rejected_at: store.rejectedAt || null,
+          beneficiary_name: store.bankBeneficiary || store.owner || "",
+          account_number: store.bankAccount || "",
+          ifsc_code: store.bankIfsc || "",
+          account_type: store.bankAccountType || "current",
+          pan: store.bankPan || ""
+        };
+      }
+
+      function productToBackendPayload(storeId, product) {
+        return {
+          id: String(product.id),
+          store_id: String(storeId),
+          name: product.name,
+          category: product.category || null,
+          price_inr: Math.max(0, Math.round(Number(product.price || 0))),
+          stock_qty: Math.max(0, Math.round(Number(product.stock || 0))),
+          image_url: product.image || fallbackProduct,
+          enhanced: Boolean(product.enhanced),
+          is_active: true
+        };
+      }
+
+      async function hydrateStoresFromBackend() {
+        if (!window.MM_API?.autoshelfStores) return false;
+        const data = await window.MM_API.autoshelfStores();
+        const stores = (data.stores || []).map(backendStoreToLocal);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stores));
+        syncSmartMallData(stores);
+        return true;
+      }
+
+      async function persistStoreToBackend(store) {
+        if (!window.MM_API?.saveAutoshelfStore) return false;
+        await window.MM_API.saveAutoshelfStore(storeToBackendPayload(store));
+        return true;
+      }
+
+      async function deleteStoreFromBackend(storeId) {
+        if (!window.MM_API?.deleteAutoshelfStore) return false;
+        await window.MM_API.deleteAutoshelfStore(storeId);
+        return true;
+      }
+
+      async function persistProductToBackend(storeId, product) {
+        if (!window.MM_API?.saveAutoshelfProduct) return false;
+        await window.MM_API.saveAutoshelfProduct(productToBackendPayload(storeId, product));
+        return true;
+      }
+
+      async function deleteProductFromBackend(productId) {
+        if (!window.MM_API?.deleteAutoshelfProduct) return false;
+        await window.MM_API.deleteAutoshelfProduct(productId);
+        return true;
+      }
+
+      async function recordStockEvent(storeId, productId, eventType, qtyDelta, stockAfter, reason) {
+        if (!window.MM_API?.recordAutoshelfStockEvent) return false;
+        await window.MM_API.recordAutoshelfStockEvent({
+          store_id: storeId,
+          product_id: productId,
+          event_type: eventType,
+          qty_delta: qtyDelta,
+          stock_after: stockAfter,
+          reason: reason || null
+        });
+        return true;
+      }
+
+      async function safeBackendWrite(label, action) {
+        if (!backendConfigured()) return false;
+        try {
+          await action();
+          return true;
+        } catch (error) {
+          console.warn(`AutoShelf ${label} saved locally but backend sync failed`, error);
+          showToast(`${label} saved locally. Backend sync needs attention.`);
+          return false;
+        }
+      }
+
+      function money(value) {
+        return `Rs ${Math.round(Number(value || 0)).toLocaleString("en-IN")}`;
+      }
+
+      function virtualProductId(storeId, productId) {
+        return `vsp-${storeId}-${productId}`;
+      }
+
+      function updateHeaderCounts() {
+        const cart = readJson(CART_KEY, []);
+        const wishlist = readJson(WISHLIST_KEY, []);
+        const cartCount = cart.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
+        const wishCount = wishlist.length;
+        const cartBadge = document.querySelector('a[href="cart.html"] .sm-count');
+        const wishBadge = document.querySelector('a[href="wishlist.html"] .sm-count');
+        if (cartBadge) cartBadge.textContent = String(cartCount);
+        if (wishBadge) wishBadge.textContent = String(wishCount);
+      }
+
+      function showToast(message) {
+        let toast = document.getElementById("vs-toast");
+        if (!toast) {
+          toast = document.createElement("div");
+          toast.id = "vs-toast";
+          toast.className = "vs-toast";
+          toast.setAttribute("role", "status");
+          document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.clearTimeout(showToast.timer);
+        showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      function productPayload(store, product) {
+        const id = virtualProductId(store.id, product.id);
+        return {
+          id,
+          name: product.name,
+          price: Number(product.price || 0),
+          image: product.image || fallbackProduct,
+          storeId: store.id,
+          storeName: store.name,
+          trustKey: "local",
+          trustLabel: "Local store",
+          deliveryPromise: "Local pickup"
+        };
+      }
+
+      function addProductToCart(store, product) {
+        const payload = productPayload(store, product);
+        const cart = readJson(CART_KEY, []);
+        const existing = cart.find((item) => String(item.id) === String(payload.id));
+        if (existing) existing.quantity = Number(existing.quantity || 1) + 1;
+        else cart.push({ ...payload, quantity: 1 });
+        writeJson(CART_KEY, cart);
+        updateHeaderCounts();
+        showToast(`${product.name} added to cart.`);
+      }
+
+      function toggleProductWishlist(store, product) {
+        const payload = productPayload(store, product);
+        const wishlist = readJson(WISHLIST_KEY, []);
+        const index = wishlist.findIndex((item) => String(item.id) === String(payload.id));
+        if (index >= 0) {
+          wishlist.splice(index, 1);
+          showToast(`${product.name} removed from wishlist.`);
+        } else {
+          wishlist.unshift(payload);
+          showToast(`${product.name} saved to wishlist.`);
+        }
+        writeJson(WISHLIST_KEY, wishlist);
+        updateHeaderCounts();
+      }
+
+      function isWishlisted(productId) {
+        const wishlist = readJson(WISHLIST_KEY, []);
+        return wishlist.some((item) => String(item.id) === String(productId));
+      }
+
+      function syncSmartMallData(stores) {
+        const existingMalls = readJson(APP_MALLS_KEY, []).filter((mall) => mall.id !== VIRTUAL_MALL_ID);
+        const existingStores = readJson(APP_STORES_KEY, []).filter((store) => !store.virtualSource);
+        const existingProducts = readJson(APP_PRODUCTS_KEY, []).filter((product) => !product.virtualSource);
+        const stock = readJson(APP_STOCK_KEY, {});
+
+        const virtualMall = {
+          id: VIRTUAL_MALL_ID,
+          name: "SmartMall Local Stores",
+          location: "Nearby local market",
+          image: fallbackBanner,
+          rating: 4.6,
+          storeCount: stores.length,
+          openHours: "Live local storefronts",
+          description: "Admin-created virtual stores connected to nearby physical shops.",
+          floors: 1,
+          deliveryTime: "Local pickup",
+          virtualSource: true
+        };
+
+        const mappedStores = stores.map((store) => ({
+          id: store.id,
+          mallId: VIRTUAL_MALL_ID,
+          name: store.name,
+          category: store.category,
+          image: store.banner || fallbackBanner,
+          rating: 4.4,
+          floor: "Virtual Store",
+          isOpen: true,
+          productCount: (store.products || []).length,
+          address: store.address,
+          phone: store.phone,
+          hours: store.hours,
+          ownerName: store.owner,
+          verificationStatus: store.status || "pending",
+          virtualSource: true
+        }));
+
+        const mappedProducts = stores.flatMap((store) => (store.products || []).map((product) => {
+          const id = virtualProductId(store.id, product.id);
+          const stockCount = Number(product.stock || 0);
+          stock[id] = stockCount;
+          return {
+            id,
+            storeId: store.id,
+            mallId: VIRTUAL_MALL_ID,
+            name: product.name,
+            price: Number(product.price || 0),
+            originalPrice: Number(product.originalPrice || 0) || Number(product.price || 0),
+            image: product.image || fallbackProduct,
+            category: product.category || store.category || "Local Store",
+            rating: 4.4,
+            reviews: 0,
+            inStock: stockCount > 0,
+            stockCount,
+            variants: [],
+            storeName: store.name,
+            mallName: "SmartMall Local Stores",
+            deliveryTime: "Local pickup",
+            badge: product.enhanced ? "Enhanced" : "Local",
+            virtualSource: true
+          };
+        }));
+
+        localStorage.setItem(APP_MALLS_KEY, JSON.stringify([virtualMall, ...existingMalls]));
+        localStorage.setItem(APP_STORES_KEY, JSON.stringify([...mappedStores, ...existingStores]));
+        localStorage.setItem(APP_PRODUCTS_KEY, JSON.stringify([...mappedProducts, ...existingProducts]));
+        localStorage.setItem(APP_STOCK_KEY, JSON.stringify(stock));
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function slugify(value) {
+        const slug = String(value || "store")
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+        return slug || `store-${Date.now()}`;
+      }
+
+      function getStoreById(id) {
+        return readStores().find((store) => String(store.id) === String(id));
+      }
+
+      function allStoreProducts(stores) {
+        return (stores || []).flatMap((store) => (store.products || []).map((product) => ({
+          ...product,
+          storeId: store.id,
+          storeName: store.name,
+          storeCategory: store.category,
+          storeAddress: store.address
+        })));
+      }
+
+      function appUrlForStore(id) {
+        return `autoshelf.html?store=${encodeURIComponent(String(id || ""))}`;
+      }
+
+      function mapsUrlForStore(store) {
+        const query = [store?.address, store?.name, store?.category].filter(Boolean).join(", ");
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query || "store")}`;
+      }
+
+      function mapsEmbedUrlForStore(store) {
+        const query = [store?.address, store?.name, store?.category].filter(Boolean).join(", ");
+        return `https://www.google.com/maps?q=${encodeURIComponent(query || "store")}&output=embed`;
+      }
+
+      function statusLabel(status) {
+        return String(status || "pending").toLowerCase();
+      }
+
+      function qrCells() {
+        return Array.from({ length: 49 }, (_, index) => `<i style="opacity:${index % 2 === 0 ? 1 : index % 5 === 0 ? 0.7 : 0.32}"></i>`).join("");
+      }
+
+      function drawFallbackQr(canvas, text, size = 180) {
+        const s = Math.max(140, Number(size || 180));
+        canvas.width = s;
+        canvas.height = s;
+        const ctx = canvas.getContext("2d");
+        const cells = 29;
+        const quiet = 3;
+        const scale = Math.floor(s / (cells + quiet * 2));
+        const offset = Math.floor((s - cells * scale) / 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, s, s);
+        ctx.fillStyle = "#0f172a";
+
+        function drawFinder(x, y) {
+          ctx.fillRect(offset + x * scale, offset + y * scale, 7 * scale, 7 * scale);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(offset + (x + 1) * scale, offset + (y + 1) * scale, 5 * scale, 5 * scale);
+          ctx.fillStyle = "#0f172a";
+          ctx.fillRect(offset + (x + 2) * scale, offset + (y + 2) * scale, 3 * scale, 3 * scale);
+        }
+
+        drawFinder(0, 0);
+        drawFinder(cells - 7, 0);
+        drawFinder(0, cells - 7);
+
+        let hash = 2166136261;
+        for (const ch of String(text || "")) {
+          hash ^= ch.charCodeAt(0);
+          hash = Math.imul(hash, 16777619);
+        }
+
+        for (let y = 0; y < cells; y++) {
+          for (let x = 0; x < cells; x++) {
+            const inFinder =
+              (x < 8 && y < 8) ||
+              (x >= cells - 8 && y < 8) ||
+              (x < 8 && y >= cells - 8);
+            if (inFinder) continue;
+            const bit = ((Math.imul(x + 11, y + 17) + hash + x * 7 + y * 13) >>> 0) % 5;
+            if (bit === 0 || bit === 3) {
+              ctx.fillRect(offset + x * scale, offset + y * scale, scale, scale);
+            }
+          }
+        }
+      }
+
+      function drawQrCanvases(root = document) {
+        root.querySelectorAll("canvas[data-qr-text]").forEach((canvas) => {
+          const text = canvas.getAttribute("data-qr-text") || "";
+          if (!text) return;
+          try {
+            if (window.MM_QR?.draw) window.MM_QR.draw(canvas, text, 180);
+            else drawFallbackQr(canvas, text, 180);
+          } catch {
+            drawFallbackQr(canvas, text, 180);
+          }
+        });
+      }
+
+      function downloadCanvasQr(canvas, fileName) {
+        if (!canvas) return;
+        const link = document.createElement("a");
+        link.download = `${slugify(fileName || "store-qr")}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }
+
+      async function copyText(value, label = "Link") {
+        try {
+          await navigator.clipboard.writeText(String(value || ""));
+          showToast(`${label} copied.`);
+        } catch {
+          showToast(`${label}: ${value}`);
+        }
+      }
+
+      function addProductAndCheckout(store, product) {
+        addProductToCart(store, product);
+        window.location.href = "cart.html";
+      }
+
+      async function generatePaymentQr(store, product) {
+        const amountInput = document.getElementById("payment-amount");
+        const amount = Math.max(1, Number(amountInput?.value || product?.price || 1));
+        const result = document.getElementById("payment-qr-result");
+        if (!window.MM_API?.hasApi?.()) {
+          showToast("Start the backend API to generate Razorpay payment QR.");
+          return;
+        }
+        if (result) {
+          result.classList.add("show");
+          result.innerHTML = `<p class="text-sm font-extrabold text-emerald-800">Generating Razorpay QR...</p>`;
+        }
+        try {
+          const payload = await window.MM_API.createRazorpayQr({
+            amount_inr: amount,
+            store_id: store.id,
+            product_id: product?.id || "",
+            name: `${store.name} payment`,
+            description: product ? `${product.name} from ${store.name}` : `Payment to ${store.name}`,
+            local_reference: `AS-${store.id}-${Date.now()}`
+          });
+          const qr = payload.qr || {};
+          if (result) {
+            const image = qr.image_url
+              ? `<img src="${escapeHtml(qr.image_url)}" alt="Razorpay UPI QR" />`
+              : `<canvas data-qr-text="${escapeHtml(`razorpay:${qr.id || 'mock'}:${amount}`)}" class="vs-qr-canvas"></canvas>`;
+            result.innerHTML = `
+              <div class="flex flex-wrap items-center gap-3">
+                ${image}
+                <div class="min-w-0">
+                  <p class="text-sm font-extrabold text-emerald-900">${qr.mock ? "Mock QR ready" : "Razorpay QR ready"}</p>
+                  <p class="mt-1 text-xs font-bold text-emerald-700">${money(amount)} - ${escapeHtml(qr.status || "active")}</p>
+                  <p class="mt-1 break-all text-xs text-emerald-700">${escapeHtml(qr.id || "")}</p>
+                  ${qr.image_url ? `<a href="${escapeHtml(qr.image_url)}" target="_blank" rel="noreferrer" class="mt-2 inline-flex rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-extrabold text-white">Open QR</a>` : ""}
+                </div>
+              </div>
+            `;
+            drawQrCanvases(result);
+          }
+          showToast("Payment QR generated.");
+        } catch (error) {
+          if (result) {
+            result.classList.add("show");
+            result.innerHTML = `<p class="text-sm font-extrabold text-rose-700">${escapeHtml(error.message || String(error))}</p>`;
+          }
+          showToast(error.message || "Razorpay QR generation failed.");
+        }
+      }
+
+      function fileToEnhancedImage(file, opts = {}) {
+        return new Promise((resolve, reject) => {
+          if (!file) return resolve("");
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error("Could not read image."));
+          reader.onload = () => {
+            const img = new Image();
+            img.onerror = () => reject(new Error("Could not load image."));
+            img.onload = () => {
+              const maxW = opts.banner ? 1400 : 900;
+              const maxH = opts.banner ? 620 : 900;
+              const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+              const w = Math.max(1, Math.round(img.width * scale));
+              const h = Math.max(1, Math.round(img.height * scale));
+              const canvas = document.createElement("canvas");
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext("2d");
+              ctx.fillStyle = "#f8fafc";
+              ctx.fillRect(0, 0, w, h);
+              ctx.filter = "brightness(1.08) contrast(1.1) saturate(1.14)";
+              ctx.drawImage(img, 0, 0, w, h);
+              ctx.filter = "none";
+              ctx.strokeStyle = "rgba(15, 23, 42, 0.08)";
+              ctx.lineWidth = Math.max(2, Math.round(w * 0.004));
+              ctx.strokeRect(1, 1, w - 2, h - 2);
+              resolve(canvas.toDataURL("image/jpeg", 0.86));
+            };
+            img.src = String(reader.result || "");
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function bindEnhancedUpload(inputId, previewId, onReady, opts = {}) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        if (!input) return;
+        input.addEventListener("change", async () => {
+          const file = input.files?.[0];
+          if (!file) return;
+          const enhanced = await fileToEnhancedImage(file, opts);
+          onReady(enhanced);
+          if (preview) {
+            preview.src = enhanced;
+            preview.classList.add("show");
+          }
+        });
+      }
+
+      function bindEnhancedUploadOptions(inputIds, previewId, onReady, opts = {}) {
+        inputIds.forEach((id) => bindEnhancedUpload(id, previewId, onReady, opts));
+      }
+
+      function normalizeSearch(value) {
+        return String(value || "").trim().toLowerCase();
+      }
+
+      function setResultCount(id, count, label) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = `${count} ${label}${count === 1 ? "" : "s"}`;
+      }
+
+      function bindCreatePageSearch() {
+        const topSearch = document.getElementById("local-search");
+        const storeSearch = document.getElementById("store-search");
+        const productSearch = document.getElementById("product-search");
+        const storeCards = Array.from(document.querySelectorAll("[data-store-card]"));
+        const productCards = Array.from(document.querySelectorAll("[data-product-card]"));
+        const storeEmpty = document.getElementById("store-search-empty");
+        const productEmpty = document.getElementById("product-search-empty");
+
+        const applyFilters = () => {
+          const sharedTerm = normalizeSearch(topSearch?.value);
+          const storeTerm = normalizeSearch(storeSearch?.value);
+          const productTerm = normalizeSearch(productSearch?.value);
+          const storeTerms = [sharedTerm, storeTerm].filter(Boolean);
+          const productTerms = [sharedTerm, productTerm].filter(Boolean);
+          let visibleStores = 0;
+          let visibleProducts = 0;
+
+          storeCards.forEach((card) => {
+            const haystack = normalizeSearch(card.getAttribute("data-search"));
+            const isVisible = storeTerms.every((term) => haystack.includes(term));
+            card.hidden = !isVisible;
+            if (isVisible) visibleStores += 1;
+          });
+
+          productCards.forEach((card) => {
+            const haystack = normalizeSearch(card.getAttribute("data-search"));
+            const isVisible = productTerms.every((term) => haystack.includes(term));
+            card.hidden = !isVisible;
+            if (isVisible) visibleProducts += 1;
+          });
+
+          if (storeEmpty) storeEmpty.hidden = storeCards.length === 0 || visibleStores > 0;
+          if (productEmpty) productEmpty.hidden = productCards.length === 0 || visibleProducts > 0;
+          setResultCount("store-result-count", visibleStores, "store");
+          setResultCount("product-result-count", visibleProducts, "product");
+        };
+
+        [topSearch, storeSearch, productSearch].filter(Boolean).forEach((input) => {
+          input.addEventListener("input", applyFilters);
+        });
+
+        document.querySelectorAll("[data-focus-local-search]").forEach((link) => {
+          link.addEventListener("click", (event) => {
+            if (!topSearch) return;
+            event.preventDefault();
+            topSearch.focus();
+            document.getElementById("stores")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        });
+
+        applyFilters();
+      }
+
+      function bindStoreProductSearch() {
+        const input = document.getElementById("store-product-search");
+        const cards = Array.from(document.querySelectorAll("[data-store-product-card]"));
+        const empty = document.getElementById("store-product-search-empty");
+
+        const applyFilter = () => {
+          const term = normalizeSearch(input?.value);
+          let visible = 0;
+
+          cards.forEach((card) => {
+            const haystack = normalizeSearch(card.getAttribute("data-search"));
+            const isVisible = !term || haystack.includes(term);
+            card.hidden = !isVisible;
+            if (isVisible) visible += 1;
+          });
+
+          if (empty) empty.hidden = cards.length === 0 || visible > 0;
+          setResultCount("store-product-result-count", visible, "product");
+        };
+
+        if (input) input.addEventListener("input", applyFilter);
+        applyFilter();
+      }
+
+      function findProductByVirtualId(virtualId) {
+        for (const store of readStores()) {
+          for (const product of store.products || []) {
+            if (virtualProductId(store.id, product.id) === String(virtualId)) {
+              return { store, product };
+            }
+          }
+        }
+        return null;
+      }
+
+      function bindProductActions() {
+        document.querySelectorAll("[data-add-product]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const match = findProductByVirtualId(button.getAttribute("data-add-product"));
+            if (!match) return;
+            addProductToCart(match.store, match.product);
+          });
+        });
+
+        document.querySelectorAll("[data-wish-product]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const match = findProductByVirtualId(button.getAttribute("data-wish-product"));
+            if (!match) return;
+            toggleProductWishlist(match.store, match.product);
+            button.classList.toggle("active");
+            button.textContent = button.classList.contains("active") ? "Saved" : "Wishlist";
+          });
+        });
+
+        document.querySelectorAll("[data-pay-product]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const match = findProductByVirtualId(button.getAttribute("data-pay-product"));
+            if (!match) return;
+            addProductAndCheckout(match.store, match.product);
+          });
+        });
+      }
+
+      function bindQrActions(store) {
+        document.querySelectorAll("[data-download-store-qr]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const canvas = button.closest(".mm-card, .vs-store-card")?.querySelector("canvas[data-qr-text]");
+            downloadCanvasQr(canvas, `${store?.name || "store"}-qr`);
+          });
+        });
+        document.querySelectorAll("[data-copy-store-link]").forEach((button) => {
+          button.addEventListener("click", () => copyText(button.getAttribute("data-copy-store-link"), "Store link"));
+        });
+        document.getElementById("payment-qr-form")?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const featured = (store.products || [])[0] || null;
+          generatePaymentQr(store, featured);
+        });
+      }
+
+      function bindInventoryControls(storeId) {
+        document.querySelectorAll("[data-stock-delta]").forEach((button) => {
+          button.addEventListener("click", async () => {
+            const productId = button.getAttribute("data-product-id");
+            const delta = Number(button.getAttribute("data-stock-delta") || 0);
+            let changedProduct = null;
+            const updatedStore = updateStore(storeId, (draft) => {
+              const product = (draft.products || []).find((item) => String(item.id) === String(productId));
+              if (!product) return;
+              product.stock = String(Math.max(0, Number(product.stock || 0) + delta));
+              changedProduct = { ...product };
+            });
+            if (updatedStore && changedProduct) {
+              await safeBackendWrite("Inventory", async () => {
+                await persistProductToBackend(storeId, changedProduct);
+                await recordStockEvent(
+                  storeId,
+                  changedProduct.id,
+                  delta >= 0 ? "stock_in" : "stock_out",
+                  delta,
+                  Number(changedProduct.stock || 0),
+                  "Quick inventory control"
+                );
+              });
+            }
+            renderStorePage(getStoreById(storeId));
+            showToast("Inventory updated.");
+          });
+        });
+
+        document.querySelectorAll("[data-delete-product]").forEach((button) => {
+          button.addEventListener("click", async () => {
+            const productId = button.getAttribute("data-delete-product");
+            if (!window.confirm("Remove this product from the storefront?")) return;
+            let removed = null;
+            updateStore(storeId, (draft) => {
+              removed = (draft.products || []).find((item) => String(item.id) === String(productId)) || null;
+              draft.products = (draft.products || []).filter((item) => String(item.id) !== String(productId));
+            });
+            await safeBackendWrite("Product delete", async () => {
+              if (removed) await recordStockEvent(storeId, removed.id, "delete", -Number(removed.stock || 0), 0, "Product removed");
+              await deleteProductFromBackend(productId);
+            });
+            renderStorePage(getStoreById(storeId));
+            showToast("Product removed.");
+          });
+        });
+      }
+
+      function renderCreatePage() {
+        const stores = readStores();
+        const allProducts = allStoreProducts(stores);
+        const verifiedStores = stores.filter((store) => statusLabel(store.status) === "verified").length;
+        const pendingStores = stores.length - verifiedStores;
+        app.innerHTML = `
+          <section class="vs-hero">
+            <div class="container mx-auto px-4 py-20 md:py-24">
+              <div class="max-w-3xl text-white">
+                <p class="inline-flex rounded-full border border-amber-300/40 bg-amber-400/15 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-amber-300">Local store setup</p>
+                <h1 class="font-display mt-5 text-5xl md:text-7xl font-extrabold leading-tight">Create a store website for a local shop.</h1>
+                <p class="mt-5 max-w-2xl text-lg leading-relaxed text-white/80">Admins create and verify local stores here. After creation, open the store page to manage its banner, QR storefront, map link, and products.</p>
+                <div class="vs-hero-stats">
+                  <div class="vs-hero-stat"><strong>${stores.length}</strong><span>local stores created</span></div>
+                  <div class="vs-hero-stat"><strong>${verifiedStores}</strong><span>verified storefronts</span></div>
+                  <div class="vs-hero-stat"><strong>${allProducts.length}</strong><span>products visible on SmartMall</span></div>
+                </div>
+                <div class="vs-search-panel" role="search" aria-label="Search local stores and products">
+                  <div class="vs-search-grid">
+                    <label class="vs-search-label" for="local-search">
+                      Search stores and products
+                      <input id="local-search" class="vs-search-input" type="search" placeholder="Search XYZ Mart, grocery, rice, address..." autocomplete="off" />
+                    </label>
+                    <a href="#stores" class="rounded-xl bg-amber-400 px-5 py-3 text-center text-sm font-extrabold text-slate-950">Search</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="stores" class="container mx-auto px-4 py-10 md:py-14">
+            <div class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+              <section class="mm-card mm-card-pad vs-form-panel">
+                <div class="vs-panel-title">
+                  <div>
+                    <p class="vs-section-kicker">Admin onboarding</p>
+                    <h2 class="font-display mt-1 text-3xl font-bold text-slate-900">Create store</h2>
+                    <p class="mt-2 text-sm leading-relaxed text-muted-foreground">Create the public store website first. Product and banner management will happen inside that store subpage.</p>
+                  </div>
+                  <span class="w-fit rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-extrabold text-emerald-700">Manual approval</span>
+                </div>
+
+                <div class="vs-setup-flow" aria-label="Store setup steps">
+                  <article><span>1</span><strong>Intake</strong><p>Capture store identity, owner contact, address, and hours.</p></article>
+                  <article><span>2</span><strong>Bank</strong><p>Collect payout account for automated Razorpay transfers.</p></article>
+                  <article><span>3</span><strong>Verify</strong><p>Check document/photo before publishing as verified.</p></article>
+                  <article><span>4</span><strong>Publish</strong><p>Open QR storefront, map link, and product listings.</p></article>
+                </div>
+
+                <form id="create-store-form" class="vs-compact-form mt-5 grid gap-4">
+                  <div class="vs-field-row">
+                    <label class="vs-label">Store name<input id="store-name" class="vs-input" required autocomplete="organization" placeholder="XYZ Mart" /></label>
+                    <label class="vs-label">Category<input id="store-category" class="vs-input" required autocomplete="off" placeholder="Grocery" /></label>
+                    <label class="vs-label">Owner name<input id="store-owner" class="vs-input" required autocomplete="name" placeholder="Store owner name" /></label>
+                    <label class="vs-label">Contact phone<input id="store-phone" class="vs-input" inputmode="tel" autocomplete="tel" placeholder="+91 90000 12345" /></label>
+                  </div>
+                  <label class="vs-label vs-field-wide">Store address<input id="store-address" class="vs-input" required autocomplete="street-address" placeholder="Main Road, Pilot Nagar" /></label>
+                  <div class="vs-field-row">
+                    <label class="vs-label">Opening hours<input id="store-hours" class="vs-input" value="10:00 AM - 10:00 PM" placeholder="10:00 AM - 10:00 PM" /></label>
+                    <label class="vs-label">Store banner URL<input id="store-banner" class="vs-input" placeholder="Optional image URL" /></label>
+                  </div>
+                  <div class="vs-label">
+                    Store banner image
+                    <div class="vs-upload-options">
+                        <label class="vs-upload-control">Use camera<small>Best for real storefront photos</small><input id="store-banner-camera" type="file" accept="image/*" capture="environment" /></label>
+                        <label class="vs-upload-control">Choose file<small>Use a wide, bright banner image</small><input id="store-banner-file" type="file" accept="image/*" /></label>
+                    </div>
+                  </div>
+                  <img id="store-banner-preview" class="vs-upload-preview" alt="Enhanced store banner preview" />
+                  <div class="vs-field-row">
+                    <label class="vs-label">Verification document<input id="store-doc" class="vs-input" placeholder="GST/license/owner ID reference" /></label>
+                    <div class="vs-label">
+                      Verification photo
+                      <div class="vs-upload-options">
+                        <label class="vs-upload-control">Use camera<small>Capture shop board or owner proof</small><input id="store-camera" type="file" accept="image/*" capture="environment" /></label>
+                        <label class="vs-upload-control">Choose file<small>Upload a clear verification image</small><input id="store-photo" type="file" accept="image/*" /></label>
+                      </div>
+                    </div>
+                  </div>
+                  <img id="store-photo-preview" class="vs-upload-preview" alt="Enhanced verification preview" />
+                  <section class="mm-bank-panel">
+                    <div class="mm-bank-panel-head">
+                      <span class="mm-bank-panel-icon" aria-hidden="true">₹</span>
+                      <div>
+                        <p class="mm-bank-panel-title">Bank account for automated payouts</p>
+                        <p class="mm-bank-panel-desc">Customer payments are split automatically — your product share lands in this account via Razorpay Route.</p>
+                      </div>
+                    </div>
+                    <div class="vs-field-row">
+                      <label class="vs-label">Account holder name<input id="store-bank-beneficiary" class="vs-input" required placeholder="As per bank records" /></label>
+                      <label class="vs-label">Account number<input id="store-bank-account" class="vs-input" required inputmode="numeric" autocomplete="off" placeholder="Bank account number" /></label>
+                      <label class="vs-label">IFSC code<input id="store-bank-ifsc" class="vs-input" required placeholder="HDFC0001234" style="text-transform:uppercase" /></label>
+                      <label class="vs-label">Account type
+                        <select id="store-bank-type" class="vs-input" required>
+                          <option value="current">Current</option>
+                          <option value="savings">Savings</option>
+                        </select>
+                      </label>
+                    </div>
+                  </section>
+                  <div class="vs-admin-note">Store starts pending verification. Bank details create a Razorpay linked account for automatic payouts after orders are paid.</div>
+                  <button type="submit" class="mm-form-submit">Create and open store website</button>
+                </form>
+              </section>
+
+              <section class="mm-card mm-card-pad">
+                <div class="vs-panel-title">
+                  <div>
+                    <h2 class="font-display text-3xl font-bold text-slate-900">Created stores</h2>
+                    <p class="mt-2 text-sm text-muted-foreground">Click a store to open its website and manage its banner/products.</p>
+                  </div>
+                  <span class="vs-count-pill">${pendingStores} pending</span>
+                </div>
+                <div class="vs-filter-bar" role="search" aria-label="Filter created stores">
+                  <label class="vs-label" for="store-search">Store search
+                    <input id="store-search" class="vs-input" type="search" placeholder="Filter by name, category, owner, phone, address..." autocomplete="off" />
+                  </label>
+                  <span id="store-result-count" class="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">${stores.length} stores</span>
+                </div>
+                <div class="mt-5 vs-store-grid">
+                  ${stores.length ? stores.map((store) => `
+                    <article class="vs-store-card hover:shadow-card-hover" data-store-card data-search="${escapeHtml([store.name, store.category, store.owner, store.phone, store.address, store.hours, statusLabel(store.status), store.verificationDoc, ...(store.products || []).flatMap((product) => [product.name, product.category])].filter(Boolean).join(' '))}">
+                      <div class="vs-store-cover" style="background-image:url('${escapeHtml(store.banner || fallbackBanner)}')">
+                        <div class="vs-store-cover-content">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <p class="text-xs font-extrabold uppercase tracking-wide text-amber-300">${escapeHtml(store.category)}</p>
+                            <span class="vs-status ${statusLabel(store.status)}">${escapeHtml(statusLabel(store.status))}</span>
+                          </div>
+                          <h3 class="mt-1 text-2xl font-extrabold leading-tight">${escapeHtml(store.name)}</h3>
+                        </div>
+                      </div>
+                      <div class="vs-store-body">
+                        <div class="mb-3 flex items-start justify-between gap-3">
+                          <canvas data-qr-text="${escapeHtml(appUrlForStore(store.id))}" class="vs-qr-canvas shrink-0" aria-label="${escapeHtml(store.name)} QR preview"></canvas>
+                          <div class="min-w-0 text-right">
+                            <p class="text-xs font-extrabold text-slate-500">QR Storefront</p>
+                            <p class="mt-1 break-all text-[11px] font-bold text-slate-500">${escapeHtml(appUrlForStore(store.id))}</p>
+                          </div>
+                        </div>
+                        <div class="vs-mini-list">
+                          <p><span>Address</span><strong>${escapeHtml(store.address)}</strong></p>
+                          <p><span>Owner</span><strong>${escapeHtml(store.owner || 'Not assigned')}${store.phone ? ` - ${escapeHtml(store.phone)}` : ''}</strong></p>
+                          <p><span>Verification</span><strong>${escapeHtml(store.verificationDoc || 'Document pending')}</strong></p>
+                          <p><span>Products</span><strong>${(store.products || []).length} listed</strong></p>
+                        </div>
+                        <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+                          <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">${escapeHtml(store.hours || 'Hours pending')}</span>
+                          <div class="flex flex-wrap gap-2">
+                            <button type="button" data-verify-store="${escapeHtml(store.id)}" class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">Verify</button>
+                            <button type="button" data-reject-store="${escapeHtml(store.id)}" class="rounded-full bg-rose-50 px-3 py-1 text-xs font-extrabold text-rose-700">Reject</button>
+                            <button type="button" data-delete-store="${escapeHtml(store.id)}" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">Delete</button>
+                            <a href="${appUrlForStore(store.id)}" class="rounded-full bg-amber-50 px-3 py-1 text-xs font-extrabold text-amber-700">Open</a>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  `).join("") : `
+                    <div class="rounded-xl border border-dashed border-border bg-muted p-5 text-sm text-muted-foreground">
+                      No stores created yet. Create XYZ Mart or any local shop from the form.
+                    </div>
+                  `}
+                  <div id="store-search-empty" class="vs-search-empty" hidden>No stores match this search yet.</div>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section id="all-products" class="bg-slate-50 border-y border-border">
+            <div class="container mx-auto px-4 py-10 md:py-14">
+              <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 class="font-display text-3xl font-bold text-slate-900">Products from created stores</h2>
+                  <p class="mt-2 text-sm text-muted-foreground">Every product manually uploaded inside a store also appears here and on the main SmartMall page.</p>
+                </div>
+                <span class="vs-count-pill">${allProducts.length} products</span>
+              </div>
+              <div class="vs-filter-bar mb-5" role="search" aria-label="Filter created store products">
+                <label class="vs-label" for="product-search">Product search
+                  <input id="product-search" class="vs-input" type="search" placeholder="Filter by product, store, category, stock..." autocomplete="off" />
+                </label>
+                <span id="product-result-count" class="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">${allProducts.length} products</span>
+              </div>
+
+              <div class="vs-product-list">
+                ${allProducts.length ? allProducts.map((product) => {
+                  const virtualId = virtualProductId(product.storeId, product.id);
+                  return `
+                  <article class="mm-card overflow-hidden hover:shadow-card-hover vs-product-row" data-product-card data-search="${escapeHtml([product.name, product.category, product.storeCategory, product.storeName, product.storeAddress, product.price, product.stock].filter(Boolean).join(' '))}">
+                    <a class="vs-product-media" href="${appUrlForStore(product.storeId)}" aria-label="Open ${escapeHtml(product.storeName)}">
+                      <img class="vs-product-img" src="${escapeHtml(product.image || fallbackProduct)}" alt="${escapeHtml(product.name)}" width="420" height="315" loading="lazy" decoding="async" />
+                    </a>
+                    <div class="vs-product-row-body">
+                      <div class="vs-product-main">
+                        <p class="vs-product-name">${escapeHtml(product.name)}</p>
+                        <p class="vs-product-meta">${escapeHtml(product.category || product.storeCategory || 'Product')} - ${escapeHtml(product.storeName)}</p>
+                        <p class="vs-product-address">${escapeHtml(product.storeAddress || product.storeCategory || 'Local store')}</p>
+                      </div>
+                      <div class="vs-product-commerce">
+                        <strong>${money(product.price)}</strong>
+                        <span>${escapeHtml(product.stock)} in stock</span>
+                        <div class="vs-product-actions">
+                          <button type="button" class="vs-buy-btn" data-add-product="${escapeHtml(virtualId)}">Add to cart</button>
+                          <button type="button" class="vs-pay-btn" data-pay-product="${escapeHtml(virtualId)}">Pay now</button>
+                          <button type="button" class="vs-wish-btn ${isWishlisted(virtualId) ? 'active' : ''}" data-wish-product="${escapeHtml(virtualId)}">${isWishlisted(virtualId) ? 'Saved' : 'Wishlist'}</button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                `;
+                }).join("") : `
+                  <div class="rounded-xl border border-dashed border-border bg-card p-6 text-sm text-muted-foreground">
+                    No products uploaded yet. Open a created store and add products from its manage panel.
+                  </div>
+                `}
+                <div id="product-search-empty" class="vs-search-empty" hidden>No products match this search yet.</div>
+              </div>
+            </div>
+          </section>
+        `;
+
+        pendingVerificationImage = "";
+        pendingBannerImage = "";
+        bindEnhancedUploadOptions(["store-banner-camera", "store-banner-file"], "store-banner-preview", (value) => {
+          pendingBannerImage = value;
+        }, { banner: true });
+        bindEnhancedUploadOptions(["store-camera", "store-photo"], "store-photo-preview", (value) => {
+          pendingVerificationImage = value;
+        }, { banner: true });
+        drawQrCanvases(app);
+        bindCreatePageSearch();
+        bindProductActions();
+        updateHeaderCounts();
+
+        document.querySelectorAll("[data-verify-store]").forEach((button) => {
+          button.addEventListener("click", async () => {
+            const id = button.getAttribute("data-verify-store");
+            const updated = updateStore(id, (draft) => {
+              draft.status = "verified";
+              draft.verifiedAt = new Date().toISOString();
+              draft.rejectedAt = "";
+            });
+            if (updated) await safeBackendWrite("Store verification", () => persistStoreToBackend(updated));
+            renderCreatePage();
+            showToast("Store verified.");
+          });
+        });
+
+        document.querySelectorAll("[data-reject-store]").forEach((button) => {
+          button.addEventListener("click", async () => {
+            const id = button.getAttribute("data-reject-store");
+            const updated = updateStore(id, (draft) => {
+              draft.status = "rejected";
+              draft.rejectedAt = new Date().toISOString();
+              draft.verifiedAt = "";
+            });
+            if (updated) await safeBackendWrite("Store rejection", () => persistStoreToBackend(updated));
+            renderCreatePage();
+            showToast("Store marked rejected.");
+          });
+        });
+
+        document.querySelectorAll("[data-delete-store]").forEach((button) => {
+          button.addEventListener("click", async () => {
+            const id = button.getAttribute("data-delete-store");
+            if (!window.confirm("Delete this local store and its products?")) return;
+            const storesNow = readStores().filter((store) => String(store.id) !== String(id));
+            writeStores(storesNow);
+            await safeBackendWrite("Store delete", () => deleteStoreFromBackend(id));
+            renderCreatePage();
+            showToast("Store deleted.");
+          });
+        });
+
+        document.getElementById("create-store-form").addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const storesNow = readStores();
+          const name = document.getElementById("store-name").value.trim();
+          const idBase = slugify(name);
+          const id = storesNow.some((store) => store.id === idBase) ? `${idBase}-${Date.now()}` : idBase;
+          let banner = pendingBannerImage || document.getElementById("store-banner").value.trim() || fallbackBanner;
+          let verificationPhoto = pendingVerificationImage;
+          if (backendConfigured()) {
+            try {
+              if (pendingBannerImage) banner = await uploadAutoshelfAsset(`stores/${id}/banner.jpg`, pendingBannerImage);
+              if (pendingVerificationImage) verificationPhoto = await uploadAutoshelfAsset(`stores/${id}/verification.jpg`, pendingVerificationImage);
+            } catch (error) {
+              console.warn("AutoShelf asset upload failed; keeping local image data.", error);
+              showToast("Image saved locally. Storage upload needs attention.");
+            }
+          }
+          const store = {
+            id,
+            name,
+            category: document.getElementById("store-category").value.trim(),
+            owner: document.getElementById("store-owner").value.trim(),
+            phone: document.getElementById("store-phone").value.trim(),
+            address: document.getElementById("store-address").value.trim(),
+            hours: document.getElementById("store-hours").value.trim(),
+            banner,
+            status: "pending",
+            verificationDoc: document.getElementById("store-doc").value.trim(),
+            verificationPhoto,
+            bankBeneficiary: document.getElementById("store-bank-beneficiary").value.trim(),
+            bankAccount: document.getElementById("store-bank-account").value.trim(),
+            bankIfsc: document.getElementById("store-bank-ifsc").value.trim().toUpperCase(),
+            bankAccountType: document.getElementById("store-bank-type").value,
+            products: []
+          };
+          storesNow.unshift(store);
+          writeStores(storesNow);
+          await safeBackendWrite("Store", () => persistStoreToBackend(store));
+          window.location.href = `autoshelf.html?store=${encodeURIComponent(id)}`;
+        });
+      }
+
+      function renderStorePage(store) {
+        const products = store.products || [];
+        const featuredProduct = products[0];
+        app.innerHTML = `
+          <section class="vs-banner" style="background-image:url('${escapeHtml(store.banner || fallbackBanner)}')">
+            <div class="container mx-auto px-4 py-16 md:py-24 vs-banner-content text-white">
+              <a href="autoshelf.html" class="inline-flex rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-extrabold text-white backdrop-blur hover:bg-white/15">Back to stores</a>
+              <h1 class="font-display mt-6 text-5xl md:text-7xl font-extrabold leading-tight">${escapeHtml(store.name)}</h1>
+              <p class="mt-4 max-w-2xl text-lg text-white/80">${escapeHtml(store.category)} - ${escapeHtml(store.address)}</p>
+              <div class="mt-6 flex flex-wrap gap-2">
+                <span class="vs-status ${statusLabel(store.status)}">${escapeHtml(statusLabel(store.status))}</span>
+                <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-extrabold">Owner: ${escapeHtml(store.owner)}</span>
+                <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-extrabold">Hours: ${escapeHtml(store.hours)}</span>
+                ${store.phone ? `<span class="rounded-full bg-white/15 px-3 py-1 text-xs font-extrabold">Phone: ${escapeHtml(store.phone)}</span>` : ""}
+              </div>
+              <div class="mt-5 flex flex-wrap gap-3">
+                <a href="${mapsUrlForStore(store)}" target="_blank" rel="noreferrer" class="rounded-full bg-amber-400 px-5 py-2.5 text-sm font-extrabold text-slate-950">Open Google Maps directions</a>
+                <a href="#manage" class="rounded-full border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-extrabold text-white backdrop-blur">Manage store</a>
+              </div>
+            </div>
+          </section>
+
+          <section class="container mx-auto px-4 py-10 md:py-14">
+            <div class="vs-info-grid">
+              <div class="vs-info-tile"><span>Category</span><strong>${escapeHtml(store.category)}</strong></div>
+              <div class="vs-info-tile"><span>Address</span><strong>${escapeHtml(store.address)}</strong></div>
+              <div class="vs-info-tile"><span>Verification</span><strong>${escapeHtml(statusLabel(store.status))}</strong></div>
+              <div class="vs-info-tile"><span>Products</span><strong>${products.length} listed</strong></div>
+            </div>
+
+            <div class="vs-store-layout">
+              <div>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p class="vs-section-kicker mt-10">Public storefront</p>
+                    <h2 class="font-display mt-1 text-3xl font-bold text-slate-900">Shop ${escapeHtml(store.name)}</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">Customers see live products, directions, QR access, address, hours, and verified store details here.</p>
+                  </div>
+                  <span class="vs-count-pill">${products.length} products</span>
+                </div>
+                <div class="vs-filter-bar" role="search" aria-label="Search products in this store">
+                  <label class="vs-label" for="store-product-search">Search this store
+                    <input id="store-product-search" class="vs-input" type="search" placeholder="Search product name, category, price, stock..." autocomplete="off" />
+                  </label>
+                  <span id="store-product-result-count" class="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">${products.length} products</span>
+                </div>
+
+                ${featuredProduct ? `
+                  <section class="mt-5 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+                    <div class="grid md:grid-cols-[240px_1fr]">
+                      <img class="h-full min-h-56 w-full object-cover" src="${escapeHtml(featuredProduct.image || fallbackProduct)}" alt="${escapeHtml(featuredProduct.name)}" width="420" height="315" loading="lazy" decoding="async" />
+                      <div class="p-5">
+                        <p class="vs-section-kicker">Featured product</p>
+                        <h3 class="font-display mt-1 text-3xl font-bold text-slate-900">${escapeHtml(featuredProduct.name)}</h3>
+                        <p class="mt-2 text-sm text-muted-foreground">${escapeHtml(featuredProduct.category || store.category)} from ${escapeHtml(store.name)}</p>
+                        <div class="mt-4 flex flex-wrap items-center gap-2">
+                          <strong class="text-2xl">${money(featuredProduct.price)}</strong>
+                          <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">${escapeHtml(featuredProduct.stock)} in stock</span>
+                          ${featuredProduct.enhanced ? '<span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-extrabold text-amber-700">Enhanced image</span>' : ''}
+                        </div>
+                        <div class="vs-product-actions max-w-md">
+                          <button type="button" class="vs-buy-btn" data-add-product="${escapeHtml(virtualProductId(store.id, featuredProduct.id))}">Add to cart</button>
+                          <button type="button" class="vs-pay-btn" data-pay-product="${escapeHtml(virtualProductId(store.id, featuredProduct.id))}">Pay now</button>
+                          <button type="button" class="vs-wish-btn ${isWishlisted(virtualProductId(store.id, featuredProduct.id)) ? 'active' : ''}" data-wish-product="${escapeHtml(virtualProductId(store.id, featuredProduct.id))}">${isWishlisted(virtualProductId(store.id, featuredProduct.id)) ? 'Saved' : 'Wishlist'}</button>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                ` : ""}
+
+                <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  ${products.length ? products.map((product) => `
+                    <article class="mm-card overflow-hidden" data-store-product-card data-search="${escapeHtml([product.name, product.category, store.category, product.price, product.stock].filter(Boolean).join(' '))}">
+                      <img class="vs-product-img w-full" src="${escapeHtml(product.image || fallbackProduct)}" alt="${escapeHtml(product.name)}" width="420" height="315" loading="lazy" decoding="async" />
+                      <div class="p-4">
+                        <p class="font-extrabold text-slate-900">${escapeHtml(product.name)}</p>
+                        <p class="mt-1 text-sm text-muted-foreground">${escapeHtml(product.category || store.category)}</p>
+                        <div class="mt-3 flex items-center justify-between gap-2">
+                          <strong>${money(product.price)}</strong>
+                          <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">${escapeHtml(product.stock)} in stock</span>
+                        </div>
+                        ${product.enhanced ? '<p class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs font-extrabold text-amber-700">Enhanced camera upload</p>' : ''}
+                        <div class="vs-product-actions">
+                          <button type="button" class="vs-buy-btn" data-add-product="${escapeHtml(virtualProductId(store.id, product.id))}">Add to cart</button>
+                          <button type="button" class="vs-pay-btn" data-pay-product="${escapeHtml(virtualProductId(store.id, product.id))}">Pay now</button>
+                          <button type="button" class="vs-wish-btn ${isWishlisted(virtualProductId(store.id, product.id)) ? 'active' : ''}" data-wish-product="${escapeHtml(virtualProductId(store.id, product.id))}">${isWishlisted(virtualProductId(store.id, product.id)) ? 'Saved' : 'Wishlist'}</button>
+                        </div>
+                      </div>
+                    </article>
+                  `).join("") : `
+                    <div class="sm:col-span-2 xl:col-span-3 rounded-xl border border-dashed border-border bg-muted p-6 text-sm text-muted-foreground">
+                      No products uploaded yet. Use the manage panel to add products manually.
+                    </div>
+                  `}
+                  <div id="store-product-search-empty" class="sm:col-span-2 xl:col-span-3 vs-search-empty" hidden>No products match this search yet.</div>
+                </div>
+              </div>
+
+              <aside class="space-y-4">
+                <section class="mm-card mm-card-pad">
+                  <h3 class="text-xl font-extrabold">Store QR</h3>
+                  <p class="mt-1 text-sm text-muted-foreground">Print this QR for counter, bill, packaging, or banner.</p>
+                  <div class="mt-4 flex items-center gap-4">
+                    <canvas data-qr-text="${escapeHtml(appUrlForStore(store.id))}" class="vs-qr-canvas" aria-label="QR preview"></canvas>
+                    <div class="min-w-0">
+                      <p class="text-xs text-muted-foreground">QR redirects to</p>
+                      <p class="mt-1 break-all text-sm font-extrabold text-slate-900">${escapeHtml(appUrlForStore(store.id))}</p>
+                      <a href="${mapsUrlForStore(store)}" target="_blank" rel="noreferrer" class="mt-2 inline-flex text-xs font-extrabold text-amber-600 hover:underline">Google Maps directions</a>
+                    </div>
+                  </div>
+                  <div class="vs-qr-actions">
+                    <button type="button" data-download-store-qr>Download QR</button>
+                    <button type="button" data-copy-store-link="${escapeHtml(appUrlForStore(store.id))}">Copy link</button>
+                  </div>
+                </section>
+
+                <section class="mm-card mm-card-pad">
+                  <h3 class="text-xl font-extrabold">Razorpay payment QR</h3>
+                  <p class="mt-1 text-sm text-muted-foreground">Generate a fixed-amount UPI QR for counter payment. Requires backend API and Razorpay QR access on your account.</p>
+                  <form id="payment-qr-form" class="mt-4 grid gap-3">
+                    <label class="vs-label" for="payment-amount">Amount
+                      <input id="payment-amount" class="vs-input" type="number" min="1" value="${escapeHtml(featuredProduct?.price || '')}" placeholder="Amount in INR" />
+                    </label>
+                    <button type="submit" class="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white">Generate payment QR</button>
+                  </form>
+                  <div id="payment-qr-result" class="vs-payment-result"></div>
+                </section>
+
+                <section class="mm-card mm-card-pad">
+                  <h3 class="text-xl font-extrabold">Map navigation</h3>
+                  <p class="mt-1 text-sm text-muted-foreground">${escapeHtml(store.address)}</p>
+                  <iframe class="vs-map-frame mt-4" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${mapsEmbedUrlForStore(store)}" title="${escapeHtml(store.name)} map"></iframe>
+                  <a href="${mapsUrlForStore(store)}" target="_blank" rel="noreferrer" class="mt-3 inline-flex rounded-full bg-slate-900 px-4 py-2 text-xs font-extrabold text-white">Open directions</a>
+                </section>
+
+                <section id="manage" class="vs-admin-shell">
+                  <div class="vs-admin-shell-head">
+                    <p class="vs-section-kicker">Admin tools</p>
+                    <h3 class="mt-1 text-xl font-extrabold">Manage store content</h3>
+                    <p class="mt-1 text-sm text-muted-foreground">Upload banners and products manually. Camera/file uploads are enhanced before saving.</p>
+                  </div>
+                  <div class="vs-admin-shell-body">
+                  <div>
+                  <h4 class="text-base font-extrabold">Manage banner</h4>
+                  <form id="banner-form" class="mt-4 grid gap-3">
+                    <input id="banner-url" class="vs-input" value="${escapeHtml(store.banner || "")}" placeholder="Banner image URL" />
+                    <div class="vs-label">
+                      Upload banner image
+                      <div class="vs-upload-options">
+                        <label class="vs-upload-control">Use camera<input id="banner-camera" type="file" accept="image/*" capture="environment" /></label>
+                        <label class="vs-upload-control">Choose file<input id="banner-file" type="file" accept="image/*" /></label>
+                      </div>
+                    </div>
+                    <img id="banner-preview" class="vs-upload-preview" alt="Enhanced banner preview" />
+                    <button type="submit" class="rounded-xl border border-border px-4 py-2.5 text-sm font-extrabold hover:bg-muted">Update banner</button>
+                  </form>
+                  </div>
+
+                  <div class="vs-admin-divider"></div>
+
+                  <div>
+                  <h4 class="text-base font-extrabold">Manually upload product</h4>
+                  <form id="product-form" class="mt-4 grid gap-3">
+                    <input id="product-name" class="vs-input" required placeholder="Product name" />
+                    <input id="product-category" class="vs-input" placeholder="Category" />
+                    <input id="product-price" class="vs-input" required type="number" min="0" placeholder="Price" />
+                    <input id="product-stock" class="vs-input" required type="number" min="0" placeholder="Stock" />
+                    <input id="product-image" class="vs-input" placeholder="Product image URL" />
+                    <div class="vs-label">
+                      Upload product image
+                      <div class="vs-upload-options">
+                        <label class="vs-upload-control">Use camera<input id="product-camera" type="file" accept="image/*" capture="environment" /></label>
+                        <label class="vs-upload-control">Choose file<input id="product-file" type="file" accept="image/*" /></label>
+                      </div>
+                    </div>
+                    <img id="product-preview" class="vs-upload-preview" alt="Enhanced product preview" />
+                    <p class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-700">Images are enhanced in-browser before saving: brightness, contrast, saturation, compression, and marketplace-ready sizing.</p>
+                    <button type="submit" class="rounded-xl bg-primary px-4 py-3 text-sm font-extrabold text-white">Enhance and add product</button>
+                  </form>
+                  <div class="mt-5">
+                    <h4 class="text-base font-extrabold">Inventory controls</h4>
+                    <p class="mt-1 text-xs font-bold text-slate-500">Adjust stock quickly or remove products that should no longer appear on the storefront.</p>
+                    <div class="vs-manage-list">
+                      ${products.length ? products.map((product) => `
+                        <article class="vs-manage-row">
+                          <div class="vs-manage-row-main">
+                            <p class="truncate text-sm font-extrabold text-slate-900">${escapeHtml(product.name)}</p>
+                            <p class="mt-1 text-xs font-bold text-slate-500">${escapeHtml(product.category || store.category)} - ${money(product.price)} - stock ${escapeHtml(product.stock)}</p>
+                          </div>
+                          <div class="vs-manage-row-actions">
+                            <button type="button" data-stock-delta="-1" data-product-id="${escapeHtml(product.id)}">-1</button>
+                            <button type="button" data-stock-delta="1" data-product-id="${escapeHtml(product.id)}">+1</button>
+                            <button type="button" data-delete-product="${escapeHtml(product.id)}">Delete</button>
+                          </div>
+                        </article>
+                      `).join("") : `
+                        <div class="rounded-xl border border-dashed border-border bg-muted p-4 text-sm text-muted-foreground">Add a product above to unlock inventory controls.</div>
+                      `}
+                    </div>
+                  </div>
+                  </div>
+                  </div>
+                </section>
+              </aside>
+            </div>
+          </section>
+        `;
+
+        pendingProductImage = "";
+        pendingBannerImage = "";
+        drawQrCanvases(app);
+        bindStoreProductSearch();
+        bindProductActions();
+        bindQrActions(store);
+        bindInventoryControls(store.id);
+        updateHeaderCounts();
+        bindEnhancedUploadOptions(["product-camera", "product-file"], "product-preview", (value) => {
+          pendingProductImage = value;
+        });
+        bindEnhancedUploadOptions(["banner-camera", "banner-file"], "banner-preview", (value) => {
+          pendingBannerImage = value;
+        }, { banner: true });
+
+        document.getElementById("banner-form").addEventListener("submit", async (event) => {
+          event.preventDefault();
+          let banner = pendingBannerImage || document.getElementById("banner-url").value.trim() || fallbackBanner;
+          if (backendConfigured() && pendingBannerImage) {
+            try {
+              banner = await uploadAutoshelfAsset(`stores/${store.id}/banner.jpg`, pendingBannerImage);
+            } catch (error) {
+              console.warn("AutoShelf banner upload failed; keeping local image data.", error);
+              showToast("Banner saved locally. Storage upload needs attention.");
+            }
+          }
+          const updated = updateStore(store.id, (draft) => {
+            draft.banner = banner;
+          });
+          if (updated) await safeBackendWrite("Banner", () => persistStoreToBackend(updated));
+          renderStorePage(getStoreById(store.id));
+        });
+
+        document.getElementById("product-form").addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const productId = `p-${Date.now()}`;
+          let image = pendingProductImage || document.getElementById("product-image").value.trim() || fallbackProduct;
+          if (backendConfigured() && pendingProductImage) {
+            try {
+              image = await uploadAutoshelfAsset(`stores/${store.id}/products/${productId}.jpg`, pendingProductImage);
+            } catch (error) {
+              console.warn("AutoShelf product upload failed; keeping local image data.", error);
+              showToast("Product image saved locally. Storage upload needs attention.");
+            }
+          }
+          const product = {
+            id: productId,
+            name: document.getElementById("product-name").value.trim(),
+            category: document.getElementById("product-category").value.trim(),
+            price: document.getElementById("product-price").value.trim(),
+            stock: document.getElementById("product-stock").value.trim(),
+            image,
+            enhanced: Boolean(pendingProductImage),
+            uploadedAt: new Date().toISOString()
+          };
+          updateStore(store.id, (draft) => {
+            draft.products = draft.products || [];
+            draft.products.unshift(product);
+          });
+          await safeBackendWrite("Product", async () => {
+            await persistProductToBackend(store.id, product);
+            await recordStockEvent(store.id, product.id, "stock_in", Number(product.stock || 0), Number(product.stock || 0), "Initial product stock");
+          });
+          renderStorePage(getStoreById(store.id));
+        });
+      }
+
+      function updateStore(id, mutator) {
+        const stores = readStores();
+        const index = stores.findIndex((store) => String(store.id) === String(id));
+        if (index === -1) return null;
+        const draft = { ...stores[index], products: [...(stores[index].products || [])] };
+        mutator(draft);
+        stores[index] = draft;
+        writeStores(stores);
+        return draft;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const storeId = params.get("store");
+
+      async function initAutoshelf() {
+        app.innerHTML = `
+          <section class="container mx-auto px-4 py-16">
+            <div class="mm-card mm-card-pad">
+              <p class="vs-section-kicker">AutoShelf</p>
+              <h1 class="mt-1 text-3xl font-extrabold text-slate-900">Loading local stores</h1>
+              <p class="mt-2 text-sm text-muted-foreground">Loading your local store workspace.</p>
+            </div>
+          </section>
+        `;
+        try {
+          const hydrated = await hydrateStoresFromBackend();
+          if (hydrated) showToast("AutoShelf synced with backend.");
+        } catch (error) {
+          console.warn("AutoShelf backend hydrate failed; using local cache.", error);
+          showToast("Using local AutoShelf cache. Backend sync needs attention.");
+        }
+        const activeStore = storeId ? getStoreById(storeId) : null;
+        if (storeId && activeStore) {
+          renderStorePage(activeStore);
+        } else {
+          renderCreatePage();
+          if (storeId && !activeStore) showToast("Store not found. Showing all local stores.");
+        }
+      }
+
+      initAutoshelf();
+    </script>
+  </body>
+</html>

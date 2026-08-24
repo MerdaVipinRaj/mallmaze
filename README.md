@@ -1,121 +1,119 @@
-# MallMaze (HTML/CSS/JS)
+# MallMaze
 
-MallMaze is a static (HTML/CSS/vanilla JS) marketplace prototype for **nearby malls + independent stores**, with delivery shopping, reserve & try, and **Scan&Go**.
+MallMaze is a Swiggy/Zomato-style local commerce app for malls, nearby stores, delivery orders, AutoShelf stock operations, and Scan & Go receipts.
 
-## Run locally
-Any static server works.
+## Stack
 
-### Option A: VS Code Live Server
-- Install “Live Server”
-- Right-click `index.html` → **Open with Live Server**
+- Frontend: static HTML/CSS/vanilla JavaScript.
+- Backend: Node.js API in `backend/server.js`.
+- Database: PostgreSQL in production through `DATABASE_URL`; local JSON file fallback for development.
+- Auth: email/phone OTP through the backend.
+- Payments: Razorpay order and QR payment APIs through the backend.
+- Delivery: delivery-job abstraction ready for manual ops or partner integrations.
 
-### Option B: Python
+## Run Locally
 
 ```bash
-python -m http.server 5500
+npm install
+npm run dev
 ```
 
-Then open `http://localhost:5500/index.html`.
+Open:
 
-## Configure Supabase + Stripe
-Edit `assets/js/config.js`:
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-- `STRIPE_PUBLISHABLE_KEY` (for real checkout)
-- `SUPABASE_FUNCTIONS_URL` (optional; if blank, derived from `SUPABASE_URL`)
+- Frontend: `http://localhost:8080`
+- API health: `http://localhost:4000/api/health`
 
-Supabase SQL files:
-- `supabase/schema.sql`
-- `supabase/schema_orders_address.sql` (delivery fields on `orders`)
-- `supabase/policies.sql`
-- `supabase/schema_extra.sql` (support tickets + order events)
-- `supabase/schema_scan_receipts.sql` (Scan&Go receipts)
+In PowerShell, do not type the URL as a command. Open it in a browser, or run:
 
-Supabase edge function scaffolds:
-- `supabase/functions/create-checkout-session/index.ts`
-- `supabase/functions/stripe-webhook/index.ts`
-- `supabase/functions/create-delivery/index.ts`
-- `supabase/functions/delivery-webhook/index.ts` (ingest delivery tracking updates)
-- `supabase/functions/create-scan-checkout-session/index.ts` (Scan&Go payment)
-- `supabase/functions/refund-order/index.ts` (admin refund via Stripe)
+```powershell
+Start-Process "http://localhost:8080"
+```
 
-### Webhook security
-- Delivery webhook can be protected by setting `DELIVERY_WEBHOOK_SECRET` and sending header `x-mm-webhook-secret`.
+## Deploy on Render
 
-## Delivery webhook secret (recommended)
-If you set `DELIVERY_WEBHOOK_SECRET` on the Supabase `delivery-webhook` function, every webhook request must include:
-- Header `x-mm-webhook-secret: <your secret>`
+Use the included `render.yaml` Blueprint or follow [docs/RENDER_DEPLOY.md](docs/RENDER_DEPLOY.md).
 
-Suggested function env vars:
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `DELIVERY_WEBHOOK_SECRET` (optional but recommended)
-- `DELIVERY_PROVIDER` (optional; default `shadowfax`)
-- `CLICKPOST_BASE_URL` (optional)
-- `CLICKPOST_API_KEY` (optional)
+1. Push the repo to GitHub.
+2. Render Dashboard → **New** → **Blueprint** → connect repo.
+3. Apply; set Razorpay keys when prompted (optional for mock checkout).
+4. Open `https://your-service.onrender.com`.
 
-## Pages
-- `index.html` Home
-- `malls.html` Malls list
-- `mall.html` Mall detail
-- `products.html` Product listing (search + category)
-- `product.html` Product detail
-- `cart.html` Cart + checkout
-- `orders.html` Orders
-- `wishlist.html` Wishlist
-- `reservations.html` Reserve & Try
-- `queue.html` Queue booking
-- `walkthrough.html` Virtual walkthrough (mock)
-- `scan.html` Scan&Go
-- `scan-receipt.html` Scan&Go receipt (QR)
-- `verify-receipt.html` Staff receipt verify
-- `admin-dashboard.html` Admin suite
-- `store-dashboard.html` Store manager control room
+## Production Database
 
-## Deploy (deploy-ready checklist)
-### 1) Frontend (static hosting)
-- Host this folder on any static host (Netlify / Cloudflare Pages / Vercel static / GitHub Pages).
-- Make sure pages are served over HTTPS (required for camera + service worker).
+Set `DATABASE_URL` and run:
 
-### 2) Supabase DB
-Run these SQL files in Supabase SQL editor (in order):
-1. `supabase/schema.sql`
-2. `supabase/schema_orders_address.sql`
-3. `supabase/schema_extra.sql`
-4. `supabase/schema_scan_receipts.sql`
-5. `supabase/policies.sql`
+```bash
+psql "$DATABASE_URL" -f backend/schema.sql
+```
 
-### 3) Supabase Edge Functions
-Deploy functions:
-- `create-checkout-session`
-- `stripe-webhook`
-- `create-delivery`
-- `delivery-webhook`
-- `create-scan-checkout-session`
-- `refund-order`
+When `DATABASE_URL` is present, writes are stored in PostgreSQL and projected into:
 
-Set required env vars:
-- **Common**: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
-- **Auth verify** (checkout + refunds): `SUPABASE_ANON_KEY`
-- **Stripe**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
-- **Site**: `SITE_URL` (your deployed frontend URL, e.g. `https://your-site.com`)
-- **Delivery webhook security (recommended)**: `DELIVERY_WEBHOOK_SECRET`
-- **ClickPost (optional)**: `CLICKPOST_BASE_URL`, `CLICKPOST_API_KEY`
+- `mm_users`
+- `mm_stores`
+- `mm_products`
+- `mm_orders`
+- `mm_scan_receipts`
+- `mm_stock_events`
+- `mm_delivery_jobs`
+- `mm_support_tickets`
+- `mm_otp_challenges`
 
-### 4) Stripe webhooks
-Add a Stripe webhook endpoint pointing to your Supabase function `stripe-webhook`.
-Enable at least:
-- `checkout.session.completed`
+These are the operational tables for customer data, store data, stock, receipts, orders, delivery, and support.
 
-### 5) Final config
-Update `assets/js/config.js` on the frontend:
-- `SUPABASE_URL`, `SUPABASE_ANON_KEY`
-- `STRIPE_PUBLISHABLE_KEY`
-- (optional) `SUPABASE_FUNCTIONS_URL`
+## Config
 
-### 6) Quick smoke test
-- Login (`login.html`)
-- Add items → Cart → Pay → Orders shows status + delivery tracking
-- Scan&Go (`scan.html`) → Pay → receipt QR (`scan-receipt.html`) → verify (`verify-receipt.html` as staff/admin)
-- Create refund ticket from Orders → approve/refund in Admin dashboard
+Frontend public config:
 
+- `assets/js/config.js`
+  - `API_BASE_URL`
+  - `RAZORPAY_KEY_ID`
+
+Backend private config:
+
+- `backend/.env.example`
+  - `DATABASE_URL`
+  - `JWT_SECRET`
+  - `OTP_DEV_MODE`
+  - `RAZORPAY_KEY_ID`
+  - `RAZORPAY_KEY_SECRET`
+  - `RAZORPAY_WEBHOOK_SECRET`
+  - fees/tax/delivery settings
+
+Never put database credentials, Razorpay secret, OTP provider secrets, or delivery partner secrets in frontend files.
+
+## Main Pages
+
+- `index.html`: home/search
+- `products.html`: product listing and filters
+- `cart.html`: cart and Razorpay checkout
+- `orders.html`, `order.html`: customer order history/detail
+- `autoshelf.html`: stores, product stock, QR payments, operations
+- `scan.html`: Scan & Go cart
+- `scan-receipt.html`: receipt QR
+- `verify-receipt.html`: staff receipt verification
+- `admin-dashboard.html`: admin surface
+- `store-dashboard.html`: store surface
+- `notifications.html`: orders, receipts, support notifications
+
+## Deployment
+
+See [docs/DEPLOYMENT_READY.md](docs/DEPLOYMENT_READY.md).
+
+This project is shaped for GoDaddy Node.js Hosting or GoDaddy VPS:
+
+- root `package.json`
+- `npm start`
+- runtime dependencies in `dependencies`
+- server binds to `process.env.PORT`
+- secrets read from environment variables
+
+## Launch Checklist
+
+1. Set production `DATABASE_URL`.
+2. Run `backend/schema.sql`.
+3. Set `JWT_SECRET`.
+4. Set `OTP_DEV_MODE=false` and wire an SMS/email OTP provider.
+5. Add Razorpay keys and webhook secret.
+6. Update `assets/js/config.js` with production `API_BASE_URL`.
+7. Enable HTTPS on the domain.
+8. Test login, search, products, cart checkout, Scan & Go receipt verification, AutoShelf store/product creation, notifications, and support tickets.

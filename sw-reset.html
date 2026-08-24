@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MallMaze - Reset Cache</title>
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+    <link rel="stylesheet" href="assets/css/react-styles.css">
+  </head>
+  <body class="bg-white">
+    <main class="container mx-auto px-4 py-16">
+      <section class="mm-card mm-card-pad max-w-xl mx-auto">
+        <h1 class="text-2xl font-extrabold">Refreshing MallMaze</h1>
+        <p id="reset-status" class="text-sm text-muted-foreground mt-2">Clearing the old app cache...</p>
+        <a id="reset-link" href="index.html?cache-reset=1" class="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-white font-semibold">Open MallMaze</a>
+      </section>
+    </main>
+    <script>
+      (async function () {
+        const status = document.getElementById('reset-status');
+        const setStatus = (message) => { if (status) status.textContent = message; };
+        try {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map((registration) => registration.unregister()));
+          }
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((key) => caches.delete(key)));
+          }
+          setStatus('Old cache cleared. Opening the fresh app...');
+          window.location.replace('index.html?cache-reset=' + Date.now());
+        } catch (error) {
+          setStatus('Cache reset hit a browser permission issue. Use the button below to open the fresh app.');
+        }
+      })();
+    </script>
+  </body>
+</html>

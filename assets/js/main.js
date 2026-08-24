@@ -1,4 +1,4 @@
-﻿const STORAGE_KEYS = {
+const STORAGE_KEYS = {
   user: 'mm_user',
   location: 'mm_location',
   cart: 'mm_cart',
@@ -8,8 +8,10 @@
   wishlist: 'mm_wishlist',
   customMalls: 'mm_custom_malls',
   customStores: 'mm_custom_stores',
+  customProducts: 'mm_custom_products',
   managers: 'mm_managers',
-  stock: 'mm_stock'
+  stock: 'mm_stock',
+  autoshelf: 'mm_autoshelf_ops'
 };
 
 const read = (k, f) => {
@@ -20,6 +22,103 @@ const write = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 const el = (id) => document.getElementById(id);
 const money = (n) => `Rs ${Math.round(Number(n || 0)).toLocaleString('en-IN')}`;
 
+function defaultAutoshelfState() {
+  const now = Date.now();
+  return {
+    trustOverrides: {
+      p2: 'rapid',
+      p4: 'rapid',
+      p5: 'rapid',
+      p6: 'mini',
+      p7: 'low',
+      p9: 'pos',
+      p10: 'pos',
+      p11: 'rapid',
+      p12: 'mini',
+      p15: 'pos',
+      p20: 'stale'
+    },
+    reservations: { p2: 2, p4: 1, p5: 1, p6: 1, p9: 2, p11: 1, p15: 1 },
+    selectedProducts: { p2: true, p4: true, p5: true, p9: true, p10: true, p11: true, p15: true },
+    connectors: [
+      { id: 'conn-gofrugal-techzone', storeId: 's2', storeName: 'TechZone Electronics', system: 'GoFrugal RetailEasy', method: 'Direct API', tier: 'A', status: 'healthy', lastSyncMins: 7, products: 184, accuracy: 97, writeBack: 'read-only' },
+      { id: 'conn-zoho-beauty', storeId: 's5', storeName: 'Beauty Boulevard', system: 'Zoho Inventory', method: 'OAuth API', tier: 'A', status: 'healthy', lastSyncMins: 12, products: 96, accuracy: 96, writeBack: 'reservation-only' },
+      { id: 'feed-csv-luxe', storeId: 's1', storeName: 'Luxe Fashion House', system: 'Scheduled export', method: 'CSV feed', tier: 'B', status: 'watch', lastSyncMins: 86, products: 72, accuracy: 91, writeBack: 'read-only' },
+      { id: 'mini-sportx', storeId: 's4', storeName: 'SportX Arena', system: 'SmartMall Mini-POS', method: 'Fallback console', tier: 'C', status: 'manual', lastSyncMins: 18, products: 38, accuracy: 94, writeBack: 'SmartMall-only' }
+    ],
+    rapidShelf: [
+      { id: 'RS-A1', productId: 'p2', productName: 'Wireless Noise-Cancel Headphones', storeName: 'TechZone Electronics', bin: 'A1', qty: 14, reserved: 2, status: 'sealed', lastScan: '13 min ago', sla: '45 min' },
+      { id: 'RS-A2', productId: 'p4', productName: 'Smart Watch Pro X', storeName: 'TechZone Electronics', bin: 'A2', qty: 9, reserved: 1, status: 'sealed', lastScan: '18 min ago', sla: '45 min' },
+      { id: 'RS-B1', productId: 'p5', productName: 'Luxury Perfume Collection', storeName: 'Beauty Boulevard', bin: 'B1', qty: 12, reserved: 1, status: 'sealed', lastScan: '21 min ago', sla: '60 min' },
+      { id: 'RS-B2', productId: 'p11', productName: 'Skincare Serum Set', storeName: 'Beauty Boulevard', bin: 'B2', qty: 18, reserved: 1, status: 'sealed', lastScan: '8 min ago', sla: '60 min' }
+    ],
+    stockEvents: [
+      { id: `ev-${now - 5000}`, productId: 'p2', productName: 'Wireless Noise-Cancel Headphones', type: 'scan_in', qty: 16, source: 'Rapid Shelf', actor: 'Ops lead', at: now - 13 * 60 * 1000 },
+      { id: `ev-${now - 4000}`, productId: 'p9', productName: '4K Ultra HD Monitor 27"', type: 'pos_sync', qty: 12, source: 'GoFrugal RetailEasy', actor: 'Connector', at: now - 31 * 60 * 1000 },
+      { id: `ev-${now - 3000}`, productId: 'p6', productName: 'Running Shoes Ultra Boost', type: 'walk_in_sale', qty: 1, source: 'Mini-POS', actor: 'Store staff', at: now - 44 * 60 * 1000 }
+    ],
+    syncLogs: [
+      { id: `sync-${now - 5000}`, connectorId: 'conn-gofrugal-techzone', storeName: 'TechZone Electronics', status: 'success', message: '184 products imported, 12 stock changes normalized.', at: now - 7 * 60 * 1000 },
+      { id: `sync-${now - 4000}`, connectorId: 'conn-zoho-beauty', storeName: 'Beauty Boulevard', status: 'success', message: '96 products imported, 4 reservations subtracted.', at: now - 12 * 60 * 1000 },
+      { id: `sync-${now - 3000}`, connectorId: 'feed-csv-luxe', storeName: 'Luxe Fashion House', status: 'watch', message: 'CSV feed is 86 minutes old. Safety buffer raised.', at: now - 86 * 60 * 1000 }
+    ],
+    triage: {
+      storeName: 'New pilot store',
+      posAccess: 'export',
+      discipline: 'medium',
+      fastPromise: true,
+      recommendation: 'Use CSV/import plus daily confirmation. Put only fast-moving SKUs into Rapid Shelf before promising delivery.'
+    },
+    checklist: [
+      { id: 'legal', label: 'Store terms accepted', owner: 'Mall ops', done: true },
+      { id: 'catalog', label: 'Pilot SKU list approved', owner: 'Category lead', done: true },
+      { id: 'rapid', label: 'Rapid Shelf bins sealed', owner: 'Floor runner', done: false },
+      { id: 'webhook', label: 'Order webhook tested', owner: 'Tech ops', done: false },
+      { id: 'refunds', label: 'Refund path rehearsed', owner: 'Support', done: false }
+    ],
+    slaLanes: [
+      { id: 'pick', name: 'Pick', targetMins: 12, currentMins: 9, status: 'on-track' },
+      { id: 'pack', name: 'Pack', targetMins: 8, currentMins: 11, status: 'watch' },
+      { id: 'handoff', name: 'Delivery handoff', targetMins: 15, currentMins: 18, status: 'breach' }
+    ],
+    incidents: [
+      { id: 'inc-feed-luxe', title: 'Luxe CSV feed older than 60 min', severity: 'watch', owner: 'Connector ops', status: 'open' },
+      { id: 'inc-pack-delay', title: 'Packing lane over target by 3 min', severity: 'breach', owner: 'Floor lead', status: 'open' },
+      { id: 'inc-refund-drill', title: 'Refund drill pending before launch', severity: 'watch', owner: 'Support', status: 'open' }
+    ],
+    posSystems: [
+      { id: 'pos-gofrugal', name: 'GOFRUGAL RetailEasy', route: 'Direct API', feasibility: 'ready', requirement: 'Items with rate/stock plus sales-order APIs', proof: 'Official ecommerce API docs list item stock and sales order APIs.', status: 'tested' },
+      { id: 'pos-zoho', name: 'Zoho Inventory', route: 'OAuth REST API', feasibility: 'ready', requirement: 'OAuth app, organization_id, item/SKU mapping', proof: 'Official API exposes Inventory resources through REST endpoints.', status: 'tested' },
+      { id: 'pos-tally', name: 'TallyPrime', route: 'Local bridge', feasibility: 'bridge', requirement: 'Tally running as HTTP/XML or ODBC server in store network', proof: 'Official integration docs support XML/HTTP and ODBC access.', status: 'planned' },
+      { id: 'pos-petpooja', name: 'Petpooja', route: 'Partner/export path', feasibility: 'partner', requirement: 'Partner access, online-order add-on, reports/export feed', proof: 'Public pages show integrations and reporting, but public open API docs are not exposed.', status: 'planned' },
+      { id: 'pos-generic', name: 'Any small store', route: 'CSV + Mini-POS', feasibility: 'fallback', requirement: 'Daily SKU import or SmartMall Mini-POS stock confirmation', proof: 'Fallback keeps stores onboardable even without an API.', status: 'tested' }
+    ],
+    pilot: { mall: 'Grand Luxe Mall', stores: 20, listedProducts: 760, rapidShelfUnits: 126, mismatchRate: 3.8, cancellationRate: 6.2, repeatRate: 29, paidStores: 5 }
+  };
+}
+
+function normalizeAutoshelfState(value) {
+  const base = defaultAutoshelfState();
+  const v = value && typeof value === 'object' ? value : {};
+  return {
+    ...base,
+    ...v,
+    trustOverrides: { ...base.trustOverrides, ...(v.trustOverrides || {}) },
+    reservations: { ...base.reservations, ...(v.reservations || {}) },
+    selectedProducts: { ...base.selectedProducts, ...(v.selectedProducts || {}) },
+    connectors: Array.isArray(v.connectors) && v.connectors.length ? v.connectors : base.connectors,
+    rapidShelf: Array.isArray(v.rapidShelf) && v.rapidShelf.length ? v.rapidShelf : base.rapidShelf,
+    stockEvents: Array.isArray(v.stockEvents) && v.stockEvents.length ? v.stockEvents : base.stockEvents,
+    syncLogs: Array.isArray(v.syncLogs) && v.syncLogs.length ? v.syncLogs : base.syncLogs,
+    triage: { ...base.triage, ...(v.triage || {}) },
+    checklist: Array.isArray(v.checklist) && v.checklist.length ? v.checklist : base.checklist,
+    slaLanes: Array.isArray(v.slaLanes) && v.slaLanes.length ? v.slaLanes : base.slaLanes,
+    incidents: Array.isArray(v.incidents) && v.incidents.length ? v.incidents : base.incidents,
+    posSystems: Array.isArray(v.posSystems) && v.posSystems.length ? v.posSystems : base.posSystems,
+    pilot: { ...base.pilot, ...(v.pilot || {}) }
+  };
+}
+
 function escapeHtml(s) {
   return String(s || '')
     .replaceAll('&', '&amp;')
@@ -27,6 +126,30 @@ function escapeHtml(s) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+}
+
+function hasSavedRuntimeConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('mm_runtime_config_v1') || '{}');
+    return Boolean(String(cfg.API_BASE_URL || window.MM_CONFIG?.API_BASE_URL || '').trim());
+  } catch {
+    return false;
+  }
+}
+
+function isLocalStaticHost() {
+  try {
+    return ['localhost', '127.0.0.1', '::1', ''].includes(location.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function localSafeImage(src, fallback = 'assets/media/hero-mall.jpg') {
+  const value = String(src || '').trim();
+  if (!value) return fallback;
+  if (isLocalStaticHost() && /^https?:\/\//i.test(value) && !hasSavedRuntimeConfig()) return fallback;
+  return value;
 }
 
 function prefetchPages(pages) {
@@ -75,7 +198,7 @@ function toast(message, opts) {
       <p class="mm-toast-title">${escapeHtml(title)}</p>
       <p class="mm-toast-msg">${escapeHtml(String(message || ''))}</p>
     </div>
-    <button class="mm-toast-x" type="button" aria-label="Dismiss">×</button>
+    <button class="mm-toast-x" type="button" aria-label="Dismiss">&times;</button>
   `;
   wrap.appendChild(node);
   const remove = () => node.remove();
@@ -99,7 +222,7 @@ function emptyState(opts) {
         <div class="min-w-0">
           <h2 class="text-xl font-extrabold">${title}</h2>
           ${subtitle ? `<p class="mm-page-sub">${subtitle}</p>` : ''}
-          ${href && cta ? `<a href="${href}" class="inline-flex mt-4 items-center gap-2 rounded-xl bg-primary px-5 py-3 text-white font-semibold">${cta} <span aria-hidden="true">→</span></a>` : ''}
+          ${href && cta ? `<a href="${href}" class="inline-flex mt-4 items-center gap-2 rounded-xl bg-primary px-5 py-3 text-white font-semibold">${cta} <span aria-hidden="true">&rarr;</span></a>` : ''}
         </div>
       </div>
     </div>
@@ -108,7 +231,7 @@ function emptyState(opts) {
 
 function loadingState(opts) {
   const o = opts || {};
-  const title = String(o.title || 'Loading…');
+  const title = String(o.title || 'Loading...');
   return `
     <div class="mm-card mm-card-pad max-w-2xl mx-auto">
       <div class="flex items-start gap-4">
@@ -135,19 +258,23 @@ const state = {
   wishlist: read(STORAGE_KEYS.wishlist, []),
   customMalls: read(STORAGE_KEYS.customMalls, []),
   customStores: read(STORAGE_KEYS.customStores, []),
+  customProducts: read(STORAGE_KEYS.customProducts, []),
   managers: read(STORAGE_KEYS.managers, []),
-  stock: read(STORAGE_KEYS.stock, {})
+  stock: read(STORAGE_KEYS.stock, {}),
+  autoshelf: normalizeAutoshelfState(read(STORAGE_KEYS.autoshelf, null))
 };
 
+function autoshelfState() {
+  state.autoshelf = normalizeAutoshelfState(state.autoshelf);
+  return state.autoshelf;
+}
+
 function supa() {
-  return window.MM_SUPABASE?.getClient?.() || null;
+  return null;
 }
 
 async function supaSessionUser() {
-  const client = supa();
-  if (!client) return null;
-  const { data } = await client.auth.getUser();
-  return data?.user || null;
+  return null;
 }
 
 async function ensureProfile() {
@@ -161,30 +288,54 @@ async function ensureProfile() {
 }
 
 async function loadAppData() {
-  const client = supa();
-  if (!client) {
+  async function loadMock() {
     const raw = await fetch('./data/mock-data.json')
       .then((r) => r.ok ? r.json() : ({ malls: [], stores: [], products: [], categories: [], flashDeals: [] }))
       .catch(() => ({ malls: [], stores: [], products: [], categories: [], flashDeals: [] }));
     return mergeData(raw);
   }
 
-  // Supabase-driven catalog (minimal v1 mapping)
-  const city = state.location || '';
-  const mallsQ = client.from('malls').select('*');
-  const storesQ = client.from('stores').select('*');
-  const productsQ = client.from('products').select('*').eq('is_active', true);
+  if (window.MM_API?.hasApi?.()) {
+    try {
+      const apiData = await Promise.race([
+        window.MM_API.catalog({ city: state.location || "" }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Catalog API timed out')), 5000))
+      ]);
+      return mergeData(apiData);
+    } catch {
+      if (!window.MM_CONFIG?.ENABLE_LOCAL_FALLBACKS) throw new Error('Catalog API unavailable');
+    }
+  }
 
-  const [{ data: malls }, { data: stores }, { data: products }, { data: inv }] = await Promise.all([
-    city ? mallsQ.eq('city', city) : mallsQ,
-    city ? storesQ.eq('city', city) : storesQ,
-    productsQ,
-    client.from('inventory').select('*')
-  ]);
+  const client = supa();
+  if (!client) {
+    return loadMock();
+  }
+  if (isLocalStaticHost() && !hasSavedRuntimeConfig()) {
+    return loadMock();
+  }
 
-  const invByProduct = new Map((inv || []).map((x) => [x.product_id, x]));
-  const mallById = new Map((malls || []).map((m) => [m.id, m]));
-  const storeById = new Map((stores || []).map((s) => [s.id, s]));
+  try {
+    // Legacy external catalog path kept inactive after backend migration.
+    const city = state.location || '';
+    const mallsQ = client.from('malls').select('*');
+    const storesQ = client.from('stores').select('*');
+    const productsQ = client.from('products').select('*').eq('is_active', true);
+
+    const catalogRequest = Promise.all([
+      city ? mallsQ.eq('city', city) : mallsQ,
+      city ? storesQ.eq('city', city) : storesQ,
+      productsQ,
+      client.from('inventory').select('*')
+    ]);
+    const catalogTimeout = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Catalog request timed out')), 3000);
+    });
+    const [{ data: malls }, { data: stores }, { data: products }, { data: inv }] = await Promise.race([catalogRequest, catalogTimeout]);
+
+    const invByProduct = new Map((inv || []).map((x) => [x.product_id, x]));
+    const mallById = new Map((malls || []).map((m) => [m.id, m]));
+    const storeById = new Map((stores || []).map((s) => [s.id, s]));
 
   const mappedMalls = (malls || []).map((m) => ({
     id: m.id,
@@ -237,14 +388,22 @@ async function loadAppData() {
     };
   });
 
-  const catCounts = new Map();
-  mappedProducts.forEach((p) => {
-    if (!p.category) return;
-    catCounts.set(p.category, (catCounts.get(p.category) || 0) + 1);
-  });
-  const categories = [...catCounts.entries()].map(([name, count]) => ({ name, count }));
+    const catCounts = new Map();
+    mappedProducts.forEach((p) => {
+      if (!p.category) return;
+      catCounts.set(p.category, (catCounts.get(p.category) || 0) + 1);
+    });
+    const categories = [...catCounts.entries()].map(([name, count]) => ({ name, count }));
 
-  return { malls: mappedMalls, stores: mappedStores, products: mappedProducts, categories, flashDeals: [] };
+    // If project is connected but not seeded yet, keep UI healthy with demo cards.
+    if (!mappedMalls.length && !mappedStores.length && !mappedProducts.length) {
+      toast('Backend catalog is empty. Showing demo cards until data is seeded.', { type: 'info', title: 'Catalog' });
+      return loadMock();
+    }
+    return { malls: mappedMalls, stores: mappedStores, products: mappedProducts, categories, flashDeals: [] };
+  } catch {
+    return loadMock();
+  }
 }
 
 function persist() {
@@ -257,8 +416,10 @@ function persist() {
   write(STORAGE_KEYS.wishlist, state.wishlist);
   write(STORAGE_KEYS.customMalls, state.customMalls);
   write(STORAGE_KEYS.customStores, state.customStores);
+  write(STORAGE_KEYS.customProducts, state.customProducts);
   write(STORAGE_KEYS.managers, state.managers);
   write(STORAGE_KEYS.stock, state.stock);
+  write(STORAGE_KEYS.autoshelf, autoshelfState());
 }
 
 function cityOf(location) {
@@ -281,6 +442,45 @@ function downloadTextFile(filename, content) {
   } catch {}
 }
 
+function absoluteAppUrl(path) {
+  try {
+    return new URL(String(path || ''), location.href).toString();
+  } catch {
+    return String(path || '');
+  }
+}
+
+function storePath(storeId) {
+  return `store.html?id=${encodeURIComponent(String(storeId || ''))}`;
+}
+
+function storeUrl(storeId) {
+  return absoluteAppUrl(storePath(storeId));
+}
+
+function mapUrlForStore(store) {
+  const query = [store?.address, store?.name, store?.city].filter(Boolean).join(', ') || store?.name || 'store';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+function fallbackProductImage(category) {
+  const c = String(category || '').toLowerCase();
+  if (c.includes('beauty') || c.includes('cosmetic')) return 'assets/media/hero-fashion.jpg';
+  if (c.includes('fashion') || c.includes('shoe') || c.includes('apparel')) return 'assets/media/hero-fashion.jpg';
+  if (c.includes('electronics') || c.includes('mobile') || c.includes('gadget')) return 'assets/media/hero-mall.jpg';
+  return 'assets/media/hero-mall.jpg';
+}
+
+function generatedCredential() {
+  return `COS-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+}
+
+function todayKey(value) {
+  const d = value ? new Date(value) : new Date();
+  if (Number.isNaN(d.getTime())) return new Date().toISOString().slice(0, 10);
+  return d.toISOString().slice(0, 10);
+}
+
 function icon(name) {
   const x = {
     map: '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
@@ -296,7 +496,12 @@ function icon(name) {
     catHome: '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7"/><path d="M6 9.5V20h12V9.5"/></svg>',
     catBooks: '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17H7.5A2.5 2.5 0 0 0 5 21z"/><path d="M8 7h8"/></svg>',
     catKids: '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="2.2"/><path d="M8.2 13.2h7.6"/><rect x="7.5" y="13.5" width="9" height="5.5" rx="2"/><circle cx="10" cy="19.2" r="1"/><circle cx="14" cy="19.2" r="1"/></svg>',
-    catFood: '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="4.6"/><line x1="5.2" y1="6" x2="5.2" y2="18"/><line x1="7.2" y1="6" x2="7.2" y2="18"/><line x1="5.2" y1="10" x2="7.2" y2="10"/><line x1="18.2" y1="6" x2="18.2" y2="18"/><path d="M18.2 6h1a1 1 0 0 1 1 1v2.2a2.2 2.2 0 0 1-2.2 2.2h-.8"/></svg>'
+    catFood: '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="4.6"/><line x1="5.2" y1="6" x2="5.2" y2="18"/><line x1="7.2" y1="6" x2="7.2" y2="18"/><line x1="5.2" y1="10" x2="7.2" y2="10"/><line x1="18.2" y1="6" x2="18.2" y2="18"/><path d="M18.2 6h1a1 1 0 0 1 1 1v2.2a2.2 2.2 0 0 1-2.2 2.2h-.8"/></svg>',
+    shield: '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg>',
+    sync: '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-14.8 6.9"/><path d="M3 12A9 9 0 0 1 17.8 5.1"/><path d="M7 19H3v-4"/><path d="M17 5h4v4"/></svg>',
+    barcode: '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a1 1 0 0 1 1-1h2"/><path d="M17 4h2a1 1 0 0 1 1 1v2"/><path d="M20 17v2a1 1 0 0 1-1 1h-2"/><path d="M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M7 8v8"/><path d="M10 8v8"/><path d="M14 8v8"/><path d="M17 8v8"/></svg>',
+    activity: '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 8-6-16-3 8H2"/></svg>',
+    box: '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.5 12 3 3 8.5l9 5.5 9-5.5z"/><path d="M3 8.5V16l9 5 9-5V8.5"/><path d="M12 14v7"/></svg>'
   };
   return x[name] || '';
 }
@@ -343,17 +548,21 @@ function renderNavbar() {
               <p class="sm-location-sub">Choose your shopping location</p>
             </div>
             <div class="sm-city-list">${citiesMarkup}</div>
+            <button type="button" id="sm-detect-city" class="sm-detect-city mt-2 w-full rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-900">Use my current location</button>
           </div>
         </div>
       </div>
 
       <div class="sm-nav hidden md:flex items-center gap-2">
         ${navItem('index.html', 'Home', file === 'index.html' || file === 'dashboard.html')}
-        ${navItem('malls.html', 'Malls', file === 'malls.html' || file === 'mall.html')}
+        <!-- Mall nav parked for first launch phase: ${navItem('malls.html', 'Malls', file === 'malls.html' || file === 'mall.html')} -->
         ${navItem('products.html', 'Products', file === 'products.html' || file === 'product.html')}
         ${navItem('deals.html', 'Deals', file === 'deals.html')}
         ${navItem('compare.html', 'Compare', file === 'compare.html')}
         ${navItem('scan.html', 'Scan&Go', file === 'scan.html')}
+        ${navItem('autoshelf.html', 'Local Stores', file === 'autoshelf.html')}
+        ${navItem('reservations.html', 'Reservations', file === 'reservations.html')}
+        ${navItem('register-store.html', 'Sell on MallMaze', file === 'register-store.html' || file === 'store-dashboard.html')}
       </div>
 
       <div class="sm-right flex items-center gap-2">
@@ -380,6 +589,7 @@ function renderNavbar() {
   if (file === 'deals.html') setActive('deals.html');
   if (file === 'compare.html') setActive('compare.html');
   if (file === 'scan.html') setActive('scan.html');
+  if (file === 'autoshelf.html') setActive('autoshelf.html');
   if (file === 'orders.html') setActive('orders.html');
   if (file === 'notifications.html') setActive('notifications.html');
   if (file === 'support.html') setActive('support.html');
@@ -434,16 +644,38 @@ function renderNavbar() {
   document.addEventListener('click', window.__smLocOutsideClick);
   document.addEventListener('keydown', window.__smLocEscapeKey);
 
+  el('sm-detect-city')?.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      toast('Location not supported on this device.', { type: 'bad', title: 'Location' });
+      return;
+    }
+    toast('Detecting your city…', { type: 'ok', title: 'Location', ms: 1500 });
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const result = window.MM_API?.detectLocation
+          ? await window.MM_API.detectLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+          : { city: 'Hyderabad' };
+        state.location = result.city || 'Hyderabad';
+        if (cityLabel) cityLabel.textContent = state.location;
+        persist();
+        closePanel();
+        window.location.reload();
+      } catch {
+        toast('Could not detect city. Pick manually.', { type: 'bad', title: 'Location' });
+      }
+    }, () => toast('Location permission denied.', { type: 'bad', title: 'Location' }), { enableHighAccuracy: false, timeout: 12000 });
+  });
+
 }
 
-async function trySyncAuthFromSupabase() {
+async function trySyncAuthFromLegacyRemote() {
   const client = supa();
   if (!client) return;
   try {
     const { data } = await client.auth.getSession();
     const user = data?.session?.user || null;
     if (user) {
-      state.user = { name: user.user_metadata?.name || user.email || 'User', email: user.email, role: state.user?.role || 'user', supabaseUserId: user.id };
+      state.user = { name: user.user_metadata?.name || user.email || 'User', email: user.email, role: state.user?.role || 'user', legacyRemoteUserId: user.id };
       persist();
     }
   } catch {}
@@ -462,15 +694,35 @@ function mergeData(raw) {
   const storeById = new Map(stores.map((s) => [s.id, s]));
   const mallById = new Map(malls.map((m) => [m.id, m]));
 
-  const products = (raw.products || []).map((p) => {
+  const products = [...(raw.products || []), ...(state.customProducts || [])].map((p) => {
     const stockOverride = state.stock[p.id];
-    const stockCount = Number.isFinite(stockOverride) ? stockOverride : p.stockCount;
+    const stockCount = Number.isFinite(stockOverride) ? stockOverride : Number(p.stockCount ?? p.stock_qty ?? p.stock ?? 0);
+    const storeId = p.storeId || p.store_id || '';
+    const store = storeById.get(storeId);
+    const mallId = p.mallId || store?.mallId || '';
+    const price = Number(p.price ?? p.price_inr ?? 0);
+    const originalPrice = Number(p.originalPrice ?? p.original_price_inr ?? price);
     return {
       ...p,
+      storeId,
+      store_id: storeId,
+      mallId,
+      price,
+      price_inr: price,
+      originalPrice,
+      original_price_inr: originalPrice,
       stockCount,
+      stock_qty: stockCount,
       inStock: stockCount > 0,
-      mallName: p.mallName || mallById.get(p.mallId)?.name || 'Mall',
-      storeName: p.storeName || storeById.get(p.storeId)?.name || 'Store'
+      image: p.image || p.image_url || 'assets/media/hero-mall.jpg',
+      mallName: p.mallName || mallById.get(mallId)?.name || (store?.city ? `${store.city} Local Store` : 'Local Store'),
+      storeName: p.storeName || p.store_name || store?.name || 'Store',
+      city: p.city || store?.city || '',
+      color: p.color || '',
+      size: p.size || '',
+      fit: p.fit || 'regular',
+      sizes: p.sizes || p.variants || [],
+      variants: p.variants || p.sizes || []
     };
   });
 
@@ -480,41 +732,134 @@ function mergeData(raw) {
 function scoped(data) {
   if (!state.location) return data;
   const city = state.location.toLowerCase();
-  const malls = data.malls.filter((m) => cityOf(m.location).toLowerCase() === city);
-  if (!malls.length) return data;
-  const ids = new Set(malls.map((m) => m.id));
-  const stores = data.stores.filter((s) => ids.has(s.mallId));
-  const products = data.products.filter((p) => ids.has(p.mallId));
+  const malls = data.malls.filter((m) => cityOf(m.location).toLowerCase().includes(city) || city.includes(cityOf(m.location).toLowerCase()));
+  const localStores = data.stores.filter((s) => String(s.city || s.address || '').toLowerCase().includes(city) || s.virtualSource);
+  const mallIds = new Set(malls.map((m) => m.id));
+  const localStoreIds = new Set(localStores.map((s) => s.id));
+  const stores = [...malls.length ? data.stores.filter((s) => mallIds.has(s.mallId)) : [], ...localStores.filter((s, i, arr) => arr.findIndex((x) => x.id === s.id) === i)];
+  const products = data.products.filter((p) => mallIds.has(p.mallId) || localStoreIds.has(p.storeId) || String(p.city || '').toLowerCase().includes(city));
+  if (!stores.length && !products.length) return data;
   const cm = new Map();
   products.forEach((p) => cm.set(p.category, (cm.get(p.category) || 0) + 1));
   const categories = [...cm.entries()].map(([name, count]) => ({ name, count }));
-  return { ...data, malls, stores, products, categories };
+  return { ...data, malls: malls.length ? malls : data.malls.filter(() => false), stores, products, categories };
+}
+
+function productStockCount(product) {
+  if (!product) return 0;
+  const override = state.stock?.[product.id];
+  return Number.isFinite(override) ? Number(override) : Number(product.stockCount || 0);
+}
+
+function productSeed(product) {
+  return String(product?.id || product?.name || '')
+    .split('')
+    .reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+}
+
+function connectorForProduct(product) {
+  const ops = autoshelfState();
+  const byStore = ops.connectors.find((c) => String(c.storeId) === String(product?.storeId));
+  if (byStore) return byStore;
+  const seed = productSeed(product);
+  return ops.connectors[seed % ops.connectors.length] || null;
+}
+
+function rapidShelfForProduct(product) {
+  const ops = autoshelfState();
+  return ops.rapidShelf.find((u) => String(u.productId) === String(product?.id)) || null;
+}
+
+function trustForProduct(product) {
+  const ops = autoshelfState();
+  const id = String(product?.id || '');
+  const stockCount = productStockCount(product);
+  const connector = connectorForProduct(product);
+  const rapidUnit = rapidShelfForProduct(product);
+  const override = String(ops.trustOverrides?.[id] || '');
+  const seed = productSeed(product);
+  let key = override || (rapidUnit ? 'rapid' : connector?.method?.toLowerCase().includes('mini') ? 'mini' : connector ? 'pos' : ['pos', 'mini', 'stale'][seed % 3]);
+
+  if (stockCount <= 0 || product?.inStock === false) key = 'out';
+  else if (stockCount <= 2 && key !== 'rapid') key = 'low';
+  else if (connector?.status === 'watch' && key === 'pos') key = 'stale';
+
+  const copy = {
+    rapid: { label: 'Rapid Shelf', tone: 'rapid', source: 'Controlled shelf/bin', promise: '30-60 min delivery', action: 'Instant order', rank: 5 },
+    pos: { label: 'POS synced', tone: 'pos', source: connector?.system || 'POS connector', promise: 'Synced recently', action: 'Reserve or order', rank: 4 },
+    mini: { label: 'Mini-POS managed', tone: 'mini', source: 'SmartMall stock console', promise: 'Confirmed today', action: 'Reserve or order', rank: 3 },
+    low: { label: 'Low stock: confirm', tone: 'low', source: connector?.system || 'Store stock', promise: 'Staff confirmation needed', action: 'Reserve after check', rank: 2 },
+    stale: { label: 'Stock stale', tone: 'stale', source: connector?.system || 'Last feed', promise: 'Availability reduced', action: 'Check with store', rank: 1 },
+    out: { label: 'Out of stock', tone: 'out', source: 'Inventory source', promise: 'Unavailable now', action: 'Notify me', rank: 0 }
+  };
+  const spec = copy[key] || copy.pos;
+  const reservations = Number(ops.reservations?.[id] ?? rapidUnit?.reserved ?? (seed % 2));
+  const buffer = key === 'rapid' ? 0 : key === 'pos' ? 2 : key === 'mini' ? 1 : key === 'low' ? 1 : 3;
+  const stalePenalty = key === 'stale' ? Math.min(3, Math.ceil(stockCount * 0.2)) : 0;
+  const sellableStock = key === 'out' ? 0 : Math.max(0, stockCount - reservations - buffer - stalePenalty);
+  return {
+    key,
+    ...spec,
+    stockCount,
+    reservations,
+    buffer,
+    stalePenalty,
+    sellableStock,
+    connector,
+    rapidUnit,
+    formula: `${stockCount} POS/store stock - ${reservations} reservations - ${buffer} buffer - ${stalePenalty} stale penalty = ${sellableStock} sellable`
+  };
+}
+
+function trustBadge(profile, extraClass = '') {
+  const t = profile || trustForProduct({});
+  return `<span class="sm-trust-badge trust-${t.tone} ${extraClass}">${escapeHtml(t.label)}</span>`;
+}
+
+function formatTimeAgo(value) {
+  const at = Number(value || 0);
+  if (!at) return 'just now';
+  const mins = Math.max(0, Math.round((Date.now() - at) / 60000));
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  return `${Math.round(hours / 24)} day ago`;
 }
 
 function productCard(p) {
+  const trust = trustForProduct(p);
   const discountPct = p.originalPrice > p.price ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
   const wishActive = state.wishlist.some((w) => w.id === p.id);
+  const reviewsText = Number(p.reviews || 0) > 0 ? `${Number(p.reviews || 0).toLocaleString('en-IN')} reviews` : 'Verified store';
   return `
-    <a href="product.html?id=${p.id}" class="group block overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:shadow-card-hover hover:-translate-y-1">
+    <a href="product.html?id=${encodeURIComponent(String(p.id))}" class="group block overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:shadow-card-hover hover:-translate-y-1">
       <div class="relative aspect-square overflow-hidden bg-muted">
         <div class="mm-badges">
           ${discountPct ? `<span class="mm-badge gold">${discountPct}% OFF</span>` : ''}
-          ${p.inStock ? `<span class="mm-badge green">In stock</span>` : `<span class="mm-badge red">Out of stock</span>`}
+          ${trustBadge(trust, 'compact')}
         </div>
         <div class="mm-card-actions">
-          <button class="mm-icon-btn ${wishActive ? 'active' : ''} wishlist-toggle" type="button" aria-label="${wishActive ? 'Remove from wishlist' : 'Save to wishlist'}" data-id="${p.id}">${icon('heart')}</button>
+          <button class="mm-icon-btn ${wishActive ? 'active' : ''} wishlist-toggle" type="button" aria-pressed="${wishActive ? 'true' : 'false'}" aria-label="${wishActive ? 'Remove from wishlist' : 'Save to wishlist'}" data-id="${escapeHtml(p.id)}">${icon('heart')}</button>
         </div>
-        <img src="${p.image}" alt="${escapeHtml(p.name)}" class="h-full w-full object-cover" loading="lazy" decoding="async" />
+        <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" class="h-full w-full object-cover" width="420" height="420" loading="lazy" decoding="async" />
         <div class="absolute bottom-0 left-0 right-0 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
-          <button class="add-to-cart-btn flex w-full items-center justify-center gap-2 bg-gradient-gold py-2.5 text-xs font-bold text-primary-foreground" data-id="${p.id}" aria-label="Add ${escapeHtml(p.name)} to cart">${icon('cart')} Add to Cart</button>
+          <button class="add-to-cart-btn flex w-full items-center justify-center gap-2 bg-gradient-gold py-2.5 text-xs font-bold text-primary-foreground" data-id="${escapeHtml(p.id)}" aria-label="Add ${escapeHtml(p.name)} to cart">${icon('cart')} <span>Add to Cart</span></button>
         </div>
       </div>
       <div class="p-3.5">
-        <p class="mb-0.5 truncate text-[11px] font-medium text-muted-foreground">${p.storeName} . ${p.mallName}</p>
-        <h3 class="mb-1.5 line-clamp-2 text-sm font-bold leading-tight">${p.name}</h3>
+        <p class="mb-0.5 truncate text-[11px] font-medium text-muted-foreground">${escapeHtml(p.storeName)} &middot; ${escapeHtml(p.mallName)}</p>
+        <h3 class="mb-1.5 line-clamp-2 text-sm font-bold leading-tight">${escapeHtml(p.name)}</h3>
         <div class="flex items-center justify-between gap-2">
           <div class="mb-2"><span class="text-lg font-extrabold">${money(p.price)}</span>${p.originalPrice > p.price ? ` <span class="text-xs text-muted-foreground line-through">${money(p.originalPrice)}</span>` : ''}</div>
-          <div class="text-xs font-semibold text-slate-600">${(p.rating || 0).toFixed(1)}★</div>
+          <div class="text-right text-xs font-semibold text-slate-600">
+            <span>${(p.rating || 0).toFixed(1)} &#9733;</span>
+            <span class="block text-[10px] font-medium text-muted-foreground">${escapeHtml(reviewsText)}</span>
+          </div>
+        </div>
+        <div class="sm-trust-line">
+          <span>${escapeHtml(trust.promise)}</span>
+          <span>${trust.sellableStock > 0 ? `${trust.sellableStock} sellable` : trust.action}</span>
         </div>
       </div>
     </a>
@@ -551,7 +896,7 @@ function flashDealCard(deal, idx) {
   const totalSeconds = parseHmsToSeconds(deal.endsIn);
   const timer = renderTimerParts(totalSeconds);
   const subtitle = String(deal.subtitle || '')
-    .replaceAll('â‚¹', '₹')
+    .replaceAll('â‚¹', 'Rs')
     .replaceAll('â€”', '-')
     .trim();
 
@@ -563,11 +908,11 @@ function flashDealCard(deal, idx) {
         <div class="absolute inset-0 flash-content flex flex-col justify-between p-5">
           <div>
             <span class="flash-badge">Hurry</span>
-            <h3 class="flash-title font-display text-lg font-bold text-white md:text-xl">${deal.title}</h3>
+            <h3 class="flash-title font-display text-lg font-bold text-white md:text-xl">${escapeHtml(deal.title)}</h3>
             <p class="flash-subtitle text-sm text-white/85">${subtitle}</p>
           </div>
           <div class="flash-timer-row flex items-center gap-2">
-            <span class="text-sm text-white/75">⏱</span>
+            <span class="text-sm text-white/75" aria-hidden="true">&#9201;</span>
             <span class="text-xs font-medium text-white/75">Ends in</span>
             <span class="flash-countdown flex items-center">${timer}</span>
           </div>
@@ -747,14 +1092,14 @@ function renderPriceComparisonResults(products, query, selectedId) {
   `).join('');
 
   const modeText = mode === 'exact'
-    ? 'Exact product offers compared across multiple malls'
+    ? 'Exact product offers compared across multiple stores'
     : 'Closest alternatives compared (exact match unavailable)';
 
   container.innerHTML = `
     <div class="spc-summary">
       <div>
         <p class="spc-summary-title">Best affordable: ${best.name}</p>
-        <p class="spc-summary-sub">${modeText} . ${storesCount} stores . ${mallsCount} malls</p>
+        <p class="spc-summary-sub">${modeText} . ${storesCount} stores . ${mallsCount || storesCount} locations</p>
       </div>
       <div class="spc-save">Save up to ${money(savings)}</div>
     </div>
@@ -837,9 +1182,15 @@ function bindFlashCountdown() {
 }
 
 function addToCart(product) {
+  const trust = trustForProduct(product);
   const existing = state.cart.find((x) => x.id === product.id);
-  if (existing) existing.quantity = (existing.quantity || 1) + 1;
-  else state.cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 });
+  if (existing) {
+    existing.quantity = (existing.quantity || 1) + 1;
+    existing.trustLabel = trust.label;
+    existing.deliveryPromise = trust.promise;
+  } else {
+    state.cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1, trustKey: trust.key, trustLabel: trust.label, deliveryPromise: trust.promise });
+  }
   persist();
   renderNavbar();
 }
@@ -852,19 +1203,40 @@ function toggleWishlist(product) {
   renderNavbar();
 }
 
-async function startStripeCheckoutFromCart() {
-  const cfg = window.MM_CONFIG || {};
-  const publishableKey = String(cfg.STRIPE_PUBLISHABLE_KEY || '').trim();
-  const functionsBase = window.MM_SUPABASE?.functionsBaseUrl?.() || '';
+function loadScriptOnce(src, globalName) {
+  return new Promise((resolve, reject) => {
+    if (globalName && window[globalName]) return resolve(window[globalName]);
+    const existing = document.querySelector(`script[src="${src}"]`);
+    if (existing) {
+      existing.addEventListener('load', () => resolve(globalName ? window[globalName] : true), { once: true });
+      existing.addEventListener('error', reject, { once: true });
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve(globalName ? window[globalName] : true);
+    script.onerror = () => reject(new Error(`Could not load ${src}`));
+    document.head.appendChild(script);
+  });
+}
 
-  if (!publishableKey) throw new Error('Missing STRIPE_PUBLISHABLE_KEY in assets/js/config.js');
-  if (!functionsBase) throw new Error('Missing Supabase functions base URL. Set SUPABASE_URL in assets/js/config.js');
+function requireApiLogin() {
+  if (!state.user || !window.MM_API?.token?.()) {
+    window.location.href = 'login.html';
+    return false;
+  }
+  return true;
+}
 
+async function startRazorpayCheckoutFromCart() {
+  if (!window.MM_API?.hasApi?.()) throw new Error('Backend API is not configured. Start backend/server.js or set API_BASE_URL.');
   const items = state.cart.map((i) => ({
     product_id: i.id,
     name: i.name,
-    unit_amount_paise: Math.round(Number(i.price || 0) * 100), // Stripe expects paise
-    qty: Number(i.quantity || 1)
+    unit_amount_paise: Math.round(Number(i.price || 0) * 100),
+    qty: Number(i.quantity || 1),
+    store_id: i.storeId || ''
   }));
 
   const addrKey = 'mm_delivery_address';
@@ -873,30 +1245,75 @@ async function startStripeCheckoutFromCart() {
     throw new Error('Please save delivery details first.');
   }
 
-  const client = supa();
-  const { data } = client ? await client.auth.getSession() : { data: { session: null } };
-  const token = data?.session?.access_token || '';
-
-  const res = await fetch(`${functionsBase}/create-checkout-session`, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      ...(token ? { authorization: `Bearer ${token}` } : {})
-    },
-    body: JSON.stringify({ items, city: state.location || '', delivery: { name: delivery.name, phone: delivery.phone, address: { text: delivery.address } }, success_path: '/checkout-success.html', cancel_path: '/cart.html' })
+  const payload = await window.MM_API.createRazorpayOrder({
+    items,
+    city: state.location || '',
+    delivery: { name: delivery.name, phone: delivery.phone, address: delivery.address }
   });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || 'Failed to create checkout session');
 
-  if (json.url) {
-    window.location.href = json.url;
+  if (payload.mock) {
+    const order = {
+      id: payload.order.id,
+      date: new Date().toISOString(),
+      total: window.MM_API.moneyPaiseToRupees(payload.order.totals.totalPaise),
+      status: 'paid',
+      trackingId: payload.delivery?.id || `TRK-${Math.random().toString(36).slice(2, 9).toUpperCase()}`,
+      paymentMethod: 'Razorpay mock',
+      fees: payload.order.totals,
+      delivery: payload.delivery || null,
+      items: state.cart.map((x) => ({ ...x }))
+    };
+    state.orders.unshift(order);
+    state.cart = [];
+    persist();
+    window.location.href = 'checkout-success.html';
     return;
   }
-  // If URL missing, attempt redirect using Stripe.js
-  if (!window.Stripe) throw new Error('Stripe.js not loaded');
-  const stripe = window.Stripe(publishableKey);
-  const { error } = await stripe.redirectToCheckout({ sessionId: json.id });
-  if (error) throw new Error(error.message);
+
+  await loadScriptOnce('https://checkout.razorpay.com/v1/checkout.js', 'Razorpay');
+  const key = payload.key_id || window.MM_API.getConfig().RAZORPAY_KEY_ID || window.MM_CONFIG?.RAZORPAY_KEY_ID || '';
+  if (!key) throw new Error('Missing Razorpay key id.');
+
+  await new Promise((resolve, reject) => {
+    const checkout = new window.Razorpay({
+      key,
+      amount: payload.order.amount,
+      currency: 'INR',
+      name: 'MallMaze',
+      description: 'SmartMall order payment',
+      order_id: payload.order.razorpay_order_id,
+      prefill: {
+        name: state.user?.name || delivery.name || '',
+        email: state.user?.email || '',
+        contact: state.user?.phone || delivery.phone || ''
+      },
+      notes: { app_order_id: payload.order.id },
+      handler: async (response) => {
+        try {
+          const verified = await window.MM_API.verifyRazorpayPayment(response);
+          const order = {
+            id: verified.order.id,
+            date: verified.order.created_at || new Date().toISOString(),
+            total: window.MM_API.moneyPaiseToRupees(verified.order.totals.totalPaise),
+            status: verified.order.status || 'paid',
+            trackingId: verified.delivery?.id || `TRK-${Math.random().toString(36).slice(2, 9).toUpperCase()}`,
+            paymentMethod: 'Razorpay',
+            fees: verified.order.totals,
+            items: state.cart.map((x) => ({ ...x }))
+          };
+          state.orders.unshift(order);
+          state.cart = [];
+          persist();
+          window.location.href = 'checkout-success.html';
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      },
+      modal: { ondismiss: () => reject(new Error('Payment cancelled')) }
+    });
+    checkout.open();
+  });
 }
 
 function trackRecentlyViewed(product) {
@@ -940,8 +1357,30 @@ function removeFromCart(index) {
 
 function renderIndex(data) {
   const s = scoped(data);
+  // Mall data is parked for the first launch phase; local stores are the active surface.
+  const displayMalls = [];
+  const displayStores = (s.stores && s.stores.length) ? s.stores : (data.stores || []);
+  const displayProducts = (s.products && s.products.length) ? s.products : (data.products || []);
+  const displayCategories = (s.categories && s.categories.length) ? s.categories : (data.categories || []);
+  const smartMallStores = displayStores.filter((store) => store.virtualSource || String(store.mallId || '') === 'smartmall-local-stores' || !String(store.mallId || '').trim());
+  const smartMallProducts = displayProducts.filter((product) => product.virtualSource || String(product.mallId || '') === 'smartmall-local-stores' || !String(product.mallId || '').trim());
+  const heroSearch = el('search-hero');
+  const heroForm = heroSearch?.closest('form');
+  if (heroForm && !heroForm.dataset.boundSearch) {
+    heroForm.dataset.boundSearch = 'true';
+    heroForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const q = String(heroSearch.value || '').trim();
+      if (!q) {
+        heroSearch.focus();
+        return;
+      }
+      const params = new URLSearchParams({ search: q });
+      window.location.href = `products.html?${params.toString()}`;
+    });
+  }
   if (el('top-malls-rail')) {
-    el('top-malls-rail').innerHTML = s.malls.slice(0, 10).map((m) => `
+    el('top-malls-rail').innerHTML = displayMalls.slice(0, 10).map((m) => `
       <a href="mall.html?id=${encodeURIComponent(String(m.id))}" class="shrink-0 w-[260px] group overflow-hidden rounded-2xl border border-border bg-card shadow-card hover:shadow-card-hover">
         <div class="relative aspect-[16/10] overflow-hidden bg-muted">
           <img src="${m.image}" alt="${escapeHtml(m.name)}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
@@ -954,7 +1393,7 @@ function renderIndex(data) {
     `).join('');
   }
   if (el('malls-near-list')) {
-    el('malls-near-list').innerHTML = s.malls.slice(0, 4).map((m) => `
+    el('malls-near-list').innerHTML = displayMalls.slice(0, 4).map((m) => `
       <div class="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <a href="walkthrough.html?mallId=${m.id}"><div class="relative aspect-[16/9] overflow-hidden bg-muted"><img src="${m.image}" alt="${escapeHtml(m.name)}" class="h-full w-full object-cover" loading="lazy" decoding="async" /></div></a>
         <div class="p-3"><h5 class="text-sm font-bold mb-0.5">${m.name}</h5><p class="text-xs text-muted-foreground">${m.location}</p></div>
@@ -967,7 +1406,7 @@ function renderIndex(data) {
     bindFlashCountdown();
   }
   if (el('top-deals-rail')) {
-    const deals = (s.products || []).filter((p) => Number(p.originalPrice || 0) > Number(p.price || 0)).slice(0, 12);
+    const deals = (displayProducts || []).filter((p) => Number(p.originalPrice || 0) > Number(p.price || 0)).slice(0, 12);
     el('top-deals-rail').innerHTML = deals.map((p) => `
       <a href="product.html?id=${encodeURIComponent(String(p.id))}" class="shrink-0 w-[260px] group overflow-hidden rounded-2xl border border-border bg-card shadow-card hover:shadow-card-hover">
         <div class="relative aspect-[4/3] overflow-hidden bg-muted">
@@ -990,7 +1429,7 @@ function renderIndex(data) {
     `).join('');
   }
   if (el('categories-list')) {
-    const counts = new Map((s.categories || []).map((c) => [c.name, c.count]));
+    const counts = new Map((displayCategories || []).map((c) => [c.name, c.count]));
     const ordered = [
       'Fashion',
       'Electronics',
@@ -1003,24 +1442,54 @@ function renderIndex(data) {
     ].map((name) => ({ name, count: counts.get(name) || 0 }));
     el('categories-list').innerHTML = ordered.map(categoryCard).join('');
   }
-  bindPriceComparison(s.products || []);
+  bindPriceComparison(displayProducts || []);
   if (el('malls-list')) {
-    el('malls-list').innerHTML = s.malls.map((m) => `
+    el('malls-list').innerHTML = displayMalls.map((m) => `
       <div class="group overflow-hidden rounded-2xl border border-border bg-card shadow-card">
     <a href="mall.html?id=${m.id}" class="block"><div class="relative aspect-[16/9] overflow-hidden bg-muted"><img src="${m.image}" alt="${escapeHtml(m.name)}" class="h-full w-full object-cover" loading="lazy" decoding="async" /></div></a>
         <div class="p-4"><h3 class="font-bold">${m.name}</h3><p class="text-sm text-muted-foreground">${m.description || ''}</p><div class="mt-2"><a href="walkthrough.html?mallId=${m.id}" class="text-sm font-semibold text-primary">Virtual Walkthrough</a></div></div>
       </div>
     `).join('');
   }
-  if (el('products-list')) el('products-list').innerHTML = s.products.slice(0, 10).map(productCard).join('');
-  if (el('top-deals-list')) el('top-deals-list').innerHTML = s.products.filter((p) => p.originalPrice > p.price).slice(0, 8).map(productCard).join('');
-  renderRecentlyViewedRail(s.products || []);
+  if (el('smartmall-stores-list')) {
+    el('smartmall-stores-list').innerHTML = smartMallStores.length ? smartMallStores.slice(0, 8).map((store) => `
+      <a href="autoshelf.html?store=${encodeURIComponent(String(store.id))}" class="group overflow-hidden rounded-2xl border border-border bg-card shadow-card hover:shadow-card-hover">
+        <div class="relative aspect-[16/10] overflow-hidden bg-muted">
+          <img src="${escapeHtml(store.image || 'assets/media/hero-mall.jpg')}" alt="${escapeHtml(store.name)}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" decoding="async" />
+          <div class="absolute left-3 top-3 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-extrabold text-amber-700">${escapeHtml(store.verificationStatus || 'pending')}</div>
+        </div>
+        <div class="p-4">
+          <p class="font-extrabold truncate">${escapeHtml(store.name)}</p>
+          <p class="mt-1 text-xs text-muted-foreground truncate">${escapeHtml(store.category || 'Local Store')} - ${escapeHtml(store.address || store.floor || '')}</p>
+          <div class="mt-3 flex items-center justify-between gap-2">
+            <span class="text-xs font-bold text-slate-500">${Number(store.productCount || 0)} products</span>
+            <span class="text-xs font-extrabold text-amber-600">Open store</span>
+          </div>
+        </div>
+      </a>
+    `).join('') : `
+      <div class="rounded-2xl border border-dashed border-border bg-muted p-6 text-sm text-muted-foreground">
+        No SmartMall local stores yet. Create one from Local Stores.
+      </div>
+    `;
+  }
+  if (el('smartmall-products-list')) {
+    el('smartmall-products-list').innerHTML = smartMallProducts.length ? smartMallProducts.slice(0, 12).map(productCard).join('') : `
+      <div class="rounded-2xl border border-dashed border-border bg-muted p-6 text-sm text-muted-foreground">
+        Products uploaded inside local stores will appear here.
+      </div>
+    `;
+  }
+  if (el('products-list')) el('products-list').innerHTML = displayProducts.slice(0, 10).map(productCard).join('');
+  if (el('top-deals-list')) el('top-deals-list').innerHTML = displayProducts.filter((p) => p.originalPrice > p.price).slice(0, 8).map(productCard).join('');
+  renderRecentlyViewedRail(displayProducts || []);
 }
 
 function renderMalls(data) {
   const s = scoped(data);
+  const malls = (s.malls && s.malls.length) ? s.malls : (data.malls || []);
   if (!el('malls-list')) return;
-  el('malls-list').innerHTML = s.malls.map((m) => `
+  el('malls-list').innerHTML = malls.map((m) => `
     <div class="group overflow-hidden rounded-lg border bg-card">
       <a href="mall.html?id=${m.id}" class="block"><div class="aspect-video overflow-hidden bg-muted"><img src="${m.image}" alt="${escapeHtml(m.name)}" class="w-full h-full object-cover" loading="lazy" decoding="async" /></div></a>
       <div class="p-3"><h3 class="font-semibold">${m.name}</h3><p class="text-xs text-muted-foreground">${m.location}</p><div class="mt-2"><a href="walkthrough.html?mallId=${m.id}" class="text-sm font-semibold text-primary">Open Walkthrough</a></div></div>
@@ -1030,6 +1499,7 @@ function renderMalls(data) {
 
 function renderProducts(data) {
   const s = scoped(data);
+  const sourceProducts = (s.products && s.products.length) ? s.products : (data.products || []);
   const list = el('products-list');
   if (!list) return;
   // skeletons (fast perceived performance)
@@ -1052,7 +1522,7 @@ function renderProducts(data) {
   const searchInput = el('search-input');
   const sortInput = el('sort-filter');
   const priceInput = el('price-filter');
-  const allCategories = Array.from(new Set(s.products.map((p) => p.category))).filter(Boolean);
+  const allCategories = Array.from(new Set(sourceProducts.map((p) => p.category))).filter(Boolean);
 
   if (categoryInput) {
     categoryInput.innerHTML = '<option value="">All Categories</option>' + allCategories.map((c) => `<option value="${c}">${c}</option>`).join('');
@@ -1061,6 +1531,7 @@ function renderProducts(data) {
   if (searchInput) searchInput.value = params.get('search') || '';
   if (sortInput) sortInput.value = params.get('sort') || 'reco';
   if (priceInput) priceInput.value = params.get('price') || '';
+  let trustFilter = params.get('trust') || '';
 
   // Meta + pagination controls (injected to avoid editing every template)
   const ensureMeta = () => {
@@ -1083,6 +1554,22 @@ function renderProducts(data) {
     return { meta, more };
   };
   const { meta, more } = ensureMeta();
+  const ensureSmartPicks = () => {
+    const host = list.parentElement;
+    if (!host) return null;
+    let panel = el('products-smart-picks');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'products-smart-picks';
+      host.insertBefore(panel, list);
+    }
+    return panel;
+  };
+  const ensureTrustStrip = () => {
+    el('products-trust-strip')?.remove();
+    return null;
+  };
+  ensureTrustStrip();
 
   const PAGE_SIZE = 24;
   let page = 1;
@@ -1152,18 +1639,27 @@ function renderProducts(data) {
     const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
     const sort = sortInput ? sortInput.value : 'reco';
     const price = priceInput ? priceInput.value : '';
-    let products = s.products;
+    let products = sourceProducts;
     if (c) products = products.filter((p) => p.category === c);
-    if (q) products = products.filter((p) => p.name.toLowerCase().includes(q));
+    if (q) {
+      products = products.filter((p) => [p.name, p.category, p.storeName, p.mallName, p.badge]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(q));
+    }
     if (price) {
       const [minS, maxS] = String(price).split('-');
       const min = Number(minS || 0);
       const max = Number(maxS || 999999);
       products = products.filter((p) => Number(p.price || 0) >= min && Number(p.price || 0) <= max);
     }
+    if (trustFilter === 'rapid') products = products.filter((p) => trustForProduct(p).key === 'rapid');
+    if (trustFilter === 'trusted') products = products.filter((p) => ['rapid', 'pos', 'mini'].includes(trustForProduct(p).key));
     if (sort === 'price_asc') products = [...products].sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
     if (sort === 'price_desc') products = [...products].sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
     if (sort === 'discount') products = [...products].sort((a, b) => (Number(b.originalPrice || 0) - Number(b.price || 0)) - (Number(a.originalPrice || 0) - Number(a.price || 0)));
+    if (sort === 'rating_desc') products = [...products].sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
 
     const total = products.length;
     const end = Math.min(total, page * PAGE_SIZE);
@@ -1173,8 +1669,11 @@ function renderProducts(data) {
       const pills = [];
       if (c) pills.push({ k: 'category', label: `Category: ${c}` });
       if (q) pills.push({ k: 'search', label: `Search: ${q}` });
-      if (price) pills.push({ k: 'price', label: `Price: ${price.replace('-', '–')}` });
+      if (price) pills.push({ k: 'price', label: `Price: ${price.replace('-', '-')}` });
       if (sort && sort !== 'reco') pills.push({ k: 'sort', label: `Sort: ${sort.replace('_', ' ')}` });
+      if (trustFilter) pills.push({ k: 'trust', label: `Trust: ${trustFilter === 'rapid' ? 'Rapid Shelf' : 'Trusted stock'}` });
+      meta.setAttribute('role', 'status');
+      meta.setAttribute('aria-live', 'polite');
       meta.innerHTML = `
         <div>
           <p class="text-sm font-semibold">${total.toLocaleString('en-IN')} results</p>
@@ -1187,7 +1686,7 @@ function renderProducts(data) {
           </div>
           ${pills.length ? `
             <div class="flex flex-wrap justify-end gap-1.5">
-              ${pills.map((p) => `<button type="button" class="rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold hover:bg-muted" data-clear="${p.k}">${escapeHtml(p.label)} ✕</button>`).join('')}
+              ${pills.map((p) => `<button type="button" class="rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold hover:bg-muted" data-clear="${p.k}">${escapeHtml(p.label)} &times;</button>`).join('')}
             </div>
           ` : ''}
         </div>
@@ -1199,6 +1698,7 @@ function renderProducts(data) {
         if (searchInput) searchInput.value = '';
         if (priceInput) priceInput.value = '';
         if (sortInput) sortInput.value = 'reco';
+        trustFilter = '';
         draw(true);
       });
       meta.querySelectorAll('[data-clear]').forEach((btn) => btn.addEventListener('click', () => {
@@ -1207,9 +1707,20 @@ function renderProducts(data) {
         if (k === 'search' && searchInput) searchInput.value = '';
         if (k === 'price' && priceInput) priceInput.value = '';
         if (k === 'sort' && sortInput) sortInput.value = 'reco';
+        if (k === 'trust') trustFilter = '';
         draw(true);
       }));
     }
+    ensureTrustStrip();
+    document.querySelectorAll('.mm-chip[data-q]').forEach((b) => {
+      const key = String(b.getAttribute('data-q') || '');
+      const active = (key === 'fast' && trustFilter === 'rapid')
+        || (key === 'discount' && sort === 'discount')
+        || (key === 'rating' && sort === 'rating_desc')
+        || (key === 'price-low' && price === '0-999');
+      b.classList.toggle('mm-chip-active', active);
+      b.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
 
     list.innerHTML = total
       ? visible.map(productCard).join('')
@@ -1222,12 +1733,18 @@ function renderProducts(data) {
       const canLoadMore = end < total;
       more.innerHTML = canLoadMore
         ? `<button type="button" id="btn-load-more" class="mm-action mm-action-outline">Load more</button>`
-        : (total > PAGE_SIZE ? `<p class="text-xs text-muted-foreground">You’ve reached the end.</p>` : '');
+        : (total > PAGE_SIZE ? `<p class="text-xs text-muted-foreground">You've reached the end.</p>` : '');
       el('btn-load-more')?.addEventListener('click', () => {
         page += 1;
         draw(false);
       });
     }
+
+    const smartPanel = ensureSmartPicks();
+    const searchQ = (searchInput ? searchInput.value : params.get('search') || '').trim();
+    if (smartPanel && searchQ.length >= 3 && window.MM_Marketplace?.mountSmartPicks) {
+      window.MM_Marketplace.mountSmartPicks(smartPanel, searchQ, cityOf(state.location || '') || state.location || 'Hyderabad');
+    } else if (smartPanel) smartPanel.innerHTML = '';
   };
   draw(true);
   ensureSearchUx();
@@ -1239,14 +1756,14 @@ function renderProducts(data) {
 
   document.querySelectorAll('.mm-chip[data-q]').forEach((b) => b.addEventListener('click', () => {
     const k = String(b.getAttribute('data-q') || '');
-    if (k === 'discount') { if (sortInput) sortInput.value = 'discount'; }
-    if (k === 'best') { if (sortInput) sortInput.value = 'reco'; }
-    if (k === 'new') { if (sortInput) sortInput.value = 'reco'; }
-    if (k === 'fast') { /* placeholder */ }
+    if (k === 'discount') { if (sortInput) sortInput.value = sortInput.value === 'discount' ? 'reco' : 'discount'; }
+    if (k === 'rating') { if (sortInput) sortInput.value = sortInput.value === 'rating_desc' ? 'reco' : 'rating_desc'; }
+    if (k === 'price-low') { if (priceInput) priceInput.value = priceInput.value === '0-999' ? '' : '0-999'; }
+    if (k === 'fast') { trustFilter = trustFilter === 'rapid' ? '' : 'rapid'; }
     draw(true);
   }));
 
-  renderRecentlyViewedRail(s.products || []);
+  renderRecentlyViewedRail(sourceProducts || []);
 }
 
 function renderProductDetail(data) {
@@ -1262,6 +1779,7 @@ function renderProductDetail(data) {
   trackRecentlyViewed(p);
   const discountPct = p.originalPrice > p.price ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
   const wishActive = state.wishlist.some((w) => w.id === p.id);
+  const trust = trustForProduct(p);
   const deliverCity = cityOf(state.location || '') || String(state.location || 'Hyderabad');
   const etaText = (() => {
     const raw = String(p.deliveryTime || '').trim();
@@ -1288,6 +1806,19 @@ function renderProductDetail(data) {
       <div class="mm-pdp-buy">
         <p class="text-sm text-muted-foreground mb-1">${p.storeName} . ${p.mallName}</p>
         <h1 class="text-3xl font-bold mb-2">${p.name}</h1>
+        <div class="sm-pdp-trust trust-${trust.tone}">
+          <div class="sm-pdp-trust-head">
+            ${trustBadge(trust)}
+            <span>${escapeHtml(trust.action)}</span>
+          </div>
+          <p>${escapeHtml(trust.promise)} through ${escapeHtml(trust.source)}.</p>
+          <div class="sm-trust-formula">
+            <span>${trust.stockCount} stock</span>
+            <span>${trust.reservations} reserved</span>
+            <span>${trust.buffer} buffer</span>
+            <span>${trust.sellableStock} sellable</span>
+          </div>
+        </div>
         <div class="mm-pdp-row">
           <div class="mm-pdp-price">${money(p.price)}</div>
           <div class="text-right">
@@ -1295,23 +1826,34 @@ function renderProductDetail(data) {
             ${discountPct ? `<div class="text-xs font-extrabold text-amber-600">${discountPct}% OFF</div>` : ''}
           </div>
         </div>
-        <div class="mm-pdp-meta">Rating ${(p.rating || 0).toFixed(1)}★ · ${p.inStock ? `${p.stockCount || 0} left` : 'Out of stock'} · Deliver to <b>${escapeHtml(deliverCity)}</b> in <b>${escapeHtml(etaText)}</b></div>
+        <div class="mm-pdp-meta">Rating ${(p.rating || 0).toFixed(1)}★ · ${productStockCount(p) || 0} store stock · Deliver to <b>${escapeHtml(deliverCity)}</b> in <b>${escapeHtml(etaText)}</b></div>
+        ${(p.sizes?.length || p.variants?.length || p.size) ? `
+          <div class="mt-3 grid gap-2">
+            <label class="text-sm font-semibold">Size
+              <select id="p-size" class="mt-1 w-full rounded-xl border px-3 py-2.5">
+                ${(p.sizes?.length ? p.sizes : (p.variants?.length ? p.variants : [p.size])).map((sz) => `<option value="${escapeHtml(String(sz))}" ${String(sz).toUpperCase() === String(p.size || '').toUpperCase() ? 'selected' : ''}>${escapeHtml(String(sz))}</option>`).join('')}
+              </select>
+            </label>
+            ${p.color ? `<p class="text-sm text-muted-foreground">Color: <b>${escapeHtml(p.color)}</b> · Fit: <b>${escapeHtml(p.fit || 'regular')}</b></p>` : ''}
+          </div>
+        ` : ''}
         <div class="mm-pdp-cta">
           <button id="p-add" class="mm-btn primary" ${p.inStock ? '' : 'disabled'}>${p.inStock ? 'Add to Cart' : 'Out of stock'}</button>
-          <button id="p-buy" class="mm-btn outline" ${p.inStock ? '' : 'disabled'}>${p.inStock ? 'Buy now' : 'Unavailable'}</button>
+          <button id="p-buy" class="mm-btn outline" ${p.inStock ? '' : 'disabled'}>${p.inStock ? 'Buy & Deliver' : 'Unavailable'}</button>
+          <button id="p-reserve" class="mm-btn outline" ${p.inStock ? '' : 'disabled'}>Reserve at Store</button>
           <button id="p-wish" class="mm-btn outline">${wishActive ? 'Saved' : 'Save'}</button>
         </div>
         <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
-          <div class="rounded-xl border border-border bg-card p-3"><p class="font-extrabold">Genuine</p><p class="text-xs text-muted-foreground mt-1">Verified mall inventory</p></div>
+          <div class="rounded-xl border border-border bg-card p-3"><p class="font-extrabold">Availability truth</p><p class="text-xs text-muted-foreground mt-1">${escapeHtml(trust.label)} shown before checkout</p></div>
           <div class="rounded-xl border border-border bg-card p-3"><p class="font-extrabold">Easy returns</p><p class="text-xs text-muted-foreground mt-1">Create ticket from Orders</p></div>
-          <div class="rounded-xl border border-border bg-card p-3"><p class="font-extrabold">Secure checkout</p><p class="text-xs text-muted-foreground mt-1">Stripe-powered payments</p></div>
+          <div class="rounded-xl border border-border bg-card p-3"><p class="font-extrabold">Secure checkout</p><p class="text-xs text-muted-foreground mt-1">Razorpay order verification</p></div>
         </div>
         <div class="mt-4 grid gap-3">
           <div class="rounded-xl border border-border bg-muted p-4 text-sm">
             <p class="font-semibold mb-2">Why this is a great deal</p>
             <ul class="list-disc pl-4 space-y-1 text-muted-foreground">
               ${discountPct ? `<li>Save ${discountPct}% vs original price</li>` : `<li>Top pick from ${escapeHtml(p.storeName || 'store')}</li>`}
-              <li>${p.inStock ? `In stock · ${Number(p.stockCount || 0)} left` : 'Currently out of stock'}</li>
+              <li>${productStockCount(p) > 0 ? `${productStockCount(p)} units tracked before buffers` : 'Currently out of stock'}</li>
               <li>Trusted mall inventory</li>
             </ul>
           </div>
@@ -1335,6 +1877,23 @@ function renderProductDetail(data) {
     toast('Taking you to cart…', { type: 'ok', title: 'Checkout', ms: 1200 });
     window.location.href = 'cart.html';
   });
+  el('p-reserve')?.addEventListener('click', async () => {
+    if (!window.MM_Marketplace?.reserveProduct) {
+      toast('Login and start backend to reserve.', { type: 'bad', title: 'Reserve' });
+      return;
+    }
+    try {
+      await window.MM_Marketplace.reserveProduct(p, {
+        size: el('p-size')?.value || p.size || '',
+        color: p.color || ''
+      });
+    } catch (error) {
+      toast(error.message || String(error), { type: 'bad', title: 'Reserve' });
+    }
+  });
+  if (new URLSearchParams(location.search).get('reserve') === '1') {
+    setTimeout(() => el('p-reserve')?.click(), 400);
+  }
   el('p-wish')?.addEventListener('click', () => { toggleWishlist(p); toast(wishActive ? 'Removed from wishlist' : 'Saved to wishlist', { type: 'ok', title: 'Wishlist' }); renderProductDetail(data); });
   renderRecentlyViewedRail(s.products || []);
 }
@@ -1438,11 +1997,14 @@ function renderStorePage(data) {
   const sortInput = el('store-sort');
   const scanLink = el('store-scan');
   if (!grid) return;
+  if (qInput) qInput.placeholder = 'Search in this store...';
 
-  const store = (s.stores || []).find((st) => String(st.id) === String(storeId));
+  const store = (data.stores || s.stores || []).find((st) => String(st.id) === String(storeId));
+  const mall = store ? (data.malls || s.malls || []).find((m) => String(m.id) === String(store.mallId || '')) : null;
   if (title) title.textContent = store ? store.name : 'Store';
   if (sub) sub.textContent = store ? `${store.category || 'Store'} · ${store.city || ''}`.trim() : 'Store not found.';
   if (scanLink) scanLink.href = storeId ? `scan.html?store_id=${encodeURIComponent(storeId)}` : 'scan.html';
+  if (sub && store) sub.textContent = `${store.category || 'Store'} - ${store.address || mall?.location || store.city || 'Nearby'}`.trim();
 
   // Store hero (inject to make page feel like a real storefront)
   try {
@@ -1472,10 +2034,44 @@ function renderStorePage(data) {
         </div>
       `;
       host.insertBefore(hero, grid);
+      hero.remove();
+      if (store && !el('store-qr-bridge')) {
+        const bridge = document.createElement('section');
+        bridge.id = 'store-qr-bridge';
+        bridge.className = 'mm-card mm-card-pad mb-6';
+        const storefrontUrl = storeUrl(store.id);
+        const mapUrl = mapUrlForStore({ ...store, city: store.city || cityOf(mall?.location) });
+        bridge.innerHTML = `
+          <div class="grid gap-5 lg:grid-cols-[1fr_220px]">
+            <div class="min-w-0">
+              <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Offline to online bridge</p>
+              <h2 class="text-2xl font-extrabold mt-1">${escapeHtml(store.name)}</h2>
+              <p class="text-sm text-muted-foreground mt-1">${escapeHtml(store.category || 'Store')} - ${escapeHtml(store.address || mall?.location || 'Nearby local store')}</p>
+              <div class="mt-4 grid gap-2 text-sm md:grid-cols-3">
+                <div class="rounded-xl border border-border bg-muted p-3"><p class="text-xs text-muted-foreground">Hours</p><p class="font-bold">${escapeHtml(store.hours || '10:00 AM - 10:00 PM')}</p></div>
+                <div class="rounded-xl border border-border bg-muted p-3"><p class="text-xs text-muted-foreground">Contact</p><p class="font-bold">${escapeHtml(store.phone || store.contact || 'Contact in store')}</p></div>
+                <div class="rounded-xl border border-border bg-muted p-3"><p class="text-xs text-muted-foreground">Storefront</p><p class="font-bold">QR ready</p></div>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <a href="${mapUrl}" target="_blank" rel="noopener" class="mm-action mm-action-outline mm-action-sm">${icon('pin')} Navigate</a>
+                <a href="${storefrontUrl}" class="mm-action mm-action-ghost mm-action-sm">Open storefront</a>
+              </div>
+            </div>
+            <div class="rounded-2xl border border-border bg-white p-3 text-center">
+              <canvas id="storefront-qr" width="176" height="176" class="mx-auto h-44 w-44 rounded-xl border border-border bg-white p-2"></canvas>
+              <p class="mt-2 text-xs font-semibold text-muted-foreground">Print this QR for bills, banners, and counters</p>
+              <a class="mt-1 block truncate text-xs font-bold text-primary" href="${storefrontUrl}">${escapeHtml(storefrontUrl)}</a>
+            </div>
+          </div>
+        `;
+        host.insertBefore(bridge, grid);
+        const qr = document.getElementById('storefront-qr');
+        if (qr && window.MM_QR?.draw) window.MM_QR.draw(qr, storefrontUrl, 176);
+      }
     }
   } catch {}
 
-  const base = (s.products || []).filter((p) => String(p.storeId || '') === String(storeId));
+  const base = (data.products || s.products || []).filter((p) => String(p.storeId || '') === String(storeId));
   if (!base.length) {
     grid.innerHTML = emptyState({
       title: 'No products found for this store',
@@ -1741,8 +2337,10 @@ function renderCart() {
     return;
   }
   const total = state.cart.reduce((s, i) => s + i.price * (i.quantity || 1), 0);
-  const gst = Math.round(total * 0.18);
-  const grand = total + gst;
+  const deliveryFee = total ? 49 : 0;
+  const platformFee = total ? 29 : 0;
+  const gst = Math.round((total + deliveryFee + platformFee) * 0.18);
+  const grand = total + deliveryFee + platformFee + gst;
   const couponsKey = 'mm_coupons';
   const coupon = (() => { try { return JSON.parse(localStorage.getItem(couponsKey) || '{}'); } catch { return {}; } })();
   const available = [
@@ -1794,6 +2392,7 @@ function renderCart() {
             <div class="flex-1 min-w-0">
               <h3 class="font-extrabold truncate">${escapeHtml(item.name)}</h3>
               <p class="font-semibold text-primary mt-1">${money(item.price)}</p>
+              ${item.trustLabel ? `<p class="text-xs font-semibold text-slate-600 mt-1">${escapeHtml(item.trustLabel)} · ${escapeHtml(item.deliveryPromise || '')}</p>` : ''}
               <div class="mt-3 flex flex-wrap items-center gap-2">
                 <div class="inline-flex items-center rounded-xl border border-border overflow-hidden">
                   <button type="button" class="cart-dec px-3 py-2 text-sm font-extrabold hover:bg-muted" data-idx="${idx}" aria-label="Decrease quantity">−</button>
@@ -1857,11 +2456,13 @@ function renderCart() {
         </div>
         <div class="border rounded-lg p-4">
           <p>Subtotal: ${money(total)}</p>
-          <p>GST: ${money(gst)}</p>
+          <p>Delivery fee: ${money(deliveryFee)}</p>
+          <p>Platform fee: ${money(platformFee)}</p>
+          <p>Taxes: ${money(gst)}</p>
           ${applied?.code ? `<p>Coupon (${escapeHtml(applied.code)}): <b>- ${money(applied.off || 0)}</b></p>` : ''}
           <p class="font-bold">Total: ${money(payable)}</p>
           <div class="mt-3 rounded-xl border border-border bg-card p-3">
-            <p class="text-sm font-extrabold">Payment method (demo)</p>
+            <p class="text-sm font-extrabold">Payment method</p>
             <div class="mt-2 grid gap-2 text-sm">
               <label class="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 hover:bg-muted">
                 <span class="font-semibold">UPI</span>
@@ -1876,7 +2477,7 @@ function renderCart() {
                 <input type="radio" name="mm-pay" value="cod" ${payMethod === 'cod' ? 'checked' : ''} />
               </label>
             </div>
-            <p class="mt-2 text-xs text-muted-foreground">If Stripe is configured, online payment is used at checkout.</p>
+            <p class="mt-2 text-xs text-muted-foreground">Online payment uses Razorpay and backend signature verification before delivery is created.</p>
           </div>
           <button id="checkout-btn" class="mt-3 w-full mm-action mm-action-primary">Proceed to Checkout</button>
           <p class="text-xs text-muted-foreground mt-2">Address is required for real delivery creation.</p>
@@ -1982,15 +2583,13 @@ function renderCart() {
   });
 
   el('checkout-btn')?.addEventListener('click', () => {
-    if (!state.user) return (window.location.href = 'login.html');
-    // If Stripe config exists, use real checkout; otherwise fallback to demo order.
-    const stripeKey = String((window.MM_CONFIG || {}).STRIPE_PUBLISHABLE_KEY || '').trim();
-    if (stripeKey && window.MM_SUPABASE?.functionsBaseUrl?.()) {
-      startStripeCheckoutFromCart().catch((e) => toast(e.message || String(e), { type: 'bad', title: 'Checkout' }));
+    if (!requireApiLogin()) return;
+    if (window.MM_API?.hasApi?.()) {
+      startRazorpayCheckoutFromCart().catch((e) => toast(e.message || String(e), { type: 'bad', title: 'Checkout' }));
       return;
     }
 
-    const order = { id: `ORD-${Date.now()}`, date: new Date().toISOString(), total: payable, status: 'processing', trackingId: `TRK-${Math.random().toString(36).slice(2, 9).toUpperCase()}`, items: state.cart.map((x) => ({ ...x })) };
+    const order = { id: `ORD-${Date.now()}`, date: new Date().toISOString(), total: payable, status: 'processing', trackingId: `TRK-${Math.random().toString(36).slice(2, 9).toUpperCase()}`, paymentMethod: 'local-demo', items: state.cart.map((x) => ({ ...x })) };
     state.orders.unshift(order);
     state.cart = [];
     const earn = Math.floor(grand * 0.05);
@@ -2024,75 +2623,122 @@ function renderCheckoutSuccess() {
 function renderLogin() {
   const container = el('login-container');
   if (!container) return;
-  const useSupa = Boolean(supa());
-  container.innerHTML = useSupa ? `
-    <div class="max-w-md mx-auto border rounded-lg p-6">
-      <h1 class="text-2xl font-bold mb-2">Sign in</h1>
-      <p class="text-sm text-muted-foreground mb-6">Production auth via Supabase (email OTP).</p>
-      <form id="login-form" class="space-y-4">
-        <input type="email" id="login-email" placeholder="you@example.com" required />
-        <input type="text" id="login-name" placeholder="Your name (optional)" />
-        <button type="submit" class="w-full py-2 bg-primary text-white rounded-lg">Send OTP</button>
-      </form>
-      <div class="mt-4 text-xs text-muted-foreground">
-        <p>To enable: set <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> in <code>assets/js/config.js</code>.</p>
+  const params = new URLSearchParams(location.search);
+  let loginMode = params.get('mode') || localStorage.getItem('mm_login_mode') || 'customer';
+  container.innerHTML = `
+    <div class="mm-card mm-card-pad max-w-xl mx-auto">
+      <div class="mb-5">
+        <p class="text-xs font-black uppercase text-amber-600">Secure OTP login</p>
+        <h1 class="text-2xl font-extrabold">Sign in to MallMaze</h1>
+        <p class="text-sm text-muted-foreground mt-1">One account for shopping and store management. OTP verified on the backend.</p>
       </div>
+      <div class="mb-4 flex gap-2">
+        <button type="button" id="login-mode-customer" class="flex-1 rounded-xl border px-3 py-2 text-sm font-bold ${loginMode === 'customer' ? 'bg-primary text-white border-primary' : ''}">Customer</button>
+        <button type="button" id="login-mode-shop" class="flex-1 rounded-xl border px-3 py-2 text-sm font-bold ${loginMode === 'shop' ? 'bg-primary text-white border-primary' : ''}">Shop owner</button>
+      </div>
+      <form id="otp-request-form" class="space-y-4">
+        <input class="w-full rounded-xl border px-3.5 py-2.5" type="text" id="login-name" placeholder="Full name" autocomplete="name" />
+        <input class="w-full rounded-xl border px-3.5 py-2.5" type="email" id="login-email" placeholder="Email (admin: admin@mallmaze.in)" autocomplete="email" />
+        <input class="w-full rounded-xl border px-3.5 py-2.5" type="tel" id="login-phone" placeholder="Phone, e.g. +91 90000 12345" autocomplete="tel" />
+        <button type="submit" class="w-full mm-action mm-action-primary">Send OTP</button>
+      </form>
+      <form id="otp-verify-form" class="mt-4 hidden space-y-4">
+        <input class="w-full rounded-xl border px-3.5 py-2.5 text-center tracking-[0.3em]" inputmode="numeric" maxlength="6" id="login-otp" placeholder="000000" autocomplete="one-time-code" />
+        <button type="submit" class="w-full mm-action mm-action-primary">Verify and continue</button>
+        <button type="button" id="otp-back" class="w-full mm-action mm-action-outline">Change email or phone</button>
+      </form>
+      <div id="otp-dev-note" class="mt-4 hidden rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-800"></div>
       <div class="mt-4">
-        <button id="logout-btn" class="w-full py-2 border rounded-lg">Logout</button>
+        <button id="logout-btn" class="w-full mm-action mm-action-outline">Logout</button>
       </div>
     </div>
-  ` : `
-    <div class="max-w-md mx-auto border rounded-lg p-6"><h1 class="text-2xl font-bold mb-6">Login to MallMaze</h1><form id="login-form" class="space-y-4"><input type="email" id="login-email" placeholder="you@example.com" required /><input type="text" id="login-name" placeholder="Your name" required /><select id="login-role"><option value="user">User</option><option value="admin">Admin</option></select><button type="submit" class="w-full py-2 bg-primary text-white rounded-lg">Login</button></form></div>
   `;
 
-  if (useSupa) {
-    el('login-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const client = supa();
-      if (!client) return;
-      const email = el('login-email').value;
-      const name = (el('login-name')?.value || '').trim();
-      const { error } = await client.auth.signInWithOtp({
-        email,
-        options: { data: name ? { name } : undefined }
+  let challengeId = '';
+  const showRequest = () => {
+    el('otp-request-form')?.classList.remove('hidden');
+    el('otp-verify-form')?.classList.add('hidden');
+  };
+  const showVerify = () => {
+    el('otp-request-form')?.classList.add('hidden');
+    el('otp-verify-form')?.classList.remove('hidden');
+    el('login-otp')?.focus();
+  };
+
+  el('otp-request-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = (el('login-name')?.value || '').trim();
+    const email = (el('login-email')?.value || '').trim();
+    const phone = (el('login-phone')?.value || '').trim();
+    try {
+      if (!window.MM_API?.hasApi?.()) throw new Error('Start the backend API first: cd backend && npm start');
+      const response = await window.MM_API.requestOtp({ email, phone, name });
+      challengeId = response.challenge_id;
+      const note = el('otp-dev-note');
+      if (note && response.dev_otp) {
+        note.textContent = `Development OTP: ${response.dev_otp}`;
+        note.classList.remove('hidden');
+      }
+      toast('OTP sent. Enter the 6-digit code.', { type: 'ok', title: 'Login' });
+      showVerify();
+    } catch (error) {
+      toast(error.message || String(error), { type: 'bad', title: 'Login' });
+    }
+  });
+
+  el('login-mode-customer')?.addEventListener('click', () => { loginMode = 'customer'; localStorage.setItem('mm_login_mode', loginMode); renderLogin(); });
+  el('login-mode-shop')?.addEventListener('click', () => { loginMode = 'shop'; localStorage.setItem('mm_login_mode', loginMode); renderLogin(); });
+
+  el('otp-verify-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      const response = await window.MM_API.verifyOtp({
+        challenge_id: challengeId,
+        otp: el('login-otp')?.value || '',
+        name: el('login-name')?.value || ''
       });
-      if (error) return toast(error.message, { type: 'bad', title: 'Login' });
-      toast('OTP sent. Check your email to sign in.', { type: 'ok', title: 'Login' });
-    });
-    el('logout-btn')?.addEventListener('click', async () => {
-      const client = supa();
-      if (!client) return;
-      await client.auth.signOut();
-      state.user = null;
+      window.MM_API.setToken(response.token);
+      state.user = response.user;
       persist();
       renderNavbar();
-      toast('Logged out.', { type: 'ok', title: 'Account' });
-    });
-    return;
-  }
+      const nextParam = new URLSearchParams(location.search).get('next');
+      let next = nextParam || 'index.html';
+      if (!nextParam && loginMode === 'shop') next = 'store-dashboard.html';
+      if (response.user?.role === 'admin') next = 'admin-dashboard.html';
+      window.location.href = next;
+    } catch (error) {
+      toast(error.message || String(error), { type: 'bad', title: 'Login' });
+    }
+  });
 
-  el('login-form')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    state.user = { name: el('login-name').value, email: el('login-email').value, role: el('login-role').value };
+  el('otp-back')?.addEventListener('click', showRequest);
+  el('logout-btn')?.addEventListener('click', () => {
+    window.MM_API?.setToken?.('');
+    state.user = null;
     persist();
-    window.location.href = 'index.html';
+    renderNavbar();
+    toast('Logged out.', { type: 'ok', title: 'Account' });
+    showRequest();
   });
 }
 
 function renderWishlist() {
   const container = el('wishlist-container');
   if (!container) return;
-  const priceDropKey = 'mm_price_drop_demo';
-  const priceDrops = (() => { try { return JSON.parse(localStorage.getItem(priceDropKey) || '{}'); } catch { return {}; } })();
-  // Demo: randomly assign a small price drop once per item
-  const ensureDrop = (id, price) => {
-    try {
-      if (priceDrops[id] != null) return Number(priceDrops[id] || 0);
-      const drop = Math.random() < 0.35 ? Math.max(0, Math.round(Number(price || 0) * (0.05 + Math.random() * 0.12))) : 0;
-      priceDrops[id] = drop;
-      localStorage.setItem(priceDropKey, JSON.stringify(priceDrops));
-      return drop;
-    } catch { return 0; }
+  const watchKey = 'mm_price_watch_v1';
+  const readWatch = () => { try { return JSON.parse(localStorage.getItem(watchKey) || '{}'); } catch { return {}; } };
+  const writeWatch = (value) => { try { localStorage.setItem(watchKey, JSON.stringify(value || {})); } catch {} };
+  const seedFor = (id) => String(id || 'item').split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+  const priceInsight = (id, price) => {
+    const base = Math.max(0, Number(price || 0));
+    const seed = seedFor(id);
+    const high = Math.round(base * (1.08 + (seed % 9) / 100));
+    const low = Math.max(0, Math.round(base * (0.78 + (seed % 7) / 100)));
+    const median = Math.round((high + low) / 2);
+    const drop = seed % 3 === 0 ? Math.max(0, Math.round(base * (0.06 + (seed % 5) / 100))) : 0;
+    const current = Math.max(0, base - drop);
+    const verdict = current <= low * 1.04 ? 'Great time to buy' : current <= median ? 'Fair price' : 'Watch for a drop';
+    return { high, low, median, drop, current, verdict };
   };
 
   if (!state.wishlist.length) {
@@ -2105,13 +2751,17 @@ function renderWishlist() {
     });
     return;
   }
+  const watch = readWatch();
+  const insights = state.wishlist.map((w) => ({ item: w, insight: priceInsight(w.id, w.price) }));
+  const dropCount = insights.filter(({ insight }) => insight.drop > 0).length;
+  const watchedCount = state.wishlist.filter((w) => watch[w.id]?.target).length;
   container.innerHTML = `
     <div class="mm-card mm-card-pad mb-4">
       <div class="flex items-start justify-between gap-3">
         <div>
           <p class="text-xs text-muted-foreground">Wishlist</p>
           <p class="text-lg font-extrabold">${state.wishlist.length} saved item${state.wishlist.length === 1 ? '' : 's'}</p>
-          <p class="text-xs text-muted-foreground mt-1">Move items to cart when you’re ready to checkout.</p>
+          <p class="text-xs text-muted-foreground mt-1">Buyhatke-inspired watchlist: price trend, drop signal, and target alerts for saved products.</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <a href="cart.html" class="mm-action mm-action-primary mm-action-sm">Go to cart</a>
@@ -2119,17 +2769,40 @@ function renderWishlist() {
         </div>
       </div>
     </div>
+    <div class="wishlist-intel-grid mb-4">
+      <article><span>Price drops</span><strong>${dropCount}</strong><p>Saved items below their tracked baseline.</p></article>
+      <article><span>Watching</span><strong>${watchedCount}</strong><p>Items with a target-price alert.</p></article>
+      <article><span>Best move</span><strong>${dropCount ? 'Buy deals' : 'Wait'}</strong><p>${dropCount ? 'Move discounted saved items to cart.' : 'Set target prices and wait for a better dip.'}</p></article>
+    </div>
     <div class="space-y-2">
       ${state.wishlist.map((w, idx) => {
-        const drop = ensureDrop(String(w.id), Number(w.price || 0));
-        const newPrice = Math.max(0, Number(w.price || 0) - drop);
+        const insight = priceInsight(w.id, w.price);
+        const watchTarget = Number(watch[w.id]?.target || 0);
+        const alertReady = watchTarget > 0 && insight.current <= watchTarget;
+        const barA = Math.max(8, Math.min(100, Math.round((insight.low / Math.max(1, insight.high)) * 100)));
+        const barB = Math.max(8, Math.min(100, Math.round((insight.current / Math.max(1, insight.high)) * 100)));
         return `
-          <div class="mm-card mm-card-pad">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
+          <div class="mm-card mm-card-pad wishlist-watch-card">
+            <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div class="min-w-0 wishlist-watch-main">
                 <p class="font-extrabold truncate">${escapeHtml(w.name)}</p>
-                <p class="text-sm font-semibold text-primary mt-1">${money(newPrice)} ${drop ? `<span class="ml-2 text-xs font-extrabold text-emerald-700">Price drop</span>` : ''}</p>
-                ${drop ? `<p class="text-xs text-muted-foreground mt-1">Was ${money(w.price)} · Save ${money(drop)}</p>` : `<p class="text-xs text-muted-foreground mt-1">Saved for later</p>`}
+                <p class="text-sm font-semibold text-primary mt-1">${money(insight.current)} ${insight.drop ? `<span class="ml-2 text-xs font-extrabold text-emerald-700">Price drop</span>` : ''}</p>
+                <p class="text-xs text-muted-foreground mt-1">${insight.drop ? `Was ${money(w.price)} - Save ${money(insight.drop)}` : 'Saved for later'} - ${escapeHtml(insight.verdict)}</p>
+                <div class="wishlist-price-bars" aria-label="Price range">
+                  <span style="width:${barA}%"></span>
+                  <span style="width:${barB}%"></span>
+                </div>
+                <div class="wishlist-price-meta">
+                  <span>Low ${money(insight.low)}</span>
+                  <span>Median ${money(insight.median)}</span>
+                  <span>High ${money(insight.high)}</span>
+                </div>
+                <div class="wishlist-target-row">
+                  <label for="watch-${idx}">Watch price at</label>
+                  <input id="watch-${idx}" inputmode="numeric" type="number" min="0" placeholder="${money(Math.round(insight.current * 0.92)).replace('Rs ', '')}" value="${watchTarget || ''}" data-watch-idx="${idx}" />
+                  <button type="button" class="mm-action mm-action-outline mm-action-sm wl-watch" data-idx="${idx}">${watchTarget ? 'Update alert' : 'Set alert'}</button>
+                </div>
+                ${watchTarget ? `<p class="wishlist-alert ${alertReady ? 'ready' : ''}">${alertReady ? 'Target reached. Good time to buy.' : `Watching for ${money(watchTarget)} or lower.`}</p>` : ''}
               </div>
               <div class="flex flex-wrap gap-2 justify-end">
                 <button type="button" class="mm-action mm-action-outline mm-action-sm wl-move" data-idx="${idx}">Move to cart</button>
@@ -2156,6 +2829,19 @@ function renderWishlist() {
     toast('Moved to cart.', { type: 'ok', title: 'Wishlist', ms: 1100 });
     renderWishlist();
   }));
+  container.querySelectorAll('.wl-watch').forEach((b) => b.addEventListener('click', () => {
+    const idx = Number(b.getAttribute('data-idx'));
+    const it = state.wishlist[idx];
+    if (!it) return;
+    const input = container.querySelector(`[data-watch-idx="${idx}"]`);
+    const target = Math.max(0, Number(input?.value || 0));
+    const next = readWatch();
+    if (target) next[it.id] = { target, updatedAt: Date.now() };
+    else delete next[it.id];
+    writeWatch(next);
+    toast(target ? `Watching ${it.name} at ${money(target)}.` : 'Price watch cleared.', { type: 'ok', title: 'Price watch', ms: 1300 });
+    renderWishlist();
+  }));
   container.querySelectorAll('.rm-w').forEach((b) => b.addEventListener('click', () => {
     state.wishlist.splice(Number(b.getAttribute('data-idx')), 1);
     persist();
@@ -2167,9 +2853,33 @@ function renderWishlist() {
 function renderOrders() {
   const container = el('orders-container');
   if (!container) return;
-  const client = supa();
-  if (client) {
-    renderOrdersSupabase().catch(() => renderOrdersLocal());
+  if (window.MM_API?.token?.()) {
+    container.innerHTML = loadingState({ title: 'Loading your orders...' });
+    window.MM_API.orders()
+      .then((data) => {
+        const apiOrders = (data.orders || []).map((o) => ({
+          id: o.id,
+          date: o.created_at,
+          status: o.status,
+          total: window.MM_API.moneyPaiseToRupees(o.totals?.totalPaise || o.total_paise || 0),
+          trackingId: o.delivery?.id || o.delivery_job_id || o.razorpay_payment_id || '-',
+          paymentMethod: 'Razorpay',
+          fees: o.totals || null,
+          delivery: o.delivery || null,
+          items: (o.items || []).map((item) => ({
+            id: item.product_id || item.id || item.name,
+            product_id: item.product_id || item.id || '',
+            name: item.name,
+            price: window.MM_API.moneyPaiseToRupees(item.unit_amount_paise || item.unitAmountPaise || 0),
+            quantity: item.qty || item.quantity || 1,
+            storeId: item.store_id || item.storeId || ''
+          }))
+        }));
+        state.orders = [...apiOrders, ...state.orders.filter((local) => !apiOrders.some((api) => api.id === local.id))];
+        persist();
+        renderOrdersLocal();
+      })
+      .catch(() => renderOrdersLocal());
     return;
   }
   renderOrdersLocal();
@@ -2257,15 +2967,30 @@ function renderOrdersLocal() {
     range?.addEventListener('input', () => { if (val) val.textContent = `${range.value}%`; }, { once: true });
   }));
 
-  container.querySelectorAll('.claim-refund').forEach((b) => b.addEventListener('click', () => {
+  container.querySelectorAll('.claim-refund').forEach((b) => b.addEventListener('click', async () => {
     const i = Number(b.getAttribute('data-idx'));
+    const o = state.orders[i];
     const pct = Number(el(`refund-range-${i}`)?.value || 0);
-    toast(`Refund request: ${pct}%`, { type: 'ok', title: 'Support' });
-    toast('For real support tickets, login and use Orders (Supabase).', { type: 'info', title: 'Support', ms: 4200 });
+    if (!window.MM_API?.token?.()) {
+      window.location.href = `login.html?next=${encodeURIComponent(`support.html?order_id=${o?.id || ''}&type=refund`)}`;
+      return;
+    }
+    try {
+      await window.MM_API.createSupportTicket({
+        order_id: o?.id || '',
+        type: 'refund',
+        refund_percent: pct,
+        message: `Refund request for order ${o?.id || ''}: ${pct}%`
+      });
+      toast(`Refund request submitted: ${pct}%`, { type: 'ok', title: 'Support' });
+      window.location.href = 'support.html';
+    } catch (error) {
+      toast(error.message || String(error), { type: 'bad', title: 'Support' });
+    }
   }));
 }
 
-async function renderOrdersSupabase() {
+async function renderOrdersLegacyRemote() {
   const container = el('orders-container');
   if (!container) return;
   const client = supa();
@@ -2466,6 +3191,7 @@ async function renderOrdersSupabase() {
 }
 
 function renderReservations() {
+  if (window.MM_Marketplace?.renderReservationsPage) return window.MM_Marketplace.renderReservationsPage();
   const container = el('reservations-container');
   if (!container) return;
   container.innerHTML = '<div class="text-center py-12"><h2 class="text-2xl font-bold mb-2">Reservations</h2><p class="text-muted-foreground">Reserve products during walkthrough and manage pickup windows here.</p></div>';
@@ -2490,24 +3216,1275 @@ function renderQueue(data) {
   container.innerHTML = `<h2 class="text-2xl font-bold mb-4">Your Queue Bookings</h2>` + state.queue.map((q) => `<div class="border rounded-lg p-4 mb-2"><h3 class="font-bold">${q.id}</h3><p>${q.mall} - ${q.time} - ${q.people} people</p></div>`).join('');
 }
 
-function renderStoreDashboard(data) {
+function autoshelfResearch() {
+  return {
+    findings: [
+      {
+        title: 'APIs exist, but coverage is patchy',
+        body: 'GoFrugal exposes item-with-rate-and-stock and sales-order APIs; Zoho Inventory exposes item, SKU, location stock, and OAuth scopes. Good stores can sync. Weak stores still need fallback.'
+      },
+      {
+        title: 'Desktop POS means local-agent work',
+        body: 'TallyPrime can communicate over XML/HTTP and ODBC, but it requires Tally running locally with a loaded company and configured port. That is ops-heavy, not instant SaaS onboarding.'
+      },
+      {
+        title: 'Google local inventory is a feed discipline problem',
+        body: 'Local inventory listings need store codes, product IDs, availability values, price, and matching store data. It validates the need for strict inventory truth, not loose marketplace uploads.'
+      },
+      {
+        title: 'Middleware is not the moat by itself',
+        body: 'UrbanPiper and Unicommerce already prove aggregator/POS/ERP middleware. SmartMall has to win with mall execution, Rapid Shelf control, and better trust labels.'
+      }
+    ],
+    ladder: [
+      { level: 'L1', name: 'Direct API / OAuth', proof: 'GoFrugal, Zoho, Shopify-style inventory', risk: 'Vendor credentials, rate limits, SKU mapping', promise: 'POS synced' },
+      { level: 'L2', name: 'CSV / Excel / Sheet / SFTP', proof: 'Works when POS exports data', risk: 'Stale sync and bad formatting', promise: 'Synced with penalty' },
+      { level: 'L3', name: 'Local Windows agent', proof: 'Tally-style XML/HTTP or local export folder', risk: 'Install support, offline machines, security review', promise: 'Synced if fresh' },
+      { level: 'L4', name: 'SmartMall Mini-POS', proof: 'Only listed products are tracked', risk: 'Staff forgets walk-in sales', promise: 'Confirmed today' },
+      { level: 'L5', name: 'Rapid Shelf', proof: 'Physically separated, scanned in/out', risk: 'Needs space and operator discipline', promise: 'Hard fast delivery' }
+    ],
+    risks: [
+      { name: 'Fake scale', detail: 'Publishing every SKU early will make search look big and operations fail.' },
+      { name: 'Wrong write-back', detail: 'Pushing orders into POS too early can break billing, tax, and merchant trust.' },
+      { name: 'Stale inventory', detail: 'A two-hour-old feed should not get the same label as scanned shelf stock.' },
+      { name: 'Vendor dependency', detail: 'POS vendors help after merchant demand exists, not before.' }
+    ],
+    sources: [
+      { label: 'GoFrugal API integration', href: 'https://community.gofrugal.com/portal/en/kb/gofrugalretaileasy/ecommerce-integration/api-integration/articles/api-integration' },
+      { label: 'Zoho Inventory item API', href: 'https://www.zoho.com/inventory/api/v1/items/' },
+      { label: 'TallyPrime integration', href: 'https://help.tallysolutions.com/integration-with-tallyprime/' },
+      { label: 'Google local inventory specification', href: 'https://support.google.com/merchants/answer/14819809?hl=en-IN' },
+      { label: 'UrbanPiper downstream overview', href: 'https://api-docs.urbanpiper.com/downstream/getting-started/overview' },
+      { label: 'Unicommerce omnichannel retail', href: 'https://unicommerce.com/products/omnichannel-retail-management-system/' }
+    ]
+  };
+}
+
+function autoshelfTriageRecommendation(posAccess, discipline, fastPromise) {
+  const pos = String(posAccess || 'none');
+  const stock = String(discipline || 'weak');
+  const fast = Boolean(fastPromise);
+  if (fast) return 'Do not promise fast delivery from POS stock. Use the available connector only for discovery, then move selected SKUs into Rapid Shelf.';
+  if (pos === 'api' && stock === 'strong') return 'Use direct API/OAuth read sync, selected product publishing, and reservation-only write-back after two weeks of clean mismatch data.';
+  if (pos === 'api') return 'Use API read sync with safety buffers and daily staff confirmation. Hide products when sync freshness or mismatch reports degrade.';
+  if (pos === 'export') return 'Use CSV/Sheet import with stale-sync penalties. Keep only 20-100 selected products visible until mismatch stays below 5%.';
+  if (pos === 'local') return 'Use a local sync agent only for stores willing to keep the POS machine online and reviewed. No write-back until audit logs are trusted.';
+  return 'Use Mini-POS for listed products only. If staff will not record walk-in sales, the store is browse-only or not worth onboarding yet.';
+}
+
+function renderAutoshelfOs(data) {
   const s = scoped(data);
+  const container = el('autoshelf-root');
+  if (!container) return;
+  const ops = autoshelfState();
+  const baseProducts = (s.products && s.products.length ? s.products : data.products || []);
+  const customProductIds = new Set(baseProducts.map((p) => String(p.id)));
+  const products = [...baseProducts, ...(state.customProducts || []).filter((p) => !customProductIds.has(String(p.id)))].slice(0, 120);
+  const stores = s.stores && s.stores.length ? s.stores : data.stores || [];
+  const trustedProducts = products.filter((p) => ['rapid', 'pos', 'mini'].includes(trustForProduct(p).key));
+  const rapidProducts = products.filter((p) => trustForProduct(p).key === 'rapid');
+  const staleProducts = products.filter((p) => ['stale', 'low', 'out'].includes(trustForProduct(p).key));
+  const listedPct = products.length ? Math.round((trustedProducts.length / products.length) * 100) : 0;
+  const connectorCoverage = stores.length ? Math.round((new Set(ops.connectors.map((c) => String(c.storeId))).size / stores.length) * 100) : 0;
+  const productsById = new Map(products.map((p) => [String(p.id), p]));
+  const research = autoshelfResearch();
+  const scoreProduct = (p) => {
+    const trust = trustForProduct(p);
+    const marginProxy = Math.max(1, Math.round(((Number(p.originalPrice || 0) - Number(p.price || 0)) / Math.max(1, Number(p.originalPrice || p.price || 1))) * 100));
+    return Math.min(99, trust.rank * 15 + Math.min(20, Number(p.rating || 0) * 4) + Math.min(20, marginProxy) + Math.min(14, productStockCount(p)));
+  };
+  const eventName = (type) => ({
+    stock_in: 'Stock in',
+    smartmall_sale: 'SmartMall sale',
+    walk_in_sale: 'Walk-in sale',
+    return: 'Return',
+    damaged: 'Damaged',
+    missing: 'Missing',
+    scan_in: 'Rapid Shelf scan in',
+    scan_out: 'Rapid Shelf scan out',
+    pos_sync: 'POS sync'
+  }[type] || String(type || 'Event'));
+
+  container.innerHTML = `
+    <div class="sm-os-shell">
+      <section class="sm-os-hero">
+        <div>
+          <p class="sm-os-label">SmartMall Connect Hub</p>
+          <h1>AutoShelf operations OS</h1>
+          <p class="sm-os-lede">Control POS sync quality, Mini-POS confirmations, Rapid Shelf stock, and availability labels before promising fast delivery.</p>
+        </div>
+        <div class="sm-os-hero-actions">
+          <a href="store-dashboard.html" class="sm-os-btn primary">${icon('barcode')} Store dashboard</a>
+          <a href="docs/SmartMall_AutoShelf_30_Page_Plan.pdf" class="sm-os-btn">Plan PDF</a>
+        </div>
+      </section>
+
+      <section class="sm-os-kpis">
+        <div class="sm-kpi-grid">
+          <article><span>${icon('shield')}</span><p>Trusted catalog</p><strong>${listedPct}%</strong><small>${trustedProducts.length} of ${products.length} SKUs pass trust rules</small></article>
+          <article><span>${icon('sync')}</span><p>Connector coverage</p><strong>${connectorCoverage}%</strong><small>${ops.connectors.length} active connector paths</small></article>
+          <article><span>${icon('box')}</span><p>Rapid Shelf units</p><strong>${ops.rapidShelf.reduce((sum, x) => sum + Number(x.qty || 0), 0)}</strong><small>${rapidProducts.length} products with hard fast stock</small></article>
+          <article><span>${icon('activity')}</span><p>Risk queue</p><strong>${staleProducts.length}</strong><small>Low, stale, or out-of-stock labels</small></article>
+        </div>
+      </section>
+
+      <div class="sm-os-grid">
+        <div class="sm-os-main">
+          <section class="sm-os-panel">
+            <div class="sm-os-panel-head">
+              <div><h2>Connector ladder</h2><p>Every store gets a source label based on how trustworthy the stock feed is.</p></div>
+            </div>
+            <div class="sm-connector-list">
+              ${ops.connectors.map((c) => `
+                <article class="sm-connector-card status-${escapeHtml(c.status)}">
+                  <div>
+                    <div class="sm-connector-title"><strong>${escapeHtml(c.storeName)}</strong><span>${escapeHtml(c.system)}</span></div>
+                    <p>${escapeHtml(c.method)} - ${escapeHtml(c.writeBack)} write-back</p>
+                  </div>
+                  <div class="sm-connector-stats"><span>${c.products} SKUs</span><span>${c.accuracy}% accuracy</span><span>${c.lastSyncMins} min sync</span></div>
+                  <button class="sm-os-mini-btn" type="button" data-sync-connector="${escapeHtml(c.id)}">${icon('sync')} Sync</button>
+                </article>
+              `).join('')}
+            </div>
+          </section>
+
+          <section class="sm-os-panel">
+            <div class="sm-os-panel-head">
+              <div><h2>Publishing queue</h2><p>Selected products can be confirmed, buffered, or moved to Rapid Shelf.</p></div>
+            </div>
+            <div class="sm-product-queue">
+              ${products.slice().sort((a, b) => scoreProduct(b) - scoreProduct(a)).slice(0, 8).map((p) => {
+                const trust = trustForProduct(p);
+                const selected = Boolean(ops.selectedProducts?.[p.id]);
+                return `
+                  <article class="sm-product-row">
+                    <img src="${p.image || ''}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async" />
+                    <div>
+                      <strong>${escapeHtml(p.name)}</strong>
+                      <p>${escapeHtml(p.storeName || 'Store')} - ${money(p.price)}</p>
+                      <div class="sm-row-badges">${trustBadge(trust)}<span>${trust.formula}</span><span>Score ${scoreProduct(p)}</span></div>
+                    </div>
+                    <div class="sm-product-actions">
+                      <button class="sm-os-mini-btn ${selected ? 'done' : ''}" type="button" data-toggle-product="${escapeHtml(p.id)}">${selected ? 'Listed' : 'List'}</button>
+                      <button class="sm-os-mini-btn rapid" type="button" data-mark-rapid="${escapeHtml(p.id)}">Rapid Shelf</button>
+                    </div>
+                  </article>
+                `;
+              }).join('')}
+            </div>
+          </section>
+
+          <section class="sm-os-panel">
+            <div class="sm-os-panel-head compact">
+              <div><h2>Store intake triage</h2><p>Choose the onboarding path before accepting a merchant promise.</p></div>
+            </div>
+            <form id="autoshelf-triage-form" class="sm-triage-form">
+              <input id="triage-store" value="${escapeHtml(ops.triage.storeName)}" placeholder="Store name" />
+              <select id="triage-pos">
+                ${[['api', 'Direct API'], ['export', 'CSV/export'], ['local', 'Local agent'], ['none', 'Mini-POS only']].map(([v, label]) => `<option value="${v}" ${ops.triage.posAccess === v ? 'selected' : ''}>${label}</option>`).join('')}
+              </select>
+              <select id="triage-discipline">
+                ${[['strong', 'Strong discipline'], ['medium', 'Medium discipline'], ['weak', 'Weak discipline']].map(([v, label]) => `<option value="${v}" ${ops.triage.discipline === v ? 'selected' : ''}>${label}</option>`).join('')}
+              </select>
+              <label class="sm-triage-check"><input id="triage-fast" type="checkbox" ${ops.triage.fastPromise ? 'checked' : ''} /> Fast promise</label>
+              <button type="submit" class="sm-os-btn primary">Re-score</button>
+            </form>
+            <div class="sm-triage-result"><strong>${escapeHtml(ops.triage.storeName || 'Store recommendation')}</strong><p>${escapeHtml(ops.triage.recommendation)}</p></div>
+          </section>
+
+          <section class="sm-os-panel">
+            <div class="sm-os-panel-head compact">
+              <div><h2>Reality research</h2><p>Operational constraints that shape the build plan.</p></div>
+            </div>
+            <div class="sm-research-grid">
+              ${research.findings.map((x) => `<article><strong>${escapeHtml(x.title)}</strong><p>${escapeHtml(x.body)}</p></article>`).join('')}
+            </div>
+          </section>
+        </div>
+
+        <aside class="sm-os-side">
+          <section class="sm-os-panel">
+            <h2>Trust labels</h2>
+            <div class="sm-label-stack mt-3">
+              ${['rapid', 'pos', 'mini', 'low', 'stale', 'out'].map((key) => {
+                const sample = { rapid: 'Controlled bin stock', pos: 'Recent POS feed', mini: 'Staff confirmed today', low: 'Manual confirmation needed', stale: 'Feed is old', out: 'Unavailable' }[key];
+                const label = { rapid: 'Rapid Shelf', pos: 'POS synced', mini: 'Mini-POS managed', low: 'Low stock', stale: 'Stock stale', out: 'Out of stock' }[key];
+                return `<div>${trustBadge({ tone: key, label })}<span>${sample}</span></div>`;
+              }).join('')}
+            </div>
+          </section>
+
+          <section class="sm-os-panel">
+            <h2>Rapid Shelf</h2>
+            <div class="sm-gate-list mt-3">
+              ${ops.rapidShelf.map((u) => `
+                <div>
+                  <div><strong>${escapeHtml(u.bin)} - ${escapeHtml(u.productName)}</strong><span>${Number(u.qty || 0) - Number(u.reserved || 0)} sellable</span></div>
+                  <div class="sm-os-progress"><span class="ok" style="width:${Math.max(8, Math.min(100, Number(u.qty || 0) * 5))}%"></span></div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+
+          <section class="sm-os-panel">
+            <h2>Event feed</h2>
+            <div class="sm-event-feed mt-3">
+              ${ops.stockEvents.slice(0, 6).map((ev) => `<article><span>${escapeHtml(eventName(ev.type))}</span><strong>${escapeHtml(ev.productName)}</strong><p>${escapeHtml(ev.source)} - ${Number(ev.qty || 0)} units - ${formatTimeAgo(ev.at)}</p></article>`).join('')}
+            </div>
+          </section>
+
+          <section class="sm-os-panel">
+            <h2>Risk notes</h2>
+            <div class="sm-risk-list mt-3">
+              ${research.risks.map((r) => `<article><strong>${escapeHtml(r.name)}</strong><p>${escapeHtml(r.detail)}</p></article>`).join('')}
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  `;
+
+  container.querySelectorAll('[data-toggle-product]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const id = String(button.getAttribute('data-toggle-product') || '');
+      if (!id) return;
+      ops.selectedProducts[id] = !ops.selectedProducts[id];
+      persist();
+      renderAutoshelfOs(data);
+    });
+  });
+
+  container.querySelectorAll('[data-mark-rapid]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const id = String(button.getAttribute('data-mark-rapid') || '');
+      const product = productsById.get(id);
+      if (!product) return;
+      ops.trustOverrides[id] = 'rapid';
+      ops.selectedProducts[id] = true;
+      if (!ops.rapidShelf.some((unit) => String(unit.productId) === id)) {
+        ops.rapidShelf.unshift({
+          id: `RS-${Date.now()}`,
+          productId: id,
+          productName: product.name,
+          storeName: product.storeName || 'Store',
+          bin: `N${ops.rapidShelf.length + 1}`,
+          qty: Math.max(1, productStockCount(product)),
+          reserved: 0,
+          status: 'sealed',
+          lastScan: 'just now',
+          sla: '45 min'
+        });
+      }
+      ops.stockEvents.unshift({ id: `ev-${Date.now()}`, productId: id, productName: product.name, type: 'scan_in', qty: productStockCount(product), source: 'Rapid Shelf', actor: 'Ops lead', at: Date.now() });
+      persist();
+      renderAutoshelfOs(data);
+    });
+  });
+
+  container.querySelectorAll('[data-sync-connector]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const id = String(button.getAttribute('data-sync-connector') || '');
+      const connector = ops.connectors.find((c) => String(c.id) === id);
+      if (!connector) return;
+      connector.lastSyncMins = 1;
+      connector.status = connector.status === 'manual' ? 'manual' : 'healthy';
+      ops.syncLogs.unshift({ id: `sync-${Date.now()}`, connectorId: id, storeName: connector.storeName, status: 'success', message: `${connector.products} products checked and buffers refreshed.`, at: Date.now() });
+      persist();
+      renderAutoshelfOs(data);
+    });
+  });
+
+  el('autoshelf-triage-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    ops.triage = {
+      storeName: String(el('triage-store')?.value || 'New store').trim(),
+      posAccess: String(el('triage-pos')?.value || 'none'),
+      discipline: String(el('triage-discipline')?.value || 'weak'),
+      fastPromise: Boolean(el('triage-fast')?.checked)
+    };
+    ops.triage.recommendation = autoshelfTriageRecommendation(ops.triage.posAccess, ops.triage.discipline, ops.triage.fastPromise);
+    persist();
+    renderAutoshelfOs(data);
+  });
+}
+
+function renderConnectOs(data) {
+  const s = scoped(data);
+  const container = el('autoshelf-root');
+  if (!container) return;
+
+  const ops = autoshelfState();
+  const products = (s.products && s.products.length ? s.products : data.products || []).slice(0, 120);
+  const stores = s.stores && s.stores.length ? s.stores : data.stores || [];
+  const productsById = new Map(products.map((p) => [String(p.id), p]));
+  const research = autoshelfResearch();
+  const trustedProducts = products.filter((p) => ['rapid', 'pos', 'mini'].includes(trustForProduct(p).key));
+  const rapidProducts = products.filter((p) => trustForProduct(p).key === 'rapid');
+  const staleProducts = products.filter((p) => ['stale', 'low', 'out'].includes(trustForProduct(p).key));
+  const listedPct = products.length ? Math.round((trustedProducts.length / products.length) * 100) : 0;
+  const connectorCoverage = stores.length ? Math.round((new Set(ops.connectors.map((c) => String(c.storeId))).size / stores.length) * 100) : 0;
+  const totalRapidSellable = ops.rapidShelf.reduce((sum, x) => sum + Math.max(0, Number(x.qty || 0) - Number(x.reserved || 0)), 0);
+  const selectedCount = Object.values(ops.selectedProducts || {}).filter(Boolean).length;
+  const checklistDone = (ops.checklist || []).filter((x) => x.done).length;
+  const openIncidents = (ops.incidents || []).filter((x) => x.status !== 'resolved').length;
+  const breachedLanes = (ops.slaLanes || []).filter((x) => ['breach', 'watch'].includes(x.status)).length;
+  const testedSystems = (ops.posSystems || []).filter((x) => x.status === 'tested').length;
+  const activeView = window.__mmConnectView || 'mvp';
+
+  const scoreProduct = (p) => {
+    const trust = trustForProduct(p);
+    const marginProxy = Math.max(1, Math.round(((Number(p.originalPrice || 0) - Number(p.price || 0)) / Math.max(1, Number(p.originalPrice || p.price || 1))) * 100));
+    return Math.min(99, trust.rank * 15 + Math.min(20, Number(p.rating || 0) * 4) + Math.min(20, marginProxy) + Math.min(14, productStockCount(p)));
+  };
+  const eventName = (type) => ({
+    stock_in: 'Stock in',
+    smartmall_sale: 'SmartMall sale',
+    walk_in_sale: 'Walk-in sale',
+    return: 'Return',
+    damaged: 'Damaged',
+    missing: 'Missing',
+    scan_in: 'Rapid Shelf scan in',
+    scan_out: 'Rapid Shelf scan out',
+    pos_sync: 'POS sync'
+  }[type] || String(type || 'Event'));
+  const sortedProducts = products.slice().sort((a, b) => scoreProduct(b) - scoreProduct(a));
+  const heroProduct = sortedProducts[0] || products[0] || {};
+  const heroTrust = trustForProduct(heroProduct);
+  const pilotReadiness = Math.min(98, Math.round((listedPct * 0.45) + (connectorCoverage * 0.3) + (Math.min(100, totalRapidSellable * 2) * 0.25)));
+  const viewButton = (view, label) => `<button type="button" class="connect-tab ${activeView === view ? 'active' : ''}" data-connect-view="${view}">${label}</button>`;
+  const hidden = (view) => activeView === view ? '' : ' hidden';
+  const statusTone = (status) => status === 'breach' ? 'breach' : status === 'watch' ? 'watch' : 'ok';
+
+  container.innerHTML = `
+    <div class="connect-os">
+      <section class="connect-hero">
+        <div class="connect-hero-copy">
+          <h1>SmartMall Connect OS</h1>
+          <p>A realistic path from hyperlocal marketplace MVP to the larger ConnectOS smart commerce ecosystem.</p>
+          <div class="connect-hero-actions">
+            <button type="button" class="connect-btn primary connect-btn-xl" data-open-mvp>${icon('shield')} Build Phase 1 MVP</button>
+            <button type="button" class="connect-btn" data-run-sync>${icon('sync')} Run pilot sync</button>
+            <a href="store-dashboard.html" class="connect-btn">${icon('barcode')} Store console</a>
+            <a href="docs/SmartMall_AutoShelf_30_Page_Plan.pdf" class="connect-link">Open plan PDF</a>
+          </div>
+          <div class="connect-thesis">
+            <strong>Do not start with enterprise complexity.</strong>
+            <span>Start with three pilot stores, QR storefronts, manual inventory, and AI-ready catalog media. POS sync becomes a later phase.</span>
+          </div>
+        </div>
+        <div class="connect-hero-visual" aria-label="SmartMall Connect live inventory preview">
+          <div class="connect-mall-photo"></div>
+          <div class="connect-live-panel">
+            <div class="connect-live-head"><span>Live promise engine</span><strong>${pilotReadiness}% ready</strong></div>
+            <div class="connect-flow">
+              <div><b>1</b><span>Manual store onboarding</span></div>
+              <div><b>2</b><span>AI media polish</span></div>
+              <div><b>3</b><span>QR storefronts</span></div>
+              <div><b>4</b><span>Future POS sync</span></div>
+            </div>
+            <div class="connect-featured-item">
+              <img src="${localSafeImage(heroProduct.image)}" alt="${escapeHtml(heroProduct.name || 'Featured product')}" loading="lazy" decoding="async" />
+              <div>
+                <p>${escapeHtml(heroProduct.name || 'Pilot product')}</p>
+                <strong>${heroTrust.sellableStock} sellable after buffers</strong>
+                <small>${escapeHtml(heroTrust.formula)}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="connect-metrics">
+        <article><span>MVP pilot stores</span><strong>3</strong><small>Manual onboarding before integrations</small></article>
+        <article><span>QR growth loop</span><strong>1/store</strong><small>Offline visitors become online users</small></article>
+        <article><span>Catalog readiness</span><strong>${listedPct}%</strong><small>${trustedProducts.length} SKUs safe to publish</small></article>
+        <article><span>Launch control</span><strong>${openIncidents}</strong><small>${checklistDone}/${ops.checklist.length} gates done, ${breachedLanes} SLA watch lanes</small></article>
+      </section>
+
+      <section class="connect-stage">
+        <div class="connect-stage-head">
+          <div>
+            <h2>One operating system for mall commerce truth</h2>
+            <p>Connect stores, classify inventory truth, then only promise what the mall can actually fulfill.</p>
+          </div>
+          <div class="connect-tabs" role="tablist" aria-label="Connect OS views">
+            ${viewButton('mvp', 'MVP')}
+            ${viewButton('control', 'Control')}
+            ${viewButton('workflow', 'Workflow')}
+            ${viewButton('inventory', 'Inventory')}
+            ${viewButton('risk', 'Risk')}
+          </div>
+        </div>
+
+        <div class="connect-view${hidden('mvp')}" data-view-panel="mvp">
+          <div class="connect-mvp-grid">
+            <section class="connect-board connect-mvp-brief">
+              <div class="connect-board-head">
+                <div><h3>Phased implementation model</h3><p>ConnectOS remains the vision, but Phase 1 is a practical marketplace MVP that can launch with limited resources.</p></div>
+              </div>
+              <div class="connect-roadmap">
+                <article class="active"><b>1</b><div><strong>Hyperlocal Marketplace MVP</strong><span>3 pilot stores, manual product upload, inventory visibility, QR storefronts, AI media polish.</span></div></article>
+                <article><b>2</b><div><strong>Smart Operations Layer</strong><span>Store dashboards, better analytics, offer management, support workflow, delivery and pickup controls.</span></div></article>
+                <article><b>3</b><div><strong>ConnectOS Ecosystem</strong><span>POS integrations, CRM, vendor workflows, payment intelligence, enterprise partnerships.</span></div></article>
+              </div>
+            </section>
+
+            <section class="connect-board">
+              <div class="connect-board-head">
+                <div><h3>Phase 1 working scope</h3><p>Everything here can work without enterprise partnerships.</p></div>
+              </div>
+              <div class="connect-scope-list">
+                <article><strong>Manual store onboarding</strong><span>Owner creates store profile, address, hours, categories, and product list.</span></article>
+                <article><strong>AI-ready catalog media</strong><span>Uploaded phone photos/videos are enhanced, cropped, background-optimized, and formatted.</span></article>
+                <article><strong>QR storefront acquisition</strong><span>Each store gets a QR code that turns walk-in customers into online visitors.</span></article>
+                <article><strong>Nearby customer discovery</strong><span>Customers browse available local products before visiting or ordering.</span></article>
+              </div>
+            </section>
+
+            <section class="connect-board connect-mvp-warning">
+              <h3>What not to build first</h3>
+              <p>Do not make Phase 1 depend on Zoho, Tally, Petpooja, or other POS partnerships. Treat integrations as Phase 3 after usage is proven.</p>
+            </section>
+          </div>
+        </div>
+
+        <div class="connect-view${hidden('control')}" data-view-panel="control">
+          <div class="connect-command-grid">
+            <section class="connect-board connect-launch">
+              <div class="connect-board-head">
+                <div><h3>Launch command</h3><p>Keep the pilot launchable with operational gates, SLA control, and incident burn-down.</p></div>
+              </div>
+              <div class="connect-launch-score">
+                <strong>${Math.round(((checklistDone / Math.max(1, ops.checklist.length)) * 45) + (pilotReadiness * 0.35) + (Math.max(0, 3 - openIncidents) * 6.6))}%</strong>
+                <span>launch confidence</span>
+              </div>
+              <div class="connect-checklist">
+                ${(ops.checklist || []).map((item) => `
+                  <button type="button" class="${item.done ? 'done' : ''}" data-toggle-check="${escapeHtml(item.id)}">
+                    <span>${item.done ? 'Done' : 'Todo'}</span>
+                    <strong>${escapeHtml(item.label)}</strong>
+                    <em>${escapeHtml(item.owner)}</em>
+                  </button>
+                `).join('')}
+              </div>
+            </section>
+
+            <section class="connect-board">
+              <div class="connect-board-head">
+                <div><h3>Fulfillment SLA</h3><p>Simulated floor lanes that affect the public delivery promise.</p></div>
+              </div>
+              <div class="connect-sla-list">
+                ${(ops.slaLanes || []).map((lane) => `
+                  <article class="${statusTone(lane.status)}">
+                    <div>
+                      <strong>${escapeHtml(lane.name)}</strong>
+                      <span>${lane.currentMins} min actual / ${lane.targetMins} min target</span>
+                    </div>
+                    <button type="button" data-speed-lane="${escapeHtml(lane.id)}">Recover</button>
+                  </article>
+                `).join('')}
+              </div>
+            </section>
+
+            <section class="connect-board">
+              <div class="connect-board-head">
+                <div><h3>Incident queue</h3><p>Open blockers before Connect OS can promise faster delivery.</p></div>
+                <strong class="connect-count">${openIncidents} open</strong>
+              </div>
+              <div class="connect-incident-list">
+                ${(ops.incidents || []).map((incident) => `
+                  <article class="${incident.status === 'resolved' ? 'resolved' : escapeHtml(incident.severity)}">
+                    <div>
+                      <span>${escapeHtml(incident.severity)}</span>
+                      <strong>${escapeHtml(incident.title)}</strong>
+                      <em>${escapeHtml(incident.owner)}</em>
+                    </div>
+                    ${incident.status === 'resolved' ? '<b>Resolved</b>' : `<button type="button" data-resolve-incident="${escapeHtml(incident.id)}">Resolve</button>`}
+                  </article>
+                `).join('')}
+              </div>
+            </section>
+
+            <section class="connect-board">
+              <div class="connect-board-head">
+                <div><h3>Connector log</h3><p>The latest sync events from APIs, CSV feeds, and Mini-POS.</p></div>
+              </div>
+              <div class="connect-sync-log">
+                ${(ops.syncLogs || []).slice(0, 5).map((log) => `
+                  <article>
+                    <strong>${escapeHtml(log.storeName)}</strong>
+                    <span>${escapeHtml(log.message)}</span>
+                    <em>${formatTimeAgo(log.at)}</em>
+                  </article>
+                `).join('')}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="connect-view${hidden('workflow')}" data-view-panel="workflow">
+          <div class="connect-pos-panel">
+            <div class="connect-board-head">
+              <div><h3>Can we connect to existing POS systems?</h3><p>Yes, with four lanes: direct API, OAuth inventory API, local bridge, and export/Mini-POS fallback.</p></div>
+              <div class="connect-head-actions">
+                <strong class="connect-count">${testedSystems}/${ops.posSystems.length} tested</strong>
+                <button type="button" class="connect-btn primary" data-connect-all-systems>${icon('sync')} Prepare pilot lanes</button>
+              </div>
+            </div>
+            <div class="connect-one-click">
+              <strong>Pilot-readiness check</strong>
+              <span>For demo mode, this validates each integration lane. In production, each POS still needs credentials, permissions, or partner approval.</span>
+            </div>
+            <div class="connect-pos-grid">
+              ${(ops.posSystems || []).map((system) => `
+                <article class="${escapeHtml(system.feasibility)}">
+                  <div class="connect-pos-top">
+                    <strong>${escapeHtml(system.name)}</strong>
+                    <span>${escapeHtml(system.route)}</span>
+                  </div>
+                  <p>${escapeHtml(system.requirement)}</p>
+                  <small>${escapeHtml(system.proof)}</small>
+                  <button type="button" class="${system.status === 'tested' ? 'done' : ''}" data-test-pos="${escapeHtml(system.id)}">${system.status === 'tested' ? 'Validated' : 'Mark test passed'}</button>
+                </article>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="connect-pipeline">
+            <article>
+              <span>${icon('sync')}</span>
+              <h3>Connect store systems</h3>
+              <p>Use direct APIs where possible, CSV exports when needed, and Mini-POS when the merchant has no reliable feed.</p>
+              <div class="connect-feed-list">
+                ${ops.connectors.map((c) => `
+                  <button type="button" class="connect-feed ${escapeHtml(c.status)}" data-sync-connector="${escapeHtml(c.id)}">
+                    <strong>${escapeHtml(c.storeName)}</strong>
+                    <span>${escapeHtml(c.method)} - ${c.lastSyncMins} min ago</span>
+                  </button>
+                `).join('')}
+              </div>
+            </article>
+            <article>
+              <span>${icon('shield')}</span>
+              <h3>Calculate sellable truth</h3>
+              <p>Every SKU gets a visible trust label and a formula shoppers never see but operations can defend.</p>
+              <div class="connect-formula-card">
+                ${trustBadge(heroTrust)}
+                <strong>${heroTrust.sellableStock} sellable</strong>
+                <p>${escapeHtml(heroTrust.formula)}</p>
+              </div>
+              <div class="connect-label-grid">
+                ${['rapid', 'pos', 'mini', 'low', 'stale', 'out'].map((key) => {
+                  const label = { rapid: 'Rapid Shelf', pos: 'POS synced', mini: 'Mini-POS', low: 'Confirm', stale: 'Stale', out: 'Out' }[key];
+                  return trustBadge({ tone: key, label });
+                }).join('')}
+              </div>
+            </article>
+            <article>
+              <span>${icon('box')}</span>
+              <h3>Move winners to Rapid Shelf</h3>
+              <p>Fast-moving products are physically separated, scanned in, and protected from walk-in stock drift.</p>
+              <div class="connect-bin-list">
+                ${ops.rapidShelf.slice(0, 4).map((u) => `
+                  <div>
+                    <strong>${escapeHtml(u.bin)}</strong>
+                    <span>${escapeHtml(u.productName)}</span>
+                    <em>${Math.max(0, Number(u.qty || 0) - Number(u.reserved || 0))} sellable</em>
+                  </div>
+                `).join('')}
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="connect-view${hidden('inventory')}" data-view-panel="inventory">
+          <div class="connect-inventory-layout">
+            <section class="connect-board">
+              <div class="connect-board-head">
+                <div><h3>Pilot publishing queue</h3><p>Ranked by trust, margin signal, rating, and tracked stock.</p></div>
+                <a href="products.html" class="connect-link">View shopper catalog</a>
+              </div>
+              <div class="connect-product-list">
+                ${sortedProducts.slice(0, 7).map((p) => {
+                  const trust = trustForProduct(p);
+                  const selected = Boolean(ops.selectedProducts?.[p.id]);
+                  return `
+                    <article class="connect-product-row">
+                      <img src="${localSafeImage(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async" />
+                      <div class="connect-product-main">
+                        <strong>${escapeHtml(p.name)}</strong>
+                        <span>${escapeHtml(p.storeName || 'Store')} - ${money(p.price)}</span>
+                        <div>${trustBadge(trust)}<small>Score ${scoreProduct(p)}</small><small>${trust.sellableStock} sellable</small></div>
+                      </div>
+                      <div class="connect-product-actions">
+                        <button class="connect-mini-btn ${selected ? 'done' : ''}" type="button" data-toggle-product="${escapeHtml(p.id)}">${selected ? 'Listed' : 'List'}</button>
+                        <button class="connect-mini-btn rapid" type="button" data-mark-rapid="${escapeHtml(p.id)}">Rapid</button>
+                      </div>
+                    </article>
+                  `;
+                }).join('')}
+              </div>
+            </section>
+            <aside class="connect-board connect-intake">
+              <h3>Store intake simulator</h3>
+              <p>Score a new merchant before you let them promise delivery.</p>
+              <form id="autoshelf-triage-form" class="connect-intake-form">
+                <input id="triage-store" value="${escapeHtml(ops.triage.storeName)}" placeholder="Store name" />
+                <select id="triage-pos">
+                  ${[['api', 'Direct API'], ['export', 'CSV/export'], ['local', 'Local agent'], ['none', 'Mini-POS only']].map(([v, label]) => `<option value="${v}" ${ops.triage.posAccess === v ? 'selected' : ''}>${label}</option>`).join('')}
+                </select>
+                <select id="triage-discipline">
+                  ${[['strong', 'Strong discipline'], ['medium', 'Medium discipline'], ['weak', 'Weak discipline']].map(([v, label]) => `<option value="${v}" ${ops.triage.discipline === v ? 'selected' : ''}>${label}</option>`).join('')}
+                </select>
+                <label><input id="triage-fast" type="checkbox" ${ops.triage.fastPromise ? 'checked' : ''} /> Wants fast delivery promise</label>
+                <button type="submit" class="connect-btn primary">Re-score store</button>
+              </form>
+              <div class="connect-recommendation">
+                <strong>${escapeHtml(ops.triage.storeName || 'Store recommendation')}</strong>
+                <p>${escapeHtml(ops.triage.recommendation)}</p>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <div class="connect-view${hidden('risk')}" data-view-panel="risk">
+          <div class="connect-risk-layout">
+            <section class="connect-board">
+              <div class="connect-board-head">
+                <div><h3>Risk control board</h3><p>The page is designed around what can break mall commerce.</p></div>
+              </div>
+              <div class="connect-risk-grid">
+                ${research.risks.map((r) => `<article><strong>${escapeHtml(r.name)}</strong><p>${escapeHtml(r.detail)}</p></article>`).join('')}
+              </div>
+            </section>
+            <section class="connect-board">
+              <div class="connect-board-head">
+                <div><h3>Evidence ladder</h3><p>Inventory promises improve as stores move up the ladder.</p></div>
+              </div>
+              <div class="connect-ladder">
+                ${research.ladder.map((x) => `
+                  <article>
+                    <b>${escapeHtml(x.level)}</b>
+                    <div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.proof)}</span></div>
+                    <em>${escapeHtml(x.promise)}</em>
+                  </article>
+                `).join('')}
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="connect-footer-grid">
+        <div class="connect-event-stream">
+          <div class="connect-board-head"><div><h3>Live event stream</h3><p>Operational movement that changes shopper promises.</p></div></div>
+          <div>
+            ${ops.stockEvents.slice(0, 5).map((ev) => `<article><span>${escapeHtml(eventName(ev.type))}</span><strong>${escapeHtml(ev.productName)}</strong><p>${escapeHtml(ev.source)} - ${Number(ev.qty || 0)} units - ${formatTimeAgo(ev.at)}</p></article>`).join('')}
+          </div>
+        </div>
+        <div class="connect-research">
+          <div class="connect-board-head"><div><h3>Why this is the product</h3><p>SmartMall wins by controlling availability truth, not by uploading every SKU.</p></div></div>
+          <div>
+            ${research.findings.map((x) => `<article><strong>${escapeHtml(x.title)}</strong><p>${escapeHtml(x.body)}</p></article>`).join('')}
+          </div>
+        </div>
+      </section>
+    </div>
+  `;
+
+  container.onclick = (e) => {
+    const target = e.target?.closest?.('[data-connect-view], [data-open-mvp], [data-run-sync], [data-connect-all-systems], [data-toggle-product], [data-mark-rapid], [data-sync-connector], [data-toggle-check], [data-speed-lane], [data-resolve-incident], [data-test-pos]');
+    if (!target || !container.contains(target)) return;
+
+    if (target.matches('[data-connect-view]')) {
+      window.__mmConnectView = String(target.getAttribute('data-connect-view') || 'workflow');
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-open-mvp]')) {
+      window.__mmConnectView = 'mvp';
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-run-sync]')) {
+      const currentOps = autoshelfState();
+      currentOps.connectors = currentOps.connectors.map((c) => ({ ...c, lastSyncMins: 1, status: c.status === 'manual' ? 'manual' : 'healthy' }));
+      currentOps.syncLogs.unshift({ id: `sync-${Date.now()}`, connectorId: 'pilot-run', storeName: 'Pilot stores', status: 'success', message: 'All connector paths refreshed and trust buffers recalculated.', at: Date.now() });
+      currentOps.stockEvents.unshift({ id: `ev-${Date.now()}`, productId: heroProduct.id || 'pilot', productName: heroProduct.name || 'Pilot queue', type: 'pos_sync', qty: trustedProducts.length, source: 'Connect OS', actor: 'Ops lead', at: Date.now() });
+      persist();
+      toast('Pilot sync completed. Trust labels refreshed.', { type: 'ok', title: 'Connect OS' });
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-connect-all-systems]')) {
+      const currentOps = autoshelfState();
+      currentOps.posSystems = currentOps.posSystems.map((system) => ({ ...system, status: 'tested' }));
+      currentOps.connectors = currentOps.connectors.map((connector) => ({
+        ...connector,
+        lastSyncMins: 1,
+        status: connector.status === 'manual' ? 'manual' : 'healthy'
+      }));
+      currentOps.checklist = currentOps.checklist.map((item) => (
+        ['catalog', 'webhook'].includes(item.id) ? { ...item, done: true } : item
+      ));
+      currentOps.incidents = currentOps.incidents.map((incident) => (
+        incident.id === 'inc-feed-luxe' ? { ...incident, status: 'resolved' } : incident
+      ));
+      currentOps.syncLogs.unshift({
+        id: `sync-${Date.now()}`,
+        connectorId: 'one-click-pos',
+        storeName: 'One-click POS connector',
+        status: 'success',
+        message: `${currentOps.posSystems.length} POS lanes prepared for pilot planning, ${currentOps.connectors.length} connector feeds refreshed, Mini-POS fallback kept active.`,
+        at: Date.now()
+      });
+      currentOps.stockEvents.unshift({
+        id: `ev-${Date.now()}`,
+        productId: 'connect-all',
+        productName: 'All POS systems',
+        type: 'pos_sync',
+        qty: currentOps.posSystems.length,
+        source: 'Connect OS one-click',
+        actor: 'Ops lead',
+        at: Date.now()
+      });
+      persist();
+      window.__mmConnectView = 'workflow';
+      toast('POS lanes prepared for pilot planning.', { type: 'ok', title: 'Connect OS' });
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-toggle-product]')) {
+      const id = String(target.getAttribute('data-toggle-product') || '');
+      if (!id) return;
+      const currentOps = autoshelfState();
+      currentOps.selectedProducts[id] = !currentOps.selectedProducts[id];
+      persist();
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-mark-rapid]')) {
+      const id = String(target.getAttribute('data-mark-rapid') || '');
+      const product = productsById.get(id);
+      if (!product) return;
+      const currentOps = autoshelfState();
+      currentOps.trustOverrides[id] = 'rapid';
+      currentOps.selectedProducts[id] = true;
+      if (!currentOps.rapidShelf.some((unit) => String(unit.productId) === id)) {
+        currentOps.rapidShelf.unshift({
+          id: `RS-${Date.now()}`,
+          productId: id,
+          productName: product.name,
+          storeName: product.storeName || 'Store',
+          bin: `N${currentOps.rapidShelf.length + 1}`,
+          qty: Math.max(1, productStockCount(product)),
+          reserved: 0,
+          status: 'sealed',
+          lastScan: 'just now',
+          sla: '45 min'
+        });
+      }
+      currentOps.stockEvents.unshift({ id: `ev-${Date.now()}`, productId: id, productName: product.name, type: 'scan_in', qty: productStockCount(product), source: 'Rapid Shelf', actor: 'Ops lead', at: Date.now() });
+      persist();
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-sync-connector]')) {
+      const id = String(target.getAttribute('data-sync-connector') || '');
+      const currentOps = autoshelfState();
+      const connector = currentOps.connectors.find((c) => String(c.id) === id);
+      if (!connector) return;
+      connector.lastSyncMins = 1;
+      connector.status = connector.status === 'manual' ? 'manual' : 'healthy';
+      currentOps.syncLogs.unshift({ id: `sync-${Date.now()}`, connectorId: id, storeName: connector.storeName, status: 'success', message: `${connector.products} products checked and buffers refreshed.`, at: Date.now() });
+      persist();
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-toggle-check]')) {
+      const id = String(target.getAttribute('data-toggle-check') || '');
+      const currentOps = autoshelfState();
+      const item = currentOps.checklist.find((x) => String(x.id) === id);
+      if (!item) return;
+      item.done = !item.done;
+      currentOps.syncLogs.unshift({ id: `sync-${Date.now()}`, connectorId: 'launch-gate', storeName: 'Launch control', status: item.done ? 'success' : 'watch', message: `${item.label} marked ${item.done ? 'done' : 'todo'}.`, at: Date.now() });
+      persist();
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-speed-lane]')) {
+      const id = String(target.getAttribute('data-speed-lane') || '');
+      const currentOps = autoshelfState();
+      const lane = currentOps.slaLanes.find((x) => String(x.id) === id);
+      if (!lane) return;
+      lane.currentMins = Math.max(1, Number(lane.targetMins || 1) - 1);
+      lane.status = 'on-track';
+      currentOps.stockEvents.unshift({ id: `ev-${Date.now()}`, productId: id, productName: `${lane.name} lane`, type: 'smartmall_sale', qty: lane.currentMins, source: 'Connect OS SLA', actor: 'Floor lead', at: Date.now() });
+      persist();
+      toast(`${lane.name} lane recovered.`, { type: 'ok', title: 'SLA' });
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-resolve-incident]')) {
+      const id = String(target.getAttribute('data-resolve-incident') || '');
+      const currentOps = autoshelfState();
+      const incident = currentOps.incidents.find((x) => String(x.id) === id);
+      if (!incident) return;
+      incident.status = 'resolved';
+      currentOps.syncLogs.unshift({ id: `sync-${Date.now()}`, connectorId: 'incident', storeName: 'Incident queue', status: 'success', message: `${incident.title} resolved by ${incident.owner}.`, at: Date.now() });
+      persist();
+      toast('Incident resolved.', { type: 'ok', title: 'Connect OS' });
+      renderConnectOs(data);
+      return;
+    }
+
+    if (target.matches('[data-test-pos]')) {
+      const id = String(target.getAttribute('data-test-pos') || '');
+      const currentOps = autoshelfState();
+      const system = currentOps.posSystems.find((x) => String(x.id) === id);
+      if (!system) return;
+      system.status = 'tested';
+      currentOps.syncLogs.unshift({ id: `sync-${Date.now()}`, connectorId: id, storeName: system.name, status: 'success', message: `${system.route} connection path validated for pilot use.`, at: Date.now() });
+      persist();
+      toast(`${system.name} path validated.`, { type: 'ok', title: 'POS connection' });
+      renderConnectOs(data);
+    }
+  };
+
+  el('autoshelf-triage-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const currentOps = autoshelfState();
+    currentOps.triage = {
+      storeName: String(el('triage-store')?.value || 'New store').trim(),
+      posAccess: String(el('triage-pos')?.value || 'none'),
+      discipline: String(el('triage-discipline')?.value || 'weak'),
+      fastPromise: Boolean(el('triage-fast')?.checked)
+    };
+    currentOps.triage.recommendation = autoshelfTriageRecommendation(currentOps.triage.posAccess, currentOps.triage.discipline, currentOps.triage.fastPromise);
+    persist();
+    window.__mmConnectView = 'inventory';
+    renderConnectOs(data);
+  });
+}
+
+function renderStoreDashboard(data) {
   const container = el('dashboard-container');
   if (!container) return;
-  const client = supa();
-  if (client) {
-    renderStoreDashboardSupabase().catch(() => renderStoreDashboardLocal(data));
+  if (window.MM_API?.hasApi?.()) {
+    renderStoreDashboardApi(data).catch(() => renderStoreDashboardLocal(data));
     return;
   }
   renderStoreDashboardLocal(data);
+}
+
+async function renderStoreDashboardApi(data) {
+  const container = el('dashboard-container');
+  if (!container) return;
+  container.innerHTML = '<p class="mm-payout-empty">Loading store dashboard…</p>';
+  const urlStoreId = new URLSearchParams(location.search).get('store') || '';
+  let stores = [];
+  let analytics = null;
+  let payoutData = null;
+  try {
+    const mine = await window.MM_API.myStores();
+    stores = mine.stores || [];
+  } catch {
+    stores = (data.stores || []).filter((s) => s.virtualSource || !s.mallId);
+  }
+  const selectedStore = stores.find((st) => String(st.id) === String(urlStoreId)) || stores[0] || null;
+  if (selectedStore?.id) {
+    try { analytics = await window.MM_API.storeAnalytics(selectedStore.id); } catch {}
+    try { payoutData = await window.MM_API.storePayouts(selectedStore.id); } catch {}
+  }
+  const products = selectedStore?.products || (data.products || []).filter((p) => String(p.storeId || p.store_id) === String(selectedStore?.id));
+  const storeOptions = stores.map((st) => `<option value="${escapeHtml(st.id)}" ${String(st.id) === String(selectedStore?.id) ? 'selected' : ''}>${escapeHtml(st.name)} (${escapeHtml(st.verification_status || 'pending')})</option>`).join('');
+  const verifyStatus = String(selectedStore?.verification_status || 'pending').toLowerCase();
+  const verifyClass = verifyStatus === 'verified' ? 'verified' : verifyStatus === 'rejected' ? 'rejected' : 'pending';
+  const payoutClass = selectedStore?.payout_ready ? 'payout-active' : 'payout-pending';
+  const payoutRows = (payoutData?.payouts || []).slice(0, 12);
+  container.innerHTML = `
+    <div class="mm-dash-shell">
+      <header class="mm-dash-hero">
+        <div>
+          <h1>${escapeHtml(selectedStore?.name || 'Shop Owner Dashboard')}</h1>
+          <p>Manage products, track sales, and monitor automated Razorpay payouts for your local store.</p>
+          ${selectedStore ? `
+            <div class="mm-status-row">
+              <span class="mm-status-pill ${verifyClass}">Store: ${escapeHtml(selectedStore.verification_status || 'pending')}</span>
+              <span class="mm-status-pill ${payoutClass}">Payouts: ${escapeHtml(selectedStore.payout_status || 'pending')}</span>
+              ${selectedStore.bank?.account_number_masked ? `<span class="mm-status-pill payout-active">${escapeHtml(selectedStore.bank.account_number_masked)}</span>` : ''}
+            </div>
+          ` : ''}
+        </div>
+        <div class="mm-dash-actions">
+          <select id="owner-store-select" class="mm-store-select">${storeOptions || '<option value="">No store yet</option>'}</select>
+          <a href="register-store.html" class="sm-os-btn">Add store</a>
+          ${selectedStore ? `<a href="store.html?id=${encodeURIComponent(selectedStore.id)}" class="sm-os-btn primary">View storefront</a>` : ''}
+        </div>
+      </header>
+
+      <div class="mm-metric-grid">
+        <div class="mm-metric-card accent-blue"><p>Products</p><p>${analytics?.product_count ?? products.length}</p></div>
+        <div class="mm-metric-card accent-green"><p>Orders</p><p>${analytics?.order_count ?? 0}</p></div>
+        <div class="mm-metric-card accent-amber"><p>Reservations</p><p>${analytics?.reservation_count ?? 0}</p></div>
+        <div class="mm-metric-card accent-rose"><p>Revenue</p><p>${money(analytics?.revenue_inr ?? 0)}</p></div>
+      </div>
+
+      <div class="mm-dash-layout">
+        <div class="space-y-4">
+          <section class="mm-dash-card">
+            <div class="mm-dash-card-head">
+              <div>
+                <h2>Add product</h2>
+                <p>Mobile-friendly upload with AI photo enhancement.</p>
+              </div>
+            </div>
+            <div class="mm-dash-card-body">
+              ${selectedStore ? `
+                <form id="owner-product-form" class="mm-form-grid cols-2">
+                  <label class="mm-field" style="grid-column:1/-1"><span class="mm-field-label">Product name <span class="mm-req">*</span></span><input id="owner-product-name" required class="mm-input" placeholder="e.g. Cotton casual shirt" /></label>
+                  <label class="mm-field"><span class="mm-field-label">Category</span><input id="owner-product-category" class="mm-input" value="${escapeHtml(selectedStore.category || '')}" /></label>
+                  <label class="mm-field"><span class="mm-field-label">Price (Rs) <span class="mm-req">*</span></span><input id="owner-product-price" required type="number" min="0" class="mm-input" /></label>
+                  <label class="mm-field"><span class="mm-field-label">Stock qty <span class="mm-req">*</span></span><input id="owner-product-stock" required type="number" min="0" class="mm-input" /></label>
+                  <label class="mm-field"><span class="mm-field-label">Color</span><input id="owner-product-color" class="mm-input" placeholder="e.g. blue" /></label>
+                  <label class="mm-field"><span class="mm-field-label">Size</span><input id="owner-product-size" class="mm-input" placeholder="e.g. M" /></label>
+                  <label class="mm-field" style="grid-column:1/-1"><span class="mm-field-label">Fit</span>
+                    <select id="owner-product-fit" class="mm-select"><option value="regular">Regular fit</option><option value="slim">Slim</option><option value="relaxed">Relaxed</option><option value="tailored">Tailored</option></select>
+                  </label>
+                  <div class="mm-form-section" style="grid-column:1/-1">
+                    <p class="mm-form-section-title">Product photo</p>
+                    <p class="mm-form-section-desc">Take a photo or upload from gallery — AI cleans background and optimizes for listing.</p>
+                    <div class="flex flex-wrap gap-2 mt-3 mb-3">
+                      <label class="mm-action mm-action-sm mm-action-primary cursor-pointer"><input id="owner-product-camera" type="file" accept="image/*" capture="environment" class="hidden" /> Take photo</label>
+                      <label class="mm-action mm-action-sm mm-action-outline cursor-pointer"><input id="owner-product-file" type="file" accept="image/*" class="hidden" /> Choose file</label>
+                    </div>
+                    <img id="owner-product-preview" alt="Preview" class="hidden max-h-48 rounded-xl border object-contain bg-white" />
+                    <input type="hidden" id="owner-product-image-data" />
+                  </div>
+                  <button type="submit" class="mm-form-submit" style="grid-column:1/-1">Publish to marketplace</button>
+                </form>
+              ` : `<p class="text-sm text-muted-foreground"><a href="register-store.html" class="text-primary font-bold">Register your store</a> to start uploading products.</p>`}
+            </div>
+          </section>
+
+          <section class="mm-dash-card">
+            <div class="mm-dash-card-head">
+              <div><h2>Live catalog</h2><p>${products.length} product${products.length === 1 ? '' : 's'} listed</p></div>
+            </div>
+            <div class="mm-dash-card-body">
+              <div class="mm-catalog-grid">${products.slice(0, 20).map((p) => `<article class="mm-catalog-item"><img src="${escapeHtml(p.image || p.image_url || 'assets/media/hero-mall.jpg')}" alt="" loading="lazy" /><div><strong>${escapeHtml(p.name)}</strong><span>${money(p.price || p.price_inr)} · stock ${p.stockCount ?? p.stock_qty ?? 0}</span></div></article>`).join('') || '<p class="mm-payout-empty">No products yet. Add your first item above.</p>'}</div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="space-y-4">
+          ${selectedStore ? `
+          <section class="mm-dash-card">
+            <div class="mm-dash-card-head">
+              <div>
+                <h2>Automated payouts</h2>
+                <p>Razorpay Route transfers to ${escapeHtml(selectedStore.bank?.account_number_masked || 'your bank')}</p>
+              </div>
+            </div>
+            <div class="mm-dash-card-body">
+              <div class="mm-payout-summary">
+                <div class="mm-payout-stat settled"><span>Settled</span><strong>${money(payoutData?.summary?.settled_inr ?? 0)}</strong></div>
+                <div class="mm-payout-stat pending"><span>Pending</span><strong>${money(payoutData?.summary?.pending_inr ?? 0)}</strong></div>
+                <div class="mm-payout-stat"><span>Total earned</span><strong>${money(payoutData?.summary?.total_net_inr ?? 0)}</strong></div>
+              </div>
+              <div class="mm-payout-table-wrap">
+                ${payoutRows.length ? `
+                  <table class="mm-payout-table">
+                    <thead><tr><th>Order</th><th>Status</th><th>Amount</th></tr></thead>
+                    <tbody>${payoutRows.map((p) => `<tr><td>${escapeHtml(p.order_id)}</td><td>${escapeHtml(p.status)}</td><td><strong>${money(p.net_inr)}</strong></td></tr>`).join('')}</tbody>
+                  </table>
+                ` : `<p class="mm-payout-empty">No payouts yet. They appear after customers pay for your products.</p>`}
+              </div>
+              <form id="owner-bank-form" class="mm-bank-update">
+                <p class="mm-bank-update-title">Update bank details</p>
+                <label class="mm-field"><span class="mm-field-label">Account holder</span><input id="owner-bank-beneficiary" required class="mm-input" value="${escapeHtml(selectedStore.bank?.beneficiary_name || '')}" /></label>
+                <label class="mm-field"><span class="mm-field-label">Account number</span><input id="owner-bank-account" required class="mm-input" placeholder="Enter full account number" /></label>
+                <div class="mm-form-grid cols-2">
+                  <label class="mm-field"><span class="mm-field-label">IFSC</span><input id="owner-bank-ifsc" required class="mm-input uppercase" value="${escapeHtml(selectedStore.bank?.ifsc_code || '')}" /></label>
+                  <label class="mm-field"><span class="mm-field-label">Type</span><select id="owner-bank-type" class="mm-select"><option value="current" ${selectedStore.bank?.account_type === 'current' ? 'selected' : ''}>Current</option><option value="savings" ${selectedStore.bank?.account_type === 'savings' ? 'selected' : ''}>Savings</option></select></label>
+                </div>
+                <button type="submit" class="mm-form-submit">Save &amp; re-activate payouts</button>
+              </form>
+            </div>
+          </section>
+          ` : ''}
+
+          <section class="mm-dash-card">
+            <div class="mm-dash-card-head"><div><h2>Top sellers</h2><p>Best performers in your store</p></div></div>
+            <div class="mm-dash-card-body space-y-2">
+              ${(analytics?.top_products || []).length ? analytics.top_products.map((tp) => `<div class="mm-top-seller-row"><span>${escapeHtml(tp.name)}</span><strong>${tp.qty_sold} sold</strong></div>`).join('') : '<p class="mm-payout-empty">No sales data yet.</p>'}
+              ${(analytics?.low_stock || []).length ? `<div class="mt-3 rounded-lg border border-rose-200 bg-rose-50 p-3"><p class="text-xs font-extrabold text-rose-800 uppercase tracking-wide">Low stock</p><ul class="mt-2 space-y-1 text-xs text-rose-700">${analytics.low_stock.map((p) => `<li>${escapeHtml(p.name)} — ${p.stock_qty} left</li>`).join('')}</ul></div>` : ''}
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  `;
+  el('owner-store-select')?.addEventListener('change', (e) => {
+    const u = new URL(location.href);
+    u.searchParams.set('store', String(e.target.value || ''));
+    location.href = u.toString();
+  });
+  let pendingImageUrl = '';
+  const onImageReady = async (dataUrl) => {
+    pendingImageUrl = dataUrl;
+    el('owner-product-image-data').value = dataUrl;
+    toast('Photo enhanced. Tap Upload to publish.', { type: 'ok', title: 'AI Photo', ms: 2000 });
+  };
+  window.MM_Media?.bindCameraUpload('owner-product-camera', 'owner-product-preview', onImageReady);
+  window.MM_Media?.bindCameraUpload('owner-product-file', 'owner-product-preview', onImageReady);
+  el('owner-bank-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!selectedStore) return;
+    try {
+      await window.MM_API.updateStoreBankDetails({
+        store_id: selectedStore.id,
+        beneficiary_name: el('owner-bank-beneficiary')?.value,
+        account_number: el('owner-bank-account')?.value,
+        ifsc_code: el('owner-bank-ifsc')?.value,
+        account_type: el('owner-bank-type')?.value
+      });
+      toast('Bank details updated. Payout account re-provisioned.', { type: 'ok', title: 'Payouts' });
+      setTimeout(() => window.location.reload(), 600);
+    } catch (error) {
+      toast(error.message || String(error), { type: 'bad', title: 'Payouts' });
+    }
+  });
+  el('owner-product-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!selectedStore) return;
+    try {
+      let imageUrl = 'assets/media/hero-mall.jpg';
+      const raw = el('owner-product-image-data')?.value || pendingImageUrl;
+      if (raw && raw.startsWith('data:')) {
+        const uploaded = await window.MM_API.uploadImage({ data_url: raw, store_id: selectedStore.id, kind: 'products' });
+        imageUrl = uploaded.url || imageUrl;
+      }
+      await window.MM_API.saveAutoshelfProduct({
+        store_id: selectedStore.id,
+        name: el('owner-product-name')?.value,
+        category: el('owner-product-category')?.value || selectedStore.category,
+        price_inr: Number(el('owner-product-price')?.value || 0),
+        stock_qty: Number(el('owner-product-stock')?.value || 0),
+        color: el('owner-product-color')?.value,
+        size: el('owner-product-size')?.value,
+        fit: el('owner-product-fit')?.value,
+        image_url: imageUrl,
+        enhanced: Boolean(raw)
+      });
+      toast('Product live on marketplace.', { type: 'ok', title: 'Store' });
+      setTimeout(() => window.location.reload(), 500);
+    } catch (error) {
+      toast(error.message || String(error), { type: 'bad', title: 'Upload' });
+    }
+  });
 }
 
 function renderStoreDashboardLocal(data) {
   const s = scoped(data);
   const container = el('dashboard-container');
   if (!container) return;
+  const urlStoreId = new URLSearchParams(location.search).get('store') || '';
+  const stores = urlStoreId ? (data.stores || s.stores || []) : (s.stores || []);
+  const selectedStore = stores.find((st) => String(st.id) === String(urlStoreId)) || stores[0] || null;
+  const productSource = urlStoreId ? (data.products || s.products || []) : (s.products || []);
+  const selectedProducts = selectedStore ? productSource.filter((p) => String(p.storeId) === String(selectedStore.id)) : [];
+  const today = todayKey();
+  const todayUploads = (state.customProducts || []).filter((p) => String(p.storeId) === String(selectedStore?.id || '') && todayKey(p.createdAt) === today).length;
+  const dailyGoal = 10;
+  const goalPct = Math.min(100, Math.round((todayUploads / dailyGoal) * 100));
+  const enhancedCount = selectedProducts.filter((p) => String(p.mediaStatus || '').includes('enhanced')).length;
+  const storeOptions = stores.map((st) => `<option value="${escapeHtml(st.id)}" ${String(st.id) === String(selectedStore?.id) ? 'selected' : ''}>${escapeHtml(st.name)}</option>`).join('');
+  const productRows = selectedProducts.slice(0, 40).map((p) => `
+    <div class="rounded-xl border border-border bg-card p-3">
+      <div class="flex gap-3">
+        <img src="${escapeHtml(p.image || fallbackProductImage(p.category))}" alt="${escapeHtml(p.name)}" class="h-16 w-16 rounded-lg object-cover bg-muted" loading="lazy" decoding="async" />
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+              <p class="font-extrabold truncate">${escapeHtml(p.name)}</p>
+              <p class="text-xs text-muted-foreground">${escapeHtml(p.category || 'General')} - ${money(p.price)} - stock ${productStockCount(p)}</p>
+            </div>
+            <span class="inline-flex w-fit items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">${escapeHtml(p.mediaStatus || 'catalog ready')}</span>
+          </div>
+          <p class="mt-2 text-xs text-muted-foreground">${escapeHtml((p.mediaEnhancements || []).join(', ') || 'Marketplace-ready product media')}</p>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
   container.innerHTML = `
-    <div class="space-y-6"><h1 class="text-3xl font-bold">Store Manager Control Room</h1><div class="grid grid-cols-1 md:grid-cols-4 gap-4"><div class="border rounded-lg p-4 bg-blue-50"><p class="text-sm text-muted-foreground">Total Sales</p><p class="text-2xl font-bold">${money(state.orders.reduce((sum, o) => sum + o.total, 0))}</p></div><div class="border rounded-lg p-4 bg-green-50"><p class="text-sm text-muted-foreground">Orders Today</p><p class="text-2xl font-bold">${state.orders.length}</p></div><div class="border rounded-lg p-4 bg-yellow-50"><p class="text-sm text-muted-foreground">Managed Products</p><p class="text-2xl font-bold">${s.products.length}</p></div><div class="border rounded-lg p-4 bg-purple-50"><p class="text-sm text-muted-foreground">Active Managers</p><p class="text-2xl font-bold">${state.managers.filter((m) => m.status === 'active').length}</p></div></div><div class="border rounded-xl p-4"><h2 class="text-xl font-bold mb-3">Inventory Backend Workbench</h2><form id="stock-form" class="space-y-3"><select id="stock-product">${s.products.slice(0, 100).map((p) => `<option value="${p.id}">${p.name} (${p.stockCount})</option>`).join('')}</select><input id="stock-count" type="number" min="0" placeholder="Set new stock count" required /><button type="submit" class="rounded-lg bg-primary px-4 py-2 text-white">Update Inventory</button></form></div></div>
+    <div class="space-y-6">
+      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold">Shop Owner Dashboard</h1>
+          <p class="text-sm text-muted-foreground mt-1">Upload real inventory, let ConnectOS prepare the media, and keep the local storefront alive.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          ${selectedStore ? `<a href="${storePath(selectedStore.id)}" class="sm-os-btn">${icon('store')} View storefront</a>` : ''}
+          <a href="autoshelf.html" class="sm-os-btn primary">${icon('shield')} Open Local Stores</a>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="border rounded-lg p-4 bg-blue-50"><p class="text-sm text-muted-foreground">Products in store</p><p class="text-2xl font-bold">${selectedProducts.length}</p></div>
+        <div class="border rounded-lg p-4 bg-green-50"><p class="text-sm text-muted-foreground">Uploaded today</p><p class="text-2xl font-bold">${todayUploads}/${dailyGoal}</p></div>
+        <div class="border rounded-lg p-4 bg-yellow-50"><p class="text-sm text-muted-foreground">AI media ready</p><p class="text-2xl font-bold">${enhancedCount}</p></div>
+        <div class="border rounded-lg p-4 bg-rose-50"><p class="text-sm text-muted-foreground">Open orders</p><p class="text-2xl font-bold">${state.orders.length}</p></div>
+      </div>
+
+      <div class="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
+        <section class="border rounded-xl p-4 bg-card">
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 class="text-xl font-bold">Add Product</h2>
+              <p class="text-sm text-muted-foreground">Target ${dailyGoal} products per day during the pilot launch.</p>
+            </div>
+            <select id="owner-store-select" class="rounded-xl border px-3 py-2.5">${storeOptions}</select>
+          </div>
+          <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-primary" style="width:${goalPct}%"></div></div>
+          ${selectedStore ? `
+            <form id="owner-product-form" class="mt-5 grid gap-3 md:grid-cols-2">
+              <input id="owner-product-name" required placeholder="Product name" class="rounded-xl border px-3 py-2.5" />
+              <input id="owner-product-category" placeholder="Category" value="${escapeHtml(selectedStore.category || '')}" class="rounded-xl border px-3 py-2.5" />
+              <input id="owner-product-price" required type="number" min="0" placeholder="Selling price" class="rounded-xl border px-3 py-2.5" />
+              <input id="owner-product-original" type="number" min="0" placeholder="MRP / original price" class="rounded-xl border px-3 py-2.5" />
+              <input id="owner-product-stock" required type="number" min="0" placeholder="Available stock" class="rounded-xl border px-3 py-2.5" />
+              <input id="owner-product-image" placeholder="Image URL or mobile upload link" class="rounded-xl border px-3 py-2.5" />
+              <input id="owner-product-video" placeholder="Optional video URL" class="rounded-xl border px-3 py-2.5 md:col-span-2" />
+              <label class="flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2.5 text-sm font-semibold md:col-span-2">
+                <input id="owner-ai-media" type="checkbox" checked />
+                Run AI media enhancement in background
+              </label>
+              <button type="submit" class="rounded-xl bg-primary px-4 py-3 text-white font-semibold md:col-span-2">Upload product and enhance media</button>
+            </form>
+          ` : `<div class="mt-5">${emptyState({ title: 'No store assigned yet', subtitle: 'Ask the admin to onboard a pilot store first.', href: 'admin-dashboard.html', cta: 'Open admin onboarding', icon: icon('store') })}</div>`}
+        </section>
+
+        <section class="border rounded-xl p-4 bg-card">
+          <h2 class="text-xl font-bold">Store Operations</h2>
+          <p class="text-sm text-muted-foreground mt-1">${selectedStore ? escapeHtml(selectedStore.name) : 'No store selected'}</p>
+          ${selectedStore ? `
+            <div class="mt-4 space-y-3 text-sm">
+              <div class="rounded-xl border border-border bg-muted p-3"><p class="text-xs text-muted-foreground">QR storefront</p><a class="font-bold text-primary break-all" href="${storePath(selectedStore.id)}">${escapeHtml(storeUrl(selectedStore.id))}</a></div>
+              <div class="rounded-xl border border-border bg-muted p-3"><p class="text-xs text-muted-foreground">Location</p><p class="font-bold">${escapeHtml(selectedStore.address || selectedStore.floor || 'Add address from admin')}</p></div>
+              <div class="rounded-xl border border-border bg-muted p-3"><p class="text-xs text-muted-foreground">Hours</p><p class="font-bold">${escapeHtml(selectedStore.hours || '10:00 AM - 10:00 PM')}</p></div>
+            </div>
+          ` : ''}
+        </section>
+      </div>
+
+      <section class="border rounded-xl p-4 bg-card">
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 class="text-xl font-bold">Live Catalog</h2>
+            <p class="text-sm text-muted-foreground">Products uploaded here appear on the marketplace and the QR storefront.</p>
+          </div>
+          <a href="products.html" class="mm-action mm-action-outline mm-action-sm">Browse marketplace</a>
+        </div>
+        <div class="mt-4 grid gap-3">${productRows || '<p class="text-sm text-muted-foreground">No products uploaded for this store yet.</p>'}</div>
+      </section>
+    </div>
+  `;
+
+  el('owner-store-select')?.addEventListener('change', (e) => {
+    const next = String(e.target.value || '');
+    const u = new URL(location.href);
+    if (next) u.searchParams.set('store', next);
+    location.href = u.toString();
+  });
+
+  el('owner-product-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const store = selectedStore;
+    if (!store) return;
+    const id = `cp-${Date.now()}`;
+    const name = String(el('owner-product-name')?.value || '').trim();
+    const category = String(el('owner-product-category')?.value || store.category || 'General').trim();
+    const price = Number(el('owner-product-price')?.value || 0);
+    const originalPrice = Number(el('owner-product-original')?.value || 0) || Math.round(price * 1.12);
+    const stockCount = Number(el('owner-product-stock')?.value || 0);
+    const image = String(el('owner-product-image')?.value || '').trim() || fallbackProductImage(category);
+    const videoUrl = String(el('owner-product-video')?.value || '').trim();
+    const enhanced = Boolean(el('owner-ai-media')?.checked);
+    state.customProducts.unshift({
+      id,
+      storeId: store.id,
+      mallId: store.mallId || '',
+      name,
+      category,
+      price,
+      originalPrice,
+      stockCount,
+      inStock: stockCount > 0,
+      image,
+      videoUrl,
+      rating: 4.4,
+      mediaStatus: enhanced ? 'AI enhanced' : 'manual media',
+      mediaEnhancements: enhanced ? ['lighting improved', 'background cleaned', 'dimensions optimized', videoUrl ? 'video optimized' : 'image marketplace-ready'] : ['seller uploaded media'],
+      createdAt: new Date().toISOString()
+    });
+    state.stock[id] = stockCount;
+    const customStore = state.customStores.find((st) => String(st.id) === String(store.id));
+    if (customStore) customStore.productCount = Number(customStore.productCount || 0) + 1;
+    persist();
+    toast('Product uploaded and storefront updated.', { type: 'ok', title: 'ConnectOS' });
+    setTimeout(() => window.location.reload(), 500);
+  });
+  return;
+  const dashboardProducts = s.products || [];
+  const rapidCount = dashboardProducts.filter((p) => trustForProduct(p).key === 'rapid').length;
+  const miniCount = dashboardProducts.filter((p) => trustForProduct(p).key === 'mini').length;
+  const riskCount = dashboardProducts.filter((p) => ['low', 'stale', 'out'].includes(trustForProduct(p).key)).length;
+  container.innerHTML = `
+    <div class="space-y-6">
+      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold">Store Manager Control Room</h1>
+          <p class="text-sm text-muted-foreground mt-1">Mini-POS stock discipline for SmartMall-listed products.</p>
+        </div>
+        <a href="autoshelf.html" class="sm-os-btn primary">${icon('shield')} Open Local Stores</a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="border rounded-lg p-4 bg-blue-50"><p class="text-sm text-muted-foreground">Total Sales</p><p class="text-2xl font-bold">${money(state.orders.reduce((sum, o) => sum + Number(o.total || 0), 0))}</p></div>
+        <div class="border rounded-lg p-4 bg-green-50"><p class="text-sm text-muted-foreground">Orders Today</p><p class="text-2xl font-bold">${state.orders.length}</p></div>
+        <div class="border rounded-lg p-4 bg-yellow-50"><p class="text-sm text-muted-foreground">Rapid Shelf</p><p class="text-2xl font-bold">${rapidCount}</p></div>
+        <div class="border rounded-lg p-4 bg-rose-50"><p class="text-sm text-muted-foreground">Risk Queue</p><p class="text-2xl font-bold">${riskCount}</p></div>
+      </div>
+      <div class="grid gap-6 xl:grid-cols-3">
+        <section class="xl:col-span-2 border rounded-xl p-4 bg-card">
+          <h2 class="text-xl font-bold mb-3">Mini-POS Stock Event</h2>
+          <form id="stock-form" class="grid gap-3 md:grid-cols-4">
+            <select id="stock-product" class="rounded-xl border px-3 py-2.5 md:col-span-2">${dashboardProducts.slice(0, 100).map((p) => `<option value="${p.id}">${escapeHtml(p.name)} (${productStockCount(p)})</option>`).join('')}</select>
+            <input id="stock-count" type="number" min="0" placeholder="Set stock" required class="rounded-xl border px-3 py-2.5" />
+            <button type="submit" class="rounded-xl bg-primary px-4 py-2.5 text-white font-semibold">Confirm stock</button>
+          </form>
+          <p class="text-xs text-muted-foreground mt-3">Daily confirmations improve ranking. Missed or wrong stock lowers trust labels.</p>
+        </section>
+        <section class="border rounded-xl p-4 bg-card">
+          <h2 class="text-xl font-bold mb-3">Trust Mix</h2>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center justify-between">${trustBadge({ tone: 'rapid', label: 'Rapid Shelf' })}<b>${rapidCount}</b></div>
+            <div class="flex items-center justify-between">${trustBadge({ tone: 'mini', label: 'Mini-POS managed' })}<b>${miniCount}</b></div>
+            <div class="flex items-center justify-between">${trustBadge({ tone: 'low', label: 'Needs confirmation' })}<b>${riskCount}</b></div>
+          </div>
+        </section>
+      </div>
+    </div>
   `;
   el('stock-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -2520,17 +4497,247 @@ function renderStoreDashboardLocal(data) {
 function renderAdminDashboard(data) {
   const container = el('dashboard-container');
   if (!container) return;
-  const client = supa();
-  if (client) {
-    renderAdminDashboardSupabase().catch(() => renderAdminDashboardLocal(data));
+  if (window.MM_API?.hasApi?.()) {
+    renderAdminDashboardApi(data).catch(() => renderAdminDashboardLocal(data));
     return;
   }
   renderAdminDashboardLocal(data);
 }
 
+async function renderAdminDashboardApi(data) {
+  const container = el('dashboard-container');
+  if (!container) return;
+  container.innerHTML = '<p class="text-muted-foreground">Loading admin panel…</p>';
+  try {
+    const [overview, pendingRes, allRes, usersRes, productsRes, ordersRes] = await Promise.all([
+      window.MM_API.adminOverview(),
+      window.MM_API.adminStores('pending'),
+      window.MM_API.adminStores('all'),
+      window.MM_API.adminUsers(),
+      window.MM_API.adminProducts(),
+      window.MM_API.adminOrders()
+    ]);
+    const pending = pendingRes.stores || [];
+    const allStores = allRes.stores || [];
+    const users = usersRes.users || [];
+    const products = productsRes.products || [];
+    const orders = ordersRes.orders || [];
+    container.innerHTML = `
+      <div class="space-y-6">
+        <div><h1 class="text-3xl font-bold">MallMaze Admin Console</h1><p class="text-sm text-muted-foreground mt-1">Full visibility: users, stores, products, orders, payments.</p></div>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          ${[
+            ['Users', overview.users], ['Stores', overview.stores], ['Products', overview.products], ['Orders', overview.orders],
+            ['Reservations', overview.reservations], ['Pending stores', overview.pending_stores], ['Revenue', money(overview.revenue_inr || 0)]
+          ].map(([label, val]) => `<div class="border rounded-lg p-3 bg-card"><p class="text-xs text-muted-foreground">${label}</p><p class="text-xl font-bold">${typeof val === 'number' ? val.toLocaleString('en-IN') : val}</p></div>`).join('')}
+        </div>
+        <section class="border rounded-xl p-4 bg-card overflow-x-auto">
+          <h2 class="text-xl font-bold mb-3">Users (${users.length})</h2>
+          <table class="w-full text-sm"><thead><tr class="text-left border-b"><th class="py-2">Name</th><th>Email</th><th>Phone</th><th>Role</th></tr></thead>
+          <tbody>${users.map((u) => `<tr class="border-b border-border/50"><td class="py-2">${escapeHtml(u.name || '-')}</td><td>${escapeHtml(u.email || '-')}</td><td>${escapeHtml(u.phone || '-')}</td><td><b>${escapeHtml(u.role || 'user')}</b></td></tr>`).join('') || '<tr><td colspan="4">No users yet</td></tr>'}</tbody></table>
+        </section>
+        <section class="border rounded-xl p-4 bg-card">
+          <h2 class="text-xl font-bold mb-4">Pending stores (${pending.length})</h2>
+          <div class="space-y-3">${pending.length ? pending.map((st) => `
+            <article class="rounded-xl border p-4">
+              <div class="flex flex-col lg:flex-row lg:justify-between gap-3">
+                <div>
+                  <p class="font-extrabold">${escapeHtml(st.name)}</p>
+                  <p class="text-sm text-muted-foreground">${escapeHtml(st.category || '')} · ${escapeHtml(st.city || '')} · ${escapeHtml(st.phone || '')}</p>
+                  <p class="text-sm">${escapeHtml(st.address || '')}</p>
+                  ${st.verification_photo_url ? `<img src="${escapeHtml(st.verification_photo_url)}" alt="" class="mt-2 h-20 rounded object-cover" />` : ''}
+                </div>
+                <div class="flex gap-2"><button type="button" class="mm-action mm-action-primary mm-action-sm" data-verify="${escapeHtml(st.id)}">Verify</button><button type="button" class="mm-action mm-action-outline mm-action-sm" data-reject="${escapeHtml(st.id)}">Reject</button></div>
+              </div>
+            </article>`).join('') : '<p class="text-sm text-muted-foreground">No pending applications.</p>'}
+          </div>
+        </section>
+        <section class="border rounded-xl p-4 bg-card overflow-x-auto">
+          <h2 class="text-xl font-bold mb-3">All products (${products.length})</h2>
+          <table class="w-full text-sm"><thead><tr class="text-left border-b"><th class="py-2">Product</th><th>Store</th><th>Price</th><th>Stock</th><th>Enhanced</th></tr></thead>
+          <tbody>${products.slice(0, 100).map((p) => `<tr class="border-b border-border/50"><td class="py-2">${escapeHtml(p.name)}</td><td>${escapeHtml(p.store_id)}</td><td>${money(p.price_inr || 0)}</td><td>${p.stock_qty ?? 0}</td><td>${p.enhanced ? 'Yes' : 'No'}</td></tr>`).join('') || '<tr><td colspan="5">No products</td></tr>'}</tbody></table>
+        </section>
+        <section class="border rounded-xl p-4 bg-card overflow-x-auto">
+          <h2 class="text-xl font-bold mb-3">Orders (${orders.length})</h2>
+          <table class="w-full text-sm"><thead><tr class="text-left border-b"><th class="py-2">Order</th><th>Status</th><th>Payment</th><th>Total</th></tr></thead>
+          <tbody>${orders.slice(0, 50).map((o) => `<tr class="border-b border-border/50"><td class="py-2">${escapeHtml(o.id)}</td><td>${escapeHtml(o.status)}</td><td>${escapeHtml(o.payment_status)}</td><td>${money((o.total_paise || o.totals?.totalPaise || 0) / 100)}</td></tr>`).join('') || '<tr><td colspan="4">No orders</td></tr>'}</tbody></table>
+        </section>
+        <section class="border rounded-xl p-4 bg-card">
+          <h2 class="text-xl font-bold mb-3">All stores (${allStores.length})</h2>
+          <div class="grid gap-2">${allStores.map((st) => `<div class="flex justify-between rounded-lg bg-muted px-3 py-2 text-sm"><span>${escapeHtml(st.name)} · ${escapeHtml(st.city || '')}</span><span class="font-bold">${escapeHtml(st.verification_status || 'pending')}</span></div>`).join('')}</div>
+        </section>
+      </div>`;
+    container.querySelectorAll('[data-verify]').forEach((btn) => btn.addEventListener('click', async () => {
+      await window.MM_API.verifyStore({ store_id: btn.getAttribute('data-verify') });
+      toast('Store verified.', { type: 'ok', title: 'Admin' });
+      renderAdminDashboardApi(data);
+    }));
+    container.querySelectorAll('[data-reject]').forEach((btn) => btn.addEventListener('click', async () => {
+      await window.MM_API.rejectStore({ store_id: btn.getAttribute('data-reject'), reason: 'Verification failed' });
+      toast('Store rejected.', { type: 'ok', title: 'Admin' });
+      renderAdminDashboardApi(data);
+    }));
+  } catch {
+    container.innerHTML = `<div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm">Admin login required. OTP login with <b>admin@mallmaze.in</b> (dev OTP shown in network response).</div>`;
+  }
+}
+
 function renderAdminDashboardLocal(data) {
   const container = el('dashboard-container');
   if (!container) return;
+  const pilotStores = state.customStores || [];
+  const allProducts = data.products || [];
+  const pilotProducts = (state.customProducts || []).length;
+  const qrReady = pilotStores.filter((st) => st.id).length;
+  const storeList = pilotStores.slice(0, 12).map((st) => {
+    const mgr = (state.managers || []).find((m) => String(m.storeId) === String(st.id));
+    const count = allProducts.filter((p) => String(p.storeId) === String(st.id)).length;
+    return `
+      <div class="rounded-xl border border-border bg-card p-4">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div class="min-w-0">
+            <p class="font-extrabold truncate">${escapeHtml(st.name)}</p>
+            <p class="text-sm text-muted-foreground">${escapeHtml(st.category || 'Store')} - ${escapeHtml(st.address || st.floor || 'Address pending')}</p>
+            <p class="mt-2 text-xs text-muted-foreground">Owner: ${escapeHtml(mgr?.name || st.ownerName || 'Not assigned')} ${mgr?.email ? `- ${escapeHtml(mgr.email)}` : ''}</p>
+            ${mgr?.tempPassword ? `<p class="mt-1 text-xs font-semibold text-slate-700">Temporary password: <span class="font-mono">${escapeHtml(mgr.tempPassword)}</span></p>` : ''}
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a href="${storePath(st.id)}" class="mm-action mm-action-outline mm-action-sm">Storefront</a>
+            <a href="${storeUrl(st.id)}" class="mm-action mm-action-ghost mm-action-sm">QR link</a>
+          </div>
+        </div>
+        <div class="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+          <div class="rounded-lg bg-muted p-2"><span class="text-muted-foreground">Products</span><b class="block">${count}</b></div>
+          <div class="rounded-lg bg-muted p-2"><span class="text-muted-foreground">Hours</span><b class="block">${escapeHtml(st.hours || '10 AM - 10 PM')}</b></div>
+          <div class="rounded-lg bg-muted p-2"><span class="text-muted-foreground">QR</span><b class="block">Ready</b></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="space-y-6">
+      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold">ConnectOS Pilot Admin</h1>
+          <p class="text-sm text-muted-foreground mt-1">Manually onboard the first local stores, give owners credentials, and launch QR storefronts.</p>
+        </div>
+          <a href="autoshelf.html" class="sm-os-btn primary">${icon('shield')} Local Stores</a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="border rounded-lg p-4 bg-blue-50"><p class="text-sm text-muted-foreground">Pilot stores</p><p class="text-2xl font-bold">${pilotStores.length}/3</p></div>
+        <div class="border rounded-lg p-4 bg-green-50"><p class="text-sm text-muted-foreground">Marketplace products</p><p class="text-2xl font-bold">${allProducts.length}</p></div>
+        <div class="border rounded-lg p-4 bg-yellow-50"><p class="text-sm text-muted-foreground">Owner accounts</p><p class="text-2xl font-bold">${state.managers.length}</p></div>
+        <div class="border rounded-lg p-4 bg-purple-50"><p class="text-sm text-muted-foreground">QR storefronts</p><p class="text-2xl font-bold">${qrReady}</p></div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-[.85fr_1.15fr] gap-6">
+        <section class="border rounded-xl p-4 bg-card">
+          <h2 class="text-lg font-bold mb-3">Create Pilot Store</h2>
+          <form id="add-store" class="grid gap-3">
+            <select id="store-mall" class="rounded-xl border px-3 py-2.5">${data.malls.map((m) => `<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)} - ${escapeHtml(m.location || '')}</option>`).join('')}</select>
+            <input id="store-name" placeholder="Store name" required class="rounded-xl border px-3 py-2.5" />
+            <input id="store-category" placeholder="Category" required class="rounded-xl border px-3 py-2.5" />
+            <input id="store-address" placeholder="Full address / landmark" required class="rounded-xl border px-3 py-2.5" />
+            <div class="grid gap-3 md:grid-cols-2">
+              <input id="store-phone" placeholder="Contact phone" class="rounded-xl border px-3 py-2.5" />
+              <input id="store-hours" placeholder="Operating hours" value="10:00 AM - 10:00 PM" class="rounded-xl border px-3 py-2.5" />
+            </div>
+            <input id="store-floor" placeholder="Floor / area inside mall" class="rounded-xl border px-3 py-2.5" />
+            <input id="store-image" placeholder="Store image URL" class="rounded-xl border px-3 py-2.5" />
+            <div class="grid gap-3 md:grid-cols-2">
+              <input id="store-owner-name" placeholder="Owner / manager name" required class="rounded-xl border px-3 py-2.5" />
+              <input id="store-owner-email" type="email" placeholder="owner@store.com" required class="rounded-xl border px-3 py-2.5" />
+            </div>
+            <input id="store-temp-password" placeholder="Temporary password (auto if blank)" class="rounded-xl border px-3 py-2.5" />
+            <button type="submit" class="rounded-xl bg-primary px-4 py-3 text-white font-semibold">Create store, owner login, and QR</button>
+          </form>
+        </section>
+
+        <section class="border rounded-xl p-4 bg-card">
+          <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 class="text-lg font-bold">Onboarded Pilot Stores</h2>
+              <p class="text-sm text-muted-foreground">Start with around three active shops and push each toward 10 uploads per day.</p>
+            </div>
+            <a href="store-dashboard.html" class="mm-action mm-action-outline mm-action-sm">Owner dashboard</a>
+          </div>
+          <div class="mt-4 grid gap-3">${storeList || '<p class="text-sm text-muted-foreground">No pilot stores yet. Create the first one from the form.</p>'}</div>
+        </section>
+      </div>
+
+      <section class="border rounded-xl p-4 bg-card">
+        <h2 class="text-lg font-bold">Optional Mall Setup</h2>
+        <p class="text-sm text-muted-foreground mb-3">Use this only when the pilot area or mall is missing from the demo catalog.</p>
+        <form id="add-mall" class="grid gap-3 md:grid-cols-5">
+          <input id="mall-name" placeholder="Mall / market name" required class="rounded-xl border px-3 py-2.5 md:col-span-2" />
+          <input id="mall-location" placeholder="Area, City" required class="rounded-xl border px-3 py-2.5" />
+          <input id="mall-image" placeholder="Image URL" class="rounded-xl border px-3 py-2.5" />
+          <button type="submit" class="rounded-xl bg-primary px-4 py-2.5 text-white font-semibold">Create area</button>
+        </form>
+      </section>
+    </div>
+  `;
+
+  el('add-mall')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    state.customMalls.unshift({
+      id: `cm-${Date.now()}`,
+      name: el('mall-name').value,
+      location: el('mall-location').value,
+      image: el('mall-image').value || 'assets/media/hero-mall.jpg',
+      floors: 3,
+      rating: 4.2,
+      storeCount: 0,
+      description: 'Hyperlocal pilot area onboarded by ConnectOS admin.',
+      deliveryTime: '35 min'
+    });
+    persist();
+    window.location.reload();
+  });
+
+  el('add-store')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const mallId = el('store-mall').value;
+    const mall = (data.malls || []).find((m) => String(m.id) === String(mallId));
+    const id = `cs-${Date.now()}`;
+    const tempPassword = String(el('store-temp-password')?.value || '').trim() || generatedCredential();
+    const store = {
+      id,
+      mallId,
+      name: el('store-name').value,
+      category: el('store-category').value,
+      floor: el('store-floor').value || 'Ground Floor',
+      address: el('store-address').value,
+      phone: el('store-phone').value,
+      hours: el('store-hours').value || '10:00 AM - 10:00 PM',
+      city: cityOf(mall?.location),
+      image: el('store-image').value || 'assets/media/hero-mall.jpg',
+      rating: 4.3,
+      isOpen: true,
+      productCount: 0,
+      ownerName: el('store-owner-name').value,
+      ownerEmail: el('store-owner-email').value,
+      qrUrl: storeUrl(id),
+      createdAt: new Date().toISOString()
+    };
+    state.customStores.unshift(store);
+    state.managers.unshift({
+      id: `mgr-${Date.now()}`,
+      name: store.ownerName,
+      email: store.ownerEmail,
+      mallId,
+      storeId: id,
+      status: 'active',
+      tempPassword,
+      createdAt: new Date().toISOString()
+    });
+    persist();
+    toast('Pilot store created with owner login and QR storefront.', { type: 'ok', title: 'ConnectOS' });
+    setTimeout(() => window.location.reload(), 500);
+  });
+  return;
   container.innerHTML = `
     <div class="space-y-6"><h1 class="text-3xl font-bold">Shopping Mall Admin Suite</h1><div class="grid grid-cols-1 md:grid-cols-4 gap-4"><div class="border rounded-lg p-4 bg-blue-50"><p class="text-sm text-muted-foreground">Total Malls</p><p class="text-2xl font-bold">${data.malls.length}</p></div><div class="border rounded-lg p-4 bg-green-50"><p class="text-sm text-muted-foreground">Total Stores</p><p class="text-2xl font-bold">${data.stores.length}</p></div><div class="border rounded-lg p-4 bg-yellow-50"><p class="text-sm text-muted-foreground">Store Managers</p><p class="text-2xl font-bold">${state.managers.length}</p></div><div class="border rounded-lg p-4 bg-purple-50"><p class="text-sm text-muted-foreground">Total Orders</p><p class="text-2xl font-bold">${state.orders.length}</p></div></div><div class="grid grid-cols-1 xl:grid-cols-3 gap-6"><section class="border rounded-xl p-4"><h2 class="text-lg font-bold mb-3">Add New Mall</h2><form id="add-mall" class="space-y-3"><input id="mall-name" placeholder="Mall name" required /><input id="mall-location" placeholder="Area, City" required /><input id="mall-image" placeholder="Image URL" required /><input id="mall-floors" type="number" min="1" placeholder="Floors" /><button type="submit" class="rounded-lg bg-primary px-4 py-2 text-white">Create Mall</button></form></section><section class="border rounded-xl p-4"><h2 class="text-lg font-bold mb-3">Add Store</h2><form id="add-store" class="space-y-3"><select id="store-mall">${data.malls.map((m) => `<option value="${m.id}">${m.name}</option>`).join('')}</select><input id="store-name" placeholder="Store name" required /><input id="store-category" placeholder="Category" required /><input id="store-floor" placeholder="Floor" /><input id="store-image" placeholder="Image URL" required /><button type="submit" class="rounded-lg bg-primary px-4 py-2 text-white">Create Store</button></form></section><section class="border rounded-xl p-4"><h2 class="text-lg font-bold mb-3">Assign Store Manager</h2><form id="add-mgr" class="space-y-3"><input id="mgr-name" placeholder="Manager name" required /><input id="mgr-email" type="email" placeholder="manager@mall.com" required /><select id="mgr-mall">${data.malls.map((m) => `<option value="${m.id}">${m.name}</option>`).join('')}</select><select id="mgr-store">${data.stores.map((s) => `<option value="${s.id}">${s.name}</option>`).join('')}</select><button type="submit" class="rounded-lg bg-primary px-4 py-2 text-white">Assign Manager</button></form></section></div></div>
   `;
@@ -2557,7 +4764,7 @@ function renderAdminDashboardLocal(data) {
   });
 }
 
-async function renderAdminDashboardSupabase() {
+async function renderAdminDashboardLegacyRemote() {
   const container = el('dashboard-container');
   if (!container) return;
   const client = supa();
@@ -2717,7 +4924,7 @@ async function renderAdminDashboardSupabase() {
     });
     if (error) return toast(error.message, { type: 'bad', title: 'Admin' });
     toast('Mall created.', { type: 'ok', title: 'Admin' });
-    renderAdminDashboardSupabase();
+    renderAdminDashboardLegacyRemote();
   });
 
   el('sb-add-store')?.addEventListener('submit', async (e) => {
@@ -2734,7 +4941,7 @@ async function renderAdminDashboardSupabase() {
     });
     if (error) return toast(error.message, { type: 'bad', title: 'Admin' });
     toast('Store created.', { type: 'ok', title: 'Admin' });
-    renderAdminDashboardSupabase();
+    renderAdminDashboardLegacyRemote();
   });
 
   el('sb-add-product')?.addEventListener('submit', async (e) => {
@@ -2752,10 +4959,10 @@ async function renderAdminDashboardSupabase() {
     });
     if (error) return toast(error.message, { type: 'bad', title: 'Admin' });
     toast('Product created.', { type: 'ok', title: 'Admin' });
-    renderAdminDashboardSupabase();
+    renderAdminDashboardLegacyRemote();
   });
 
-  el('sb-refresh-tickets')?.addEventListener('click', () => renderAdminDashboardSupabase());
+  el('sb-refresh-tickets')?.addEventListener('click', () => renderAdminDashboardLegacyRemote());
 
   container.querySelectorAll('[data-ticket-status]').forEach((sel) => sel.addEventListener('change', async () => {
     const id = String(sel.getAttribute('data-ticket-status') || '');
@@ -2768,7 +4975,7 @@ async function renderAdminDashboardSupabase() {
     const { error } = await client.from('support_tickets').update({ status: next }).eq('id', id);
     if (error) return toast(error.message, { type: 'bad', title: 'Support' });
     toast('Ticket updated.', { type: 'ok', title: 'Support' });
-    renderAdminDashboardSupabase();
+    renderAdminDashboardLegacyRemote();
   }));
 
   container.querySelectorAll('.sb-resolve-btn').forEach((b) => b.addEventListener('click', async () => {
@@ -2776,7 +4983,7 @@ async function renderAdminDashboardSupabase() {
     const { error } = await client.from('support_tickets').update({ status: 'resolved' }).eq('id', id);
     if (error) return toast(error.message, { type: 'bad', title: 'Support' });
     toast('Ticket resolved.', { type: 'ok', title: 'Support' });
-    renderAdminDashboardSupabase();
+    renderAdminDashboardLegacyRemote();
   }));
 
   container.querySelectorAll('.sb-refund-btn').forEach((b) => b.addEventListener('click', async () => {
@@ -2784,7 +4991,7 @@ async function renderAdminDashboardSupabase() {
     const orderId = String(b.getAttribute('data-order') || '');
     const pct = Number(container.querySelector(`[data-refund-pct="${ticketId}"]`)?.value || 100);
     if (!orderId) return toast('Missing order id on ticket.', { type: 'bad', title: 'Refund' });
-    const functionsBase = window.MM_SUPABASE?.functionsBaseUrl?.() || '';
+    const functionsBase = '';
     if (!functionsBase) return toast('Missing functions URL.', { type: 'bad', title: 'Refund' });
     const { data } = await client.auth.getSession();
     const token = data?.session?.access_token || '';
@@ -2799,11 +5006,11 @@ async function renderAdminDashboardSupabase() {
     const json = await resp.json().catch(() => ({}));
     if (!resp.ok) return toast(json?.error || 'Refund failed.', { type: 'bad', title: 'Refund' });
     toast(`Refund started: ${json.amount_inr} INR`, { type: 'ok', title: 'Refund' });
-    renderAdminDashboardSupabase();
+    renderAdminDashboardLegacyRemote();
   }));
 }
 
-async function renderStoreDashboardSupabase() {
+async function renderStoreDashboardLegacyRemote() {
   const container = el('dashboard-container');
   if (!container) return;
   const client = supa();
@@ -2863,7 +5070,7 @@ async function renderStoreDashboardSupabase() {
     const { error } = await client.from('inventory').upsert({ product_id: pid, available_qty: next, reserved_qty: 0 });
     if (error) return toast(error.message, { type: 'bad', title: 'Inventory' });
     toast('Inventory updated.', { type: 'ok', title: 'Inventory' });
-    renderStoreDashboardSupabase();
+    renderStoreDashboardLegacyRemote();
   });
 }
 
@@ -2884,37 +5091,40 @@ async function renderScanReceiptPage() {
   const container = el('scan-receipt-container');
   if (!container) return;
 
-  const client = supa();
-  if (!client) {
-    container.innerHTML = '<div class="rounded-2xl border border-border bg-card p-5"><p class="font-semibold">Supabase not configured</p><p class="text-sm text-muted-foreground mt-1">Set keys in <code>assets/js/config.js</code> to enable Scan&Go receipts.</p></div>';
+  const params = new URLSearchParams(location.search);
+  const token = params.get('token') || '';
+  const paymentSessionId = params.get('session_id') || '';
+  if (!window.MM_API?.hasApi?.()) {
+    container.innerHTML = '<div class="rounded-2xl border border-border bg-card p-5"><p class="font-semibold">Backend API not configured</p><p class="text-sm text-muted-foreground mt-1">Set API_BASE_URL in assets/js/config.js and start the Node backend.</p></div>';
     return;
   }
 
-  const { data: userData } = await client.auth.getUser();
-  if (!userData?.user) {
-    container.innerHTML = '<div class="rounded-2xl border border-border bg-card p-5"><p class="font-semibold">Please sign in</p><p class="text-sm text-muted-foreground mt-1">Login is required to view your receipt.</p><a href="login.html" class="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-white font-semibold">Login</a></div>';
+  if (!window.MM_API?.token?.()) {
+    const next = `scan-receipt.html${location.search || ''}`;
+    container.innerHTML = `<div class="rounded-2xl border border-border bg-card p-5"><p class="font-semibold">Please sign in</p><p class="text-sm text-muted-foreground mt-1">Login is required to view your receipt.</p><a href="login.html?next=${encodeURIComponent(next)}" class="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-white font-semibold">Login</a></div>`;
     return;
   }
 
-  const stripeSessionId = new URLSearchParams(location.search).get('session_id') || '';
-  if (!stripeSessionId) {
-    container.innerHTML = '<div class="rounded-2xl border border-border bg-card p-5"><p class="font-semibold">Missing session</p><p class="text-sm text-muted-foreground mt-1">Open this page from the payment success redirect.</p></div>';
+  if (!token && !paymentSessionId) {
+    container.innerHTML = '<div class="rounded-2xl border border-border bg-card p-5"><p class="font-semibold">Missing receipt token</p><p class="text-sm text-muted-foreground mt-1">Open this page from the Scan & Go checkout redirect.</p></div>';
     return;
   }
 
-  const { data: receipt } = await client
-    .from('scan_receipts')
-    .select('id, token, total_inr, created_at, verified_at')
-    .eq('stripe_checkout_session_id', stripeSessionId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  let receipt = null;
+  try {
+    const response = await window.MM_API.scanReceipt({ token, session_id: paymentSessionId });
+    receipt = response.receipt;
+  } catch (error) {
+    receipt = null;
+    container.dataset.receiptError = error.message || 'If you just paid, wait a few seconds and refresh.';
+  }
 
   if (!receipt?.token) {
+    const message = container.dataset.receiptError || 'If you just paid, wait a few seconds and refresh.';
     container.innerHTML = `
       <div class="rounded-2xl border border-border bg-card p-5">
         <p class="font-semibold">Receipt is being generated…</p>
-        <p class="text-sm text-muted-foreground mt-1">If you just paid, wait a few seconds and refresh.</p>
+        <p class="text-sm text-muted-foreground mt-1">${escapeHtml(message)}</p>
         <button id="sr-refresh" class="mt-4 rounded-lg border px-4 py-2 font-semibold">Refresh</button>
       </div>
     `;
@@ -2924,6 +5134,7 @@ async function renderScanReceiptPage() {
 
   const base = location.href.replace(/[#?].*$/, '').replace(/scan-receipt\.html$/, '');
   const verifyUrl = `${base}verify-receipt.html?token=${encodeURIComponent(receipt.token)}`;
+  const receiptItems = Array.isArray(receipt.items) ? receipt.items : [];
 
   container.innerHTML = `
     <div class="rounded-2xl border border-border bg-card p-5 shadow-card max-w-xl">
@@ -2932,9 +5143,18 @@ async function renderScanReceiptPage() {
           <p class="text-xs text-muted-foreground">Receipt Token</p>
             <p class="font-mono text-sm mt-1 break-all">${escapeHtml(receipt.token)}</p>
           <p class="mt-3 text-lg font-extrabold">Total ${money(receipt.total_inr || 0)}</p>
+          <p class="text-xs text-muted-foreground mt-1">${escapeHtml(receipt.status || 'paid')} - ${receipt.created_at ? new Date(receipt.created_at).toLocaleString() : 'just now'}</p>
           <p class="text-xs text-muted-foreground mt-1">${receipt.verified_at ? 'Verified at exit' : 'Not verified yet'}</p>
         </div>
         <canvas id="mm-receipt-qr" class="h-[240px] w-[240px] rounded-xl border border-border bg-white p-2"></canvas>
+      </div>
+      <div class="mt-4 rounded-xl border border-border bg-muted/40 p-3">
+        ${receiptItems.length ? receiptItems.slice(0, 6).map((item) => `
+          <div class="flex items-center justify-between gap-3 py-2 text-sm">
+            <span class="min-w-0 truncate">${escapeHtml(item.name || item.code || 'Scanned item')} x ${Number(item.qty || 1)}</span>
+            <span class="font-semibold">${money(Math.round(Number(item.lineTotalPaise || 0) / 100))}</span>
+          </div>
+        `).join('') : '<p class="text-sm text-muted-foreground">Receipt item details are stored in the backend.</p>'}
       </div>
       <div class="mt-4 flex flex-wrap gap-2">
         <a class="rounded-lg bg-primary px-4 py-2 text-white font-semibold" href="scan.html">Back to Scan</a>
@@ -2959,22 +5179,12 @@ async function renderVerifyReceiptPage() {
   const result = el('vr-result');
   if (!startBtn || !video || !status || !tokenInput || !verifyBtn || !result) return;
 
-  const client = supa();
-  if (!client) {
-    result.innerHTML = '<div class="rounded-xl border border-border bg-muted p-4 text-sm">Supabase not configured.</div>';
+  if (!window.MM_API?.hasApi?.()) {
+    result.innerHTML = '<div class="rounded-xl border border-border bg-muted p-4 text-sm">Backend API not configured. Set API_BASE_URL and start the backend.</div>';
     return;
   }
-
-  const { data: userData } = await client.auth.getUser();
-  if (!userData?.user) {
-    result.innerHTML = '<div class="rounded-xl border border-border bg-muted p-4 text-sm">Please login as staff/admin to verify.</div><a class="inline-flex mt-3 rounded-lg bg-primary px-4 py-2 text-white font-semibold" href="login.html">Login</a>';
-    return;
-  }
-
-  const { data: roleRow } = await client.from('user_roles').select('role').eq('user_id', userData.user.id).maybeSingle();
-  const role = String(roleRow?.role || '');
-  if (!['store_manager', 'admin'].includes(role)) {
-    result.innerHTML = '<div class="rounded-xl border border-border bg-muted p-4 text-sm">Your account is not staff/admin. Ask admin to set your role in <code>user_roles</code>.</div>';
+  if (!window.MM_API?.token?.()) {
+    result.innerHTML = `<div class="rounded-xl border border-border bg-muted p-4 text-sm">Please login as staff/admin to verify receipts.</div><a class="inline-flex mt-3 rounded-lg bg-primary px-4 py-2 text-white font-semibold" href="login.html?next=${encodeURIComponent(`verify-receipt.html${location.search || ''}`)}">Login</a>`;
     return;
   }
 
@@ -2984,59 +5194,25 @@ async function renderVerifyReceiptPage() {
   async function verifyToken(token) {
     const t = String(token || '').trim();
     if (!t) return toast('Missing token', { type: 'bad', title: 'Verify' });
-
-    const { data: row } = await client
-      .from('scan_receipts')
-      .select('id, total_inr, created_at, verified_at, verified_by')
-      .eq('token', t)
-      .limit(1)
-      .maybeSingle();
-
-    if (!row?.id) {
-      result.innerHTML = '<div class="rounded-xl border border-border bg-muted p-4 text-sm">Receipt not found.</div>';
-      return;
-    }
-
-    if (row.verified_at) {
+    verifyBtn.disabled = true;
+    try {
+      const response = await window.MM_API.verifyScanReceipt({ token: t });
+      const receipt = response.receipt || {};
       result.innerHTML = `
         <div class="rounded-xl border border-border bg-muted p-4 text-sm">
-          <p class="font-semibold">Already verified</p>
-          <p class="mt-1 text-muted-foreground">Total ${money(row.total_inr || 0)}</p>
-          <p class="mt-1 text-xs text-muted-foreground">Verified at ${new Date(row.verified_at).toLocaleString()}</p>
+          <p class="font-semibold">Receipt verified</p>
+          <p class="mt-1 text-muted-foreground">Total ${money(receipt.total_inr || 0)}</p>
+          <p class="mt-1 text-xs text-muted-foreground">Token ${escapeHtml(receipt.token || t)}</p>
+          <p class="mt-1 text-xs text-muted-foreground">Verified at ${receipt.verified_at ? new Date(receipt.verified_at).toLocaleString() : new Date().toLocaleString()}</p>
         </div>
       `;
-      toast('Already verified', { type: 'ok', title: 'Verify' });
-      return;
+      toast('Receipt verified', { type: 'ok', title: 'Verify' });
+    } catch (error) {
+      result.innerHTML = `<div class="rounded-xl border border-border bg-muted p-4 text-sm">${escapeHtml(error.message || 'Receipt not found.')}</div>`;
+      toast(error.message || 'Receipt not found.', { type: 'bad', title: 'Verify' });
+    } finally {
+      verifyBtn.disabled = false;
     }
-
-    // Prevent double-verify races: only update when verified_at is still null
-    const { data: updated, error } = await client
-      .from('scan_receipts')
-      .update({ verified_at: new Date().toISOString(), verified_by: userData.user.id })
-      .eq('id', row.id)
-      .is('verified_at', null)
-      .select('id, total_inr, verified_at')
-      .maybeSingle();
-
-    if (error) {
-      toast(error.message, { type: 'bad', title: 'Verify' });
-      return;
-    }
-
-    if (!updated?.id) {
-      // Someone else verified it between read and update.
-      toast('Already verified', { type: 'ok', title: 'Verify' });
-      return verifyToken(t);
-    }
-
-    result.innerHTML = `
-      <div class="rounded-xl border border-border bg-muted p-4 text-sm">
-        <p class="font-semibold">Verified</p>
-        <p class="mt-1 text-muted-foreground">Total ${money(updated.total_inr || 0)}</p>
-        <p class="mt-1 text-xs text-muted-foreground">Verified at ${new Date(updated.verified_at).toLocaleString()}</p>
-      </div>
-    `;
-    toast('Receipt verified', { type: 'ok', title: 'Verify' });
   }
 
   verifyBtn.addEventListener('click', () => verifyToken(tokenInput.value));
@@ -3091,6 +5267,40 @@ async function renderOrderDetailPage() {
     return;
   }
 
+  if (window.MM_API?.token?.()) {
+    container.innerHTML = loadingState({ title: 'Loading order...' });
+    try {
+      const data = await window.MM_API.order(orderId);
+      const apiOrder = data.order || {};
+      const localLike = {
+        id: apiOrder.id,
+        date: apiOrder.created_at || new Date().toISOString(),
+        status: apiOrder.status || apiOrder.payment_status || 'paid',
+        total: window.MM_API.moneyPaiseToRupees(apiOrder.totals?.totalPaise || apiOrder.total_paise || 0),
+        trackingId: apiOrder.delivery?.id || apiOrder.delivery_job_id || apiOrder.razorpay_payment_id || '-',
+        paymentMethod: 'Razorpay',
+        delivery: apiOrder.delivery || null,
+        events: data.events || [],
+        fees: apiOrder.totals || null,
+        items: (apiOrder.items || []).map((item) => ({
+          id: item.product_id || item.id || item.name,
+          name: item.name || 'Product',
+          price: window.MM_API.moneyPaiseToRupees(item.unit_amount_paise || 0),
+          quantity: item.qty || item.quantity || 1,
+          storeId: item.store_id || ''
+        }))
+      };
+      state.orders = [localLike, ...state.orders.filter((x) => String(x.id) !== String(localLike.id))];
+      persist();
+    } catch (error) {
+      const cached = state.orders.find((x) => String(x.id) === String(orderId));
+      if (!cached) {
+        container.innerHTML = emptyState({ title: 'Order not found', subtitle: error.message || 'This order may not exist or you may not have access.' });
+        return;
+      }
+    }
+  }
+
   const client = supa();
   if (!client) {
     const o = state.orders.find((x) => String(x.id) === String(orderId));
@@ -3118,6 +5328,17 @@ async function renderOrderDetailPage() {
             <a href="support.html?order_id=${encodeURIComponent(String(o.id))}&type=refund" class="mm-action mm-action-primary">Get help</a>
           </div>
         </div>
+        ${o.delivery ? `
+          <div class="mm-card mm-card-pad">
+            <p class="font-extrabold mb-3">Delivery</p>
+            <div class="rounded-xl border border-border p-3 text-sm">
+              <p><b>Tracking:</b> <span class="font-mono">${escapeHtml(String(o.delivery.id || o.trackingId || '-'))}</span></p>
+              <p><b>Status:</b> ${escapeHtml(String(o.delivery.status || o.status || '-'))}</p>
+              <p><b>Provider:</b> ${escapeHtml(String(o.delivery.provider || 'manual_ops'))}</p>
+              <p><b>ETA:</b> ${o.delivery.estimated_minutes || o.delivery.eta_minutes ? `${Number(o.delivery.estimated_minutes || o.delivery.eta_minutes)} min` : '-'}</p>
+            </div>
+          </div>
+        ` : ''}
         <div class="mm-card mm-card-pad">
           <p class="font-extrabold mb-3">Items</p>
           <div class="space-y-2">
@@ -3136,6 +5357,22 @@ async function renderOrderDetailPage() {
             <p class="font-extrabold">${money(o.total || 0)}</p>
           </div>
         </div>
+        ${Array.isArray(o.events) && o.events.length ? `
+          <div class="mm-card mm-card-pad">
+            <p class="font-extrabold mb-3">Timeline</p>
+            <div class="space-y-2">
+              ${o.events.map((ev) => `
+                <div class="rounded-xl border border-border p-3 text-sm">
+                  <div class="flex items-start justify-between gap-3">
+                    <p class="font-semibold">${escapeHtml(String(ev.event || '').replace(/_/g, ' '))}</p>
+                    <p class="text-xs text-muted-foreground">${ev.created_at ? new Date(ev.created_at).toLocaleString() : ''}</p>
+                  </div>
+                  ${ev.payload ? `<pre class="mt-2 text-xs overflow-auto bg-white border border-border rounded-lg p-2">${escapeHtml(JSON.stringify(ev.payload, null, 2))}</pre>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
     el('od-reorder')?.addEventListener('click', () => {
@@ -3238,7 +5475,7 @@ async function renderOrderDetailPage() {
   el('od-reorder')?.addEventListener('click', () => {
     const its = Array.isArray(items) ? items : [];
     if (!its.length) return toast('No items to reorder.', { type: 'bad', title: 'Reorder' });
-    // Add items to cart by name/price (product_id not required for checkout fallback; Stripe checkout uses name/amount)
+    // Add items to cart by name/price for checkout fallback; backend verifies final totals.
     for (const it of its) {
       const id = String(it.product_id || it.name || `custom-${Math.random().toString(36).slice(2, 9)}`);
       const existing = state.cart.find((x) => String(x.id) === id);
@@ -3255,16 +5492,7 @@ async function renderOrderDetailPage() {
 async function renderSupportCenter() {
   const container = el('support-container');
   if (!container) return;
-  const client = supa();
-  if (!client) {
-    container.innerHTML = emptyState({
-      title: 'Support requires Supabase',
-      subtitle: 'Configure Supabase to see your tickets and statuses.'
-    });
-    return;
-  }
-  const user = await supaSessionUser();
-  if (!user) return (window.location.href = 'login.html');
+  if (!window.MM_API?.token?.()) return (window.location.href = 'login.html');
 
   container.innerHTML = loadingState({ title: 'Loading your tickets…' });
 
@@ -3273,11 +5501,16 @@ async function renderSupportCenter() {
   const prefillType = String(qp.get('type') || '').trim();
   const prefillMsg = String(qp.get('msg') || '').trim();
 
-  const { data: tickets } = await client
-    .from('support_tickets')
-    .select('id, created_at, status, type, refund_percent, message, order_id')
-    .order('created_at', { ascending: false })
-    .limit(100);
+  let tickets = [];
+  try {
+    tickets = (await window.MM_API.supportTickets()).tickets || [];
+  } catch (error) {
+    container.innerHTML = emptyState({
+      title: 'Support unavailable',
+      subtitle: error.message || 'Start the backend API and try again.'
+    });
+    return;
+  }
 
   const badge = (s) => {
     const st = String(s || 'open');
@@ -3432,50 +5665,49 @@ async function renderSupportCenter() {
     if (!msg) return toast('Please enter a message.', { type: 'bad', title: 'Support' });
 
     const payload = {
-      user_id: user.id,
       order_id: orderId,
       type,
       refund_percent: refundPct,
-      message: msg,
-      status: 'open'
+      message: msg
     };
 
-    const { error } = await client.from('support_tickets').insert(payload);
-    if (error) return toast(error.message, { type: 'bad', title: 'Support' });
-    toast('Ticket submitted.', { type: 'ok', title: 'Support', ms: 1400 });
-    // Clean URL prefill params after submit
     try {
-      const u = new URL(location.href);
-      u.searchParams.delete('order_id');
-      u.searchParams.delete('type');
-      u.searchParams.delete('msg');
-      history.replaceState({}, '', u.toString());
-    } catch {}
-    await renderSupportCenter();
+      await window.MM_API.createSupportTicket(payload);
+      toast('Ticket submitted.', { type: 'ok', title: 'Support', ms: 1400 });
+      // Clean URL prefill params after submit
+      try {
+        const u = new URL(location.href);
+        u.searchParams.delete('order_id');
+        u.searchParams.delete('type');
+        u.searchParams.delete('msg');
+        history.replaceState({}, '', u.toString());
+      } catch {}
+      await renderSupportCenter();
+    } catch (error) {
+      toast(error.message || String(error), { type: 'bad', title: 'Support' });
+    }
   });
 }
 
 async function renderNotificationsPage() {
   const container = el('notif-container');
   if (!container) return;
-  const client = supa();
-  if (!client) {
-    container.innerHTML = emptyState({ title: 'Notifications need Supabase', subtitle: 'Configure Supabase to receive realtime updates.' });
-    return;
-  }
-  const user = await supaSessionUser();
-  if (!user) return (window.location.href = 'login.html');
+  if (!window.MM_API?.token?.()) return (window.location.href = 'login.html');
 
   container.innerHTML = loadingState({ title: 'Loading updates…' });
 
-  const [eventsRes, receiptsRes, ticketsRes] = await Promise.all([
-    client.from('order_events').select('id, order_id, event, payload, created_at').order('created_at', { ascending: false }).limit(40),
-    client.from('scan_receipts').select('id, token, total_inr, created_at, verified_at').order('created_at', { ascending: false }).limit(20),
-    client.from('support_tickets').select('id, order_id, status, type, refund_percent, created_at').order('created_at', { ascending: false }).limit(20)
-  ]);
-  const events = eventsRes?.data || [];
-  const receipts = receiptsRes?.data || [];
-  const tickets = ticketsRes?.data || [];
+  let events = [];
+  let receipts = [];
+  let tickets = [];
+  try {
+    const data = await window.MM_API.notifications();
+    events = data.events || [];
+    receipts = data.receipts || [];
+    tickets = data.tickets || [];
+  } catch (error) {
+    container.innerHTML = emptyState({ title: 'Notifications unavailable', subtitle: error.message || 'Start the backend API and try again.' });
+    return;
+  }
 
   if (!events.length && !receipts.length && !tickets.length) {
     container.innerHTML = emptyState({ title: 'No notifications yet', subtitle: 'Once you place orders or use Scan&Go, updates will show here.', href: 'products.html', cta: 'Start shopping', icon: icon('bell') });
@@ -3629,6 +5861,12 @@ function showConfigBanner(msg, actionHref, actionText) {
     `;
     document.body.appendChild(n);
     document.getElementById('mm-config-dismiss')?.addEventListener('click', () => n.remove());
+    document.getElementById('mm-config-dismiss')?.addEventListener('click', () => {
+      try {
+        document.documentElement.style.scrollPaddingTop = '';
+        document.body.style.paddingTop = '';
+      } catch {}
+    });
     // Avoid covering the header
     document.documentElement.style.scrollPaddingTop = '56px';
     document.body.style.paddingTop = '56px';
@@ -3688,6 +5926,10 @@ function initPwaUx() {
 }
 
 async function init() {
+  if (!state.location) {
+    state.location = 'Hyderabad';
+    write(STORAGE_KEYS.location, state.location);
+  }
   renderNavbar();
   
 
@@ -3701,28 +5943,24 @@ async function init() {
   } catch {}
   initPwaUx();
 
-  await trySyncAuthFromSupabase();
-  await ensureProfile();
+  // Legacy external DB auth has been removed from the active app path. OTP/session state comes from MM_API.
 
   // Location modal intentionally disabled.
 
   const file = location.pathname.split('/').pop() || 'index.html';
   // Light prefetching of key pages
   try {
-    if (file === 'index.html') prefetchPages(['products.html', 'malls.html', 'scan.html', 'compare.html']);
+      if (file === 'index.html') prefetchPages(['products.html', 'scan.html', 'compare.html', 'autoshelf.html']);
     if (file === 'products.html') prefetchPages(['product.html', 'cart.html', 'compare.html']);
     if (file === 'product.html') prefetchPages(['cart.html', 'compare.html']);
     if (file === 'orders.html') prefetchPages(['order.html', 'support.html', 'notifications.html']);
+    if (file === 'autoshelf.html') prefetchPages(['products.html', 'store-dashboard.html', 'admin-dashboard.html']);
   } catch {}
   // Friendly config guardrails
   try {
-    const cfg = window.MM_CONFIG || {};
-    const supaOk = String(cfg.SUPABASE_URL || '').trim() && String(cfg.SUPABASE_ANON_KEY || '').trim();
-    const stripeOk = String(cfg.STRIPE_PUBLISHABLE_KEY || '').trim();
-    const needsSupa = ['orders.html', 'order.html', 'support.html', 'scan-receipt.html', 'verify-receipt.html', 'admin-dashboard.html', 'store-dashboard.html'].includes(file);
-    const needsStripe = ['cart.html', 'scan.html'].includes(file);
-    if (needsSupa && !supaOk) showConfigBanner('Supabase is not configured (auth/orders/receipts will not work).', 'README.md', 'Open README');
-    if (needsStripe && !stripeOk) showConfigBanner('Stripe key missing (real payments disabled).', 'README.md', 'Open README');
+    const apiOk = Boolean(window.MM_API?.hasApi?.());
+    const needsApi = ['login.html', 'cart.html', 'orders.html', 'order.html', 'support.html', 'notifications.html', 'scan-receipt.html', 'verify-receipt.html', 'admin-dashboard.html', 'store-dashboard.html'].includes(file);
+    if (needsApi && !apiOk) showConfigBanner('Backend API is not configured. Start backend/server.js or set API_BASE_URL.', 'backend/README.md', 'Backend notes');
   } catch {}
   if (file === 'index.html' || file === 'dashboard.html') renderIndex(window.appData);
   else if (file === 'malls.html') renderMalls(window.appData);
@@ -3744,6 +5982,10 @@ async function init() {
   else if (file === 'queue.html') renderQueue(window.appData);
   else if (file === 'store-dashboard.html') renderStoreDashboard(window.appData);
   else if (file === 'admin-dashboard.html') renderAdminDashboard(window.appData);
+  else if (file === 'register-store.html') window.MM_Marketplace?.renderRegisterStorePage?.();
+  else if (file === 'autoshelf.html') {
+    // Legacy Connect OS renderer is kept above for later reuse; autoshelf.html owns the Local Stores page.
+  }
   else if (file === 'walkthrough.html') renderWalkthrough(window.appData);
   else if (file === 'scan-receipt.html') await renderScanReceiptPage();
   else if (file === 'verify-receipt.html') await renderVerifyReceiptPage();
@@ -3756,6 +5998,15 @@ async function init() {
     if (!product) return toast('Product not available in selected location.', { type: 'bad' });
     if (!product.inStock) return toast('Out of stock.', { type: 'bad' });
     addToCart(product);
+    const label = b.querySelector('span');
+    const oldText = label ? label.textContent : '';
+    b.classList.add('added');
+    b.setAttribute('aria-live', 'polite');
+    if (label) label.textContent = 'Added';
+    window.setTimeout(() => {
+      b.classList.remove('added');
+      if (label) label.textContent = oldText || 'Add to Cart';
+    }, 1200);
     toast('Added to cart', { type: 'ok', title: 'Cart' });
   });
 
@@ -3779,7 +6030,3 @@ async function init() {
 }
 
 init();
-
-
-
-

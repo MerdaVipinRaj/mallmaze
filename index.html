@@ -1,13 +1,37 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="India's #1 Smart Mall Platform - Shop from real malls online with real-time inventory, price matching, and express delivery." />
-    <title>MallMaze - India's #1 Smart Mall Platform</title>
-    <meta property="og:title" content="MallMaze - Your City's Malls, One Platform" />
-    <meta property="og:description" content="Browse malls, compare prices, reserve items, and get fast delivery. Scan&Go in-store with QR receipts." />
+    <meta name="description" content="Shop from verified local stores near you. Compare products, order delivery, use Scan&Go receipts, and register your store on MallMaze." />
+    <title>MallMaze - Local Stores, Delivery, and Scan&Go</title>
+    <link rel="canonical" href="/" />
+    <meta property="og:title" content="MallMaze - Local Stores Near You" />
+    <meta property="og:description" content="Discover local stores, compare products, order delivery, and register your shop on MallMaze." />
     <meta property="og:type" content="website" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "MallMaze",
+        "description": "Local store marketplace for product search, delivery orders, Scan&Go receipts, and store registration.",
+        "url": "/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "/products.html?search={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "MallMaze",
+        "url": "/",
+        "sameAs": []
+      }
+    </script>
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <link rel="stylesheet" href="assets/css/react-styles.css">
   </head>
@@ -24,12 +48,12 @@
       <div class="container relative mx-auto px-4 py-28 md:py-32 lg:py-36">
         <div class="mx-auto max-w-5xl text-center">
           <h1 class="mb-6 text-5xl md:text-7xl lg:text-8xl font-display font-extrabold leading-tight text-white">
-            <span class="block">Your City's Malls,</span>
+            <span class="block">Local Stores,</span>
             <span class="block text-amber-400">One Platform.</span>
           </h1>
-          <p class="mx-auto max-w-2xl text-white/80 text-lg md:text-xl mb-8">Browse malls, compare prices, reserve items, and get them delivered in minutes.</p>
+          <p class="mx-auto max-w-2xl text-white/80 text-lg md:text-xl mb-8">Shop from verified local stores in your city. Smart search finds the best size, fit, color and price — reserve at the store or get fast delivery.</p>
           <form class="mx-auto max-w-3xl flex items-center gap-3 rounded-full bg-white/10 border border-white/20 px-4 py-3 backdrop-blur-md shadow-md" role="search">
-            <input type="text" id="search-hero" placeholder='Search malls and products...' class="flex-1 bg-transparent border-none text-white placeholder:text-white/60 focus:outline-none px-3 text-lg" />
+            <input type="text" id="search-hero" placeholder="Try: blue blazer, gym equipment, running shoes..." class="flex-1 bg-transparent border-none text-white placeholder:text-white/60 focus:outline-none px-3 text-lg" />
             <button type="submit" class="ml-2 rounded-full bg-amber-400 px-6 py-2 text-sm font-semibold text-slate-900 shadow hover:opacity-95">Search</button>
           </form>
         </div>
@@ -45,8 +69,8 @@
             </div>
             <div class="min-w-0">
               <p class="font-extrabold">Fast delivery</p>
-              <p class="text-sm text-muted-foreground mt-1">From nearby malls with live tracking.</p>
-              <p class="text-sm font-semibold text-primary mt-2">Shop now →</p>
+              <p class="text-sm text-muted-foreground mt-1">From nearby local stores with live tracking.</p>
+              <p class="text-sm font-semibold text-primary mt-2">Shop now -></p>
             </div>
           </a>
 
@@ -57,7 +81,7 @@
             <div class="min-w-0">
               <p class="font-extrabold">Reserve &amp; try</p>
               <p class="text-sm text-muted-foreground mt-1">Hold items before visiting the store.</p>
-              <p class="text-sm font-semibold text-primary mt-2">Reserve →</p>
+              <p class="text-sm font-semibold text-primary mt-2">Reserve -></p>
             </div>
           </a>
 
@@ -68,7 +92,7 @@
             <div class="min-w-0">
               <p class="font-extrabold">Scan&amp;Go</p>
               <p class="text-sm text-muted-foreground mt-1">Scan, pay, show QR receipt at exit.</p>
-              <p class="text-sm font-semibold text-primary mt-2">Start scanning →</p>
+              <p class="text-sm font-semibold text-primary mt-2">Start scanning -></p>
             </div>
           </a>
 
@@ -79,7 +103,7 @@
             <div class="min-w-0">
               <p class="font-extrabold">Compare prices</p>
               <p class="text-sm text-muted-foreground mt-1">Find the best value across stores.</p>
-              <p class="text-sm font-semibold text-primary mt-2">Compare →</p>
+              <p class="text-sm font-semibold text-primary mt-2">Compare -></p>
             </div>
           </a>
         </div>
@@ -92,7 +116,7 @@
               <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Trending now</h2>
               <p class="section-subheading mt-1">Quick picks that open filtered results.</p>
             </div>
-            <a href="products.html" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-amber-600 hover:underline">All products <span aria-hidden="true">→</span></a>
+            <a href="products.html" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-amber-600 hover:underline">All products <span aria-hidden="true">-></span></a>
           </div>
           <div class="mt-4 flex gap-2 overflow-x-auto pb-1">
             <a href="products.html?category=Fashion" class="shrink-0 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">Fashion</a>
@@ -105,13 +129,14 @@
           </div>
         </div>
 
+        <!-- Mall discovery parked for the first launch phase.
         <section class="mb-10">
           <div class="flex items-end justify-between gap-4 mb-4">
             <div>
               <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Top malls</h2>
               <p class="section-subheading mt-1">Tap to explore stores and deals.</p>
             </div>
-            <a href="malls.html" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-amber-600 hover:underline">View all <span aria-hidden="true">→</span></a>
+            <a href="malls.html" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-amber-600 hover:underline">View all <span aria-hidden="true">-></span></a>
           </div>
           <div id="top-malls-rail" class="flex gap-4 overflow-x-auto pb-2"></div>
         </section>
@@ -125,6 +150,29 @@
         </div>
         <div id="malls-near-list" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"></div>
       </section>
+        -->
+
+      <section class="container mx-auto px-4 py-10">
+        <div class="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Local stores near you</h2>
+            <p class="section-subheading mt-1">Verified stores, direct storefronts, QR shopping, and delivery-ready products.</p>
+          </div>
+          <a href="autoshelf.html" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">Create store <span aria-hidden="true">-></span></a>
+        </div>
+        <div id="smartmall-stores-list" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"></div>
+      </section>
+
+      <section class="container mx-auto px-4 py-10">
+        <div class="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Recommended from local stores</h2>
+            <p class="section-subheading mt-1">Popular products, deals, and in-stock picks from store catalogs.</p>
+          </div>
+          <a href="autoshelf.html#stores" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">View stores <span aria-hidden="true">-></span></a>
+        </div>
+        <div id="smartmall-products-list" class="product-grid"></div>
+      </section>
 
       <section class="container mx-auto px-4 py-8 flash-deals-section">
         <div class="mb-5 flex items-center justify-between">
@@ -133,7 +181,7 @@
             <p class="section-subheading mt-2">Ends soon - grab before it's gone!</p>
           </div>
           <a href="deals.html" class="inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">
-            View All <span aria-hidden="true">→</span>
+            View All <span aria-hidden="true">-></span>
           </a>
         </div>
         <div id="flash-deals-list" class="grid gap-4 md:grid-cols-3"></div>
@@ -145,7 +193,7 @@
             <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Top deals</h2>
             <p class="section-subheading mt-1">Best discounts across stores.</p>
           </div>
-          <a href="deals.html" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">View all <span aria-hidden="true">→</span></a>
+          <a href="deals.html" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">View all <span aria-hidden="true">-></span></a>
         </div>
         <div id="top-deals-rail" class="flex gap-4 overflow-x-auto pb-2"></div>
       </section>
@@ -176,7 +224,7 @@
             <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Recently viewed</h2>
             <p class="section-subheading mt-1">Pick up where you left off.</p>
           </div>
-          <a href="products.html" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">Browse <span aria-hidden="true">→</span></a>
+          <a href="products.html" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">Browse <span aria-hidden="true">-></span></a>
         </div>
         <div id="rv-rail" class="flex gap-4 overflow-x-auto pb-2"></div>
       </section>
@@ -188,9 +236,9 @@
               <p class="deal-kicker">LIMITED TIME</p>
               <h3 class="deal-title">Flat 40% Off</h3>
               <p class="deal-subtitle">Fashion & accessories</p>
-              <a href="deals.html" class="deal-cta">Shop Deals <span aria-hidden="true">→</span></a>
+              <a href="deals.html" class="deal-cta">Shop Deals <span aria-hidden="true">-></span></a>
             </div>
-            <div class="deal-bg-icon" aria-hidden="true">🎁</div>
+            <div class="deal-bg-icon" aria-hidden="true">SALE</div>
           </article>
 
           <article class="deal-banner deal-banner-navy">
@@ -198,9 +246,9 @@
               <p class="deal-kicker">IN-STORE</p>
               <h3 class="deal-title">Scan &amp; Go</h3>
               <p class="deal-subtitle">Scan, pay, show QR at exit</p>
-              <a href="scan.html" class="deal-cta">Start Scanning <span aria-hidden="true">→</span></a>
+              <a href="scan.html" class="deal-cta">Start Scanning <span aria-hidden="true">-></span></a>
             </div>
-            <div class="deal-bg-icon" aria-hidden="true">🧾</div>
+            <div class="deal-bg-icon" aria-hidden="true">QR</div>
           </article>
         </div>
       </section>
@@ -214,7 +262,7 @@
         </div>
         <div class="spc-wrap">
           <form id="spc-form" class="spc-form" role="search">
-            <input id="spc-input" list="spc-products" type="text" placeholder='Select a product to compare prices across malls...' class="spc-input" />
+            <input id="spc-input" list="spc-products" type="text" placeholder="Select a product to compare prices across stores..." class="spc-input" />
             <datalist id="spc-products"></datalist>
             <select id="spc-sort" class="spc-sort" aria-label="Sort comparison">
               <option value="value">Best Value</option>
@@ -246,7 +294,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18H3V5a2 2 0 0 1 2-2h9v13"/><path d="M9 18h6"/><path d="M16 18h2a2 2 0 0 0 2-2v-5l-3-5h-3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
               </div>
               <h3 class="mb-2 font-display text-lg font-bold">Express Delivery</h3>
-              <p class="text-sm text-muted-foreground">Products delivered in under 2 hours from any mall near you</p>
+              <p class="text-sm text-muted-foreground">Products delivered from verified local stores near you</p>
             </article>
 
             <article class="why-feature-card rounded-2xl border border-border bg-background p-6 text-center transition-all hover:shadow-card-hover hover:-translate-y-1">
@@ -254,7 +302,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg>
               </div>
               <h3 class="mb-2 font-display text-lg font-bold">100% Genuine</h3>
-              <p class="text-sm text-muted-foreground">Every product verified and sourced from authorized stores</p>
+              <p class="text-sm text-muted-foreground">Every product is linked to a store catalog and stock signal</p>
             </article>
 
             <article class="why-feature-card rounded-2xl border border-border bg-background p-6 text-center transition-all hover:shadow-card-hover hover:-translate-y-1">
@@ -286,15 +334,15 @@
             Own a Store? <span class="partner-title-accent">Partner with Us</span>
           </h2>
           <p class="partner-sub mx-auto mb-8 max-w-lg">
-            Join 2,400+ stores already growing with SmartMall. Digital inventory, analytics, and access to 500K+ shoppers.
+            Create your store page, upload products, accept QR/order payments, and manage stock from one dashboard.
           </p>
           <div class="flex flex-wrap items-center justify-center gap-4">
-            <a href="login.html" class="partner-btn-gold inline-flex items-center gap-2 rounded-xl px-8 py-4 font-bold">
+            <a href="autoshelf.html#stores" class="partner-btn-gold inline-flex items-center gap-2 rounded-xl px-8 py-4 font-bold">
               Register Your Store
-              <span aria-hidden="true">→</span>
+              <span aria-hidden="true">-></span>
             </a>
-            <a href="malls.html" class="partner-btn-outline inline-flex items-center gap-2 rounded-xl px-8 py-4 font-semibold">
-              Explore Malls
+            <a href="products.html" class="partner-btn-outline inline-flex items-center gap-2 rounded-xl px-8 py-4 font-semibold">
+              Browse Products
             </a>
           </div>
         </div>
@@ -306,10 +354,10 @@
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 class="font-display text-lg font-bold text-white">MallMaze</h3>
-            <p class="text-sm text-slate-400 mt-1">Smart mall shopping: delivery + Scan&Go.</p>
+            <p class="text-sm text-slate-400 mt-1">Local store shopping: delivery + Scan&Go.</p>
           </div>
           <div class="flex flex-wrap gap-3 text-sm">
-            <a href="malls.html" class="text-slate-300 hover:text-white">Malls</a>
+            <!-- Malls link parked until mall onboarding begins. -->
             <a href="products.html" class="text-slate-300 hover:text-white">Products</a>
             <a href="deals.html" class="text-slate-300 hover:text-white">Deals</a>
             <a href="scan.html" class="text-slate-300 hover:text-white">Scan&Go</a>
@@ -321,11 +369,9 @@
     </footer>
 
     <script src="assets/js/config.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-    <script src="assets/js/supabase-client.js" defer></script>
+    <script src="assets/js/api-client.js" defer></script>
     <script src="assets/js/runtime-guard.js" defer></script>
-    <script src="assets/js/main.js" defer></script>
+    <script src="assets/js/marketplace.js" defer></script>
+    <script src="assets/js/main.js?v=marketplace-20260614" defer></script>
   </body>
 </html>
-
-

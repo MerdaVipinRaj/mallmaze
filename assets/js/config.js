@@ -1,13 +1,17 @@
 // Public (client-side) config.
-// - Supabase ANON key is safe to expose in frontend code.
-// - NEVER put Stripe secret keys or Supabase service role keys here.
+// Do not put private API secrets here. Razorpay secret, OTP provider secrets,
+// delivery partner secrets, and database credentials belong only on backend.
 window.MM_CONFIG = {
-  SUPABASE_URL: "",
-  SUPABASE_ANON_KEY: "",
-  STRIPE_PUBLISHABLE_KEY: "",
+  API_BASE_URL: (() => {
+    const host = window.location.hostname;
+    const port = window.location.port;
+    if (!host || ((host === "localhost" || host === "127.0.0.1" || host === "::1") && (port === "8080" || port === "5500" || !port))) {
+      return "http://localhost:4000/api";
+    }
+    return `${window.location.origin}/api`;
+  })(),
+  RAZORPAY_KEY_ID: "",
 
-  // Supabase Edge Function base URL (optional; derived from SUPABASE_URL if blank)
-  // Example: https://<project-ref>.functions.supabase.co
-  SUPABASE_FUNCTIONS_URL: ""
+  // Dev fallback keeps static previews usable while the backend is starting.
+  ENABLE_LOCAL_FALLBACKS: true
 };
-

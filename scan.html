@@ -12,19 +12,70 @@
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <link rel="stylesheet" href="assets/css/react-styles.css">
     <style>
-      .scan-video { width: 100%; max-height: 60vh; border-radius: 16px; background: #0b1020; }
+      .scan-video { width: 100%; max-height: 60vh; border-radius: 16px; background: #0b1020; border: 1px solid rgba(148, 163, 184, 0.25); }
       .scan-kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      .scan-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.2rem;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        background: radial-gradient(120% 120% at 0% 0%, rgba(245, 158, 11, 0.22), rgba(255, 255, 255, 0) 45%), #ffffff;
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1);
+      }
+      .scan-step {
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 0.95rem;
+        background: #ffffff;
+        padding: 0.8rem;
+      }
+      .scan-step-no {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #92400e;
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+      }
     </style>
   </head>
   <body class="bg-white">
     <nav></nav>
     <main class="container mx-auto px-4 py-10">
-      <div class="flex items-end justify-between gap-4 mb-6">
-        <div>
-          <h1 class="text-3xl md:text-4xl font-bold">Scan &amp; Go</h1>
-          <p class="text-sm text-muted-foreground mt-1">Scan, pay, show QR at exit.</p>
+      <div class="scan-hero p-5 md:p-6 mb-6">
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <h1 class="text-3xl md:text-4xl font-bold">Scan &amp; Go</h1>
+            <p class="text-sm text-muted-foreground mt-1">Your classic 4-step flow: scan, review, pay, show receipt.</p>
+          </div>
+          <a href="verify-receipt.html" class="hidden md:inline-flex items-center gap-2 mm-action mm-action-outline mm-action-sm">Staff verify</a>
         </div>
-        <a href="verify-receipt.html" class="hidden md:inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-muted">Staff verify →</a>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mt-5">
+          <div class="scan-step">
+            <div class="scan-step-no">1</div>
+            <p class="mt-2 font-extrabold text-sm">Scan items</p>
+            <p class="text-xs text-muted-foreground mt-1">Use camera or enter barcode/SKU manually.</p>
+          </div>
+          <div class="scan-step">
+            <div class="scan-step-no">2</div>
+            <p class="mt-2 font-extrabold text-sm">Review cart</p>
+            <p class="text-xs text-muted-foreground mt-1">Check quantities and remove incorrect items.</p>
+          </div>
+          <div class="scan-step">
+            <div class="scan-step-no">3</div>
+            <p class="mt-2 font-extrabold text-sm">Pay securely</p>
+            <p class="text-xs text-muted-foreground mt-1">Proceed only when all items have valid prices.</p>
+          </div>
+          <div class="scan-step">
+            <div class="scan-step-no">4</div>
+            <p class="mt-2 font-extrabold text-sm">Show QR receipt</p>
+            <p class="text-xs text-muted-foreground mt-1">Present receipt QR at the exit verification desk.</p>
+          </div>
+        </div>
       </div>
 
       <section class="mm-card mm-card-pad mb-6">
@@ -49,7 +100,7 @@
         <section class="rounded-2xl border border-border bg-card p-4 shadow-card">
           <div class="flex items-center justify-between gap-3 mb-3">
             <div class="text-sm font-semibold">Camera Scanner</div>
-            <button id="scan-start" class="rounded-lg bg-primary px-4 py-2 text-white text-sm font-semibold">Start</button>
+            <button id="scan-start" class="mm-action mm-action-primary mm-action-sm">Start scanner</button>
           </div>
           <video id="scan-video" class="scan-video" autoplay playsinline muted></video>
           <p id="scan-status" class="text-xs text-muted-foreground mt-3">Allow camera permission to scan.</p>
@@ -57,7 +108,7 @@
             <label class="text-xs font-semibold text-slate-700">Manual code entry (fallback)</label>
             <div class="flex gap-2 mt-2">
               <input id="scan-manual" class="rounded-lg border px-3 py-2 flex-1" placeholder="Enter barcode / SKU" />
-              <button id="scan-add-manual" class="rounded-lg border px-4 py-2 text-sm font-semibold">Add</button>
+              <button id="scan-add-manual" class="mm-action mm-action-outline mm-action-sm">Add</button>
             </div>
             <p class="text-xs text-muted-foreground mt-2">Tip: you can also add a product below (priced).</p>
           </div>
@@ -67,7 +118,7 @@
             <div class="flex gap-2 mt-2">
               <input id="scan-pick" list="scan-products" class="rounded-lg border px-3 py-2 flex-1" placeholder="Search product name (e.g., Headphones)" />
               <datalist id="scan-products"></datalist>
-              <button id="scan-add-picked" class="rounded-lg bg-primary px-4 py-2 text-white text-sm font-semibold">Add</button>
+              <button id="scan-add-picked" class="mm-action mm-action-primary mm-action-sm">Add</button>
             </div>
           </div>
         </section>
@@ -75,7 +126,7 @@
         <section class="rounded-2xl border border-border bg-card p-4 shadow-card">
           <div class="flex items-center justify-between mb-3">
             <div class="text-sm font-semibold">In-store Cart</div>
-            <a href="cart.html" class="text-sm font-semibold text-blue-600">Go to delivery cart →</a>
+            <a href="cart.html" class="text-sm font-semibold text-blue-600">Go to delivery cart â†’</a>
           </div>
           <div id="scan-cart" class="space-y-3"></div>
           <div class="mt-4 rounded-xl border border-border bg-muted p-4">
@@ -83,7 +134,7 @@
               <span class="text-sm font-semibold">Total</span>
               <span id="scan-total" class="text-lg font-extrabold">Rs 0</span>
             </div>
-            <button id="scan-pay" class="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-white font-semibold">Pay &amp; Get Receipt</button>
+            <button id="scan-pay" class="mt-3 w-full mm-action mm-action-primary">Pay &amp; Get Receipt</button>
             <p id="scan-pay-hint" class="text-xs text-muted-foreground mt-2">Ready to pay when cart has priced items.</p>
           </div>
           <div id="scan-receipt" class="mt-4"></div>
@@ -104,18 +155,16 @@
             <a href="orders.html" class="text-slate-300 hover:text-white">Orders</a>
           </div>
         </div>
-        <div class="border-t border-slate-800 pt-6 mt-6"><p class="text-sm text-slate-500">© 2026 MallMaze. All rights reserved.</p></div>
+        <div class="border-t border-slate-800 pt-6 mt-6"><p class="text-sm text-slate-500">Â© 2026 MallMaze. All rights reserved.</p></div>
       </div>
     </footer>
 
     <script src="assets/js/config.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-    <script src="assets/js/supabase-client.js" defer></script>
+    <script src="assets/js/api-client.js" defer></script>
     <script src="assets/js/runtime-guard.js" defer></script>
-    <script src="https://js.stripe.com/v3/" defer></script>
-    <script src="assets/js/main.js" defer></script>
+    <script src="assets/js/main.js?v=20260505-2" defer></script>
     <script>
-      // Scan&Go: local-first cart with optional Supabase sync.
+      // Scan&Go: local-first cart with backend receipt persistence.
       (function () {
         const $ = (id) => document.getElementById(id);
         const money = (n) => `Rs ${Math.round(Number(n || 0)).toLocaleString('en-IN')}`;
@@ -123,34 +172,29 @@
         const read = () => { try { return JSON.parse(localStorage.getItem(cartKey) || '[]'); } catch { return []; } };
         const write = (v) => localStorage.setItem(cartKey, JSON.stringify(v));
         const status = (t) => { const s = $('scan-status'); if (s) s.textContent = t; };
-        const supa = () => window.MM_SUPABASE?.getClient?.() || null;
         const toast = (m, o) => (window.toast ? window.toast(m, o) : alert(String(m || '')));
 
         let stream = null;
-        let sessionId = '';
         let catalog = { products: [] };
         let storeId = new URLSearchParams(location.search).get('store_id') || '';
 
         const loadCatalog = async () => {
-          // Try Supabase catalog first (latest prices), fallback to mock-data.json.
-          const client = supa();
-          if (client) {
+          // Try backend catalog first (latest prices), fallback to mock-data.json.
+          if (window.MM_API?.hasApi?.()) {
             try {
-              let q = client
-                .from('products')
-                .select('id,name,price_inr,original_price_inr,image_url,category,store_id')
-                .eq('is_active', true);
-              if (storeId) q = q.eq('store_id', storeId);
-              const { data } = await q.order('created_at', { ascending: false }).limit(500);
-              if (Array.isArray(data) && data.length) {
-                catalog.products = data.map((p) => ({
+              const data = await window.MM_API.catalog();
+              const products = Array.isArray(data?.products) ? data.products : [];
+              if (products.length) {
+                catalog.products = products
+                .filter((p) => !storeId || String(p.store_id || p.storeId || '') === String(storeId))
+                .map((p) => ({
                   id: String(p.id),
                   name: String(p.name || ''),
-                  price: Number(p.price_inr || 0),
-                  originalPrice: Number(p.original_price_inr || 0),
-                  image: p.image_url || '',
+                  price: Number(p.price_inr || p.price || 0),
+                  originalPrice: Number(p.original_price_inr || p.originalPrice || 0),
+                  image: p.image_url || p.image || '',
                   category: p.category || '',
-                  store_id: p.store_id || ''
+                  store_id: p.store_id || p.storeId || ''
                 }));
               }
             } catch {}
@@ -197,32 +241,14 @@
           return hit || null;
         };
 
-        const ensureScanSession = async () => {
-          const client = supa();
-          if (!client) return '';
-          const { data } = await client.auth.getUser();
-          const user = data?.user;
-          if (!user) return '';
-          if (sessionId) return sessionId;
-          const created = await client
-            .from('scan_sessions')
-            .insert({ user_id: user.id, status: 'open', store_id: storeId || null })
-            .select('id')
-            .single();
-          sessionId = created?.data?.id || '';
-          return sessionId;
-        };
-
         const loadStoresForPicker = async () => {
           const pick = $('scan-store');
           const badge = $('scan-store-badge');
           if (!pick || !badge) return;
-          const client = supa();
-          if (!client) return;
           try {
-            const { data } = await client.from('stores').select('id,name,city').order('created_at', { ascending: false }).limit(200);
-            const stores = Array.isArray(data) ? data : [];
-            pick.innerHTML = `<option value="">All stores (global catalog)</option>` + stores.map((st) => `<option value="${st.id}">${String(st.name || 'Store')} ${st.city ? `· ${String(st.city)}` : ''}</option>`).join('');
+            const data = window.MM_API?.hasApi?.() ? await window.MM_API.autoshelfStores() : { stores: [] };
+            const stores = Array.isArray(data?.stores) ? data.stores : [];
+            pick.innerHTML = `<option value="">All stores (global catalog)</option>` + stores.map((st) => `<option value="${st.id}">${String(st.name || 'Store')} ${st.city ? `Â· ${String(st.city)}` : ''}</option>`).join('');
             pick.value = storeId || '';
             badge.textContent = storeId ? (stores.find((x) => String(x.id) === String(storeId))?.name || 'Selected store') : 'All stores';
             pick.addEventListener('change', () => {
@@ -232,48 +258,13 @@
               else nextUrl.searchParams.delete('store_id');
               history.replaceState({}, '', nextUrl.toString());
               badge.textContent = storeId ? (stores.find((x) => String(x.id) === String(storeId))?.name || 'Selected store') : 'All stores';
-              // Reset session so it re-creates with new store_id (simple + safe)
-              sessionId = '';
               loadCatalog().catch(() => {});
-              ensureScanSession().catch(() => {});
             }, { once: false });
           } catch {}
         };
 
         const syncItemToDb = async (item) => {
-          const client = supa();
-          if (!client) return;
-          const sid = await ensureScanSession();
-          if (!sid) return;
-          const nextQty = Math.max(1, Number(item.qty || 1));
-          const next = {
-            session_id: sid,
-            product_id: item.product_id || null,
-            code: item.code,
-            name: item.name,
-            unit_price_inr: Math.round(Number(item.price || 0)),
-            qty: nextQty
-          };
-
-          // Dedupe: if same product_id or same code exists in session, update qty instead of inserting.
-          const matchBy = item.product_id ? { col: 'product_id', val: item.product_id } : { col: 'code', val: item.code };
-          const { data: existing } = await client
-            .from('scan_items')
-            .select('id, qty')
-            .eq('session_id', sid)
-            .eq(matchBy.col, matchBy.val)
-            .order('id', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          if (existing?.id) {
-            await client
-              .from('scan_items')
-              .update({ qty: nextQty, name: next.name, unit_price_inr: next.unit_price_inr })
-              .eq('id', existing.id);
-          } else {
-            await client.from('scan_items').insert(next);
-          }
+          return Promise.resolve(item);
         };
         const render = () => {
           const items = read();
@@ -315,7 +306,7 @@
             hint.textContent = !hasItems
               ? 'Add items to pay.'
               : hasUnpriced
-              ? 'Some items have Rs 0. Use “Quick add product”.'
+              ? 'Some items have Rs 0. Use â€œQuick add productâ€.'
               : 'Pay securely and get your QR receipt.';
           }
         };
@@ -345,7 +336,7 @@
               status(`Added: ${p.name}`);
             } else {
               items.unshift({ code: clean, name: `Unknown item`, price: 0, qty: 1, product_id: null });
-              status('Unknown code. Use “Quick add product” to add a priced item.');
+              status('Unknown code. Use â€œQuick add productâ€ to add a priced item.');
             }
           }
           write(items);
@@ -387,18 +378,8 @@
           }
           if (t && t.dataset && t.dataset.rm != null) {
             const i = Number(t.dataset.rm);
-            const removed = items[i];
             items.splice(i, 1);
             write(items); render();
-            // Best-effort: delete one matching row (avoid heavy sync)
-            const client = supa();
-            if (client && removed) {
-              ensureScanSession().then((sid) => {
-                if (!sid) return;
-                const matchBy = removed.product_id ? { col: 'product_id', val: removed.product_id } : { col: 'code', val: removed.code };
-                client.from('scan_items').delete().eq('session_id', sid).eq(matchBy.col, matchBy.val).limit(1).catch(() => {});
-              }).catch(() => {});
-            }
           }
         });
 
@@ -446,39 +427,30 @@
         $('scan-pay')?.addEventListener('click', async () => {
           const items = read();
           if (!items.length) return toast('Scan at least one item first.', { type: 'bad', title: 'Scan&Go' });
-
-          const client = supa();
-          const functionsBase = window.MM_SUPABASE?.functionsBaseUrl?.() || '';
-          const stripeKey = String((window.MM_CONFIG || {}).STRIPE_PUBLISHABLE_KEY || '').trim();
-          if (!client || !functionsBase || !stripeKey || !window.Stripe) {
-            return toast('Configure Supabase + Stripe to enable Scan&Go payments.', { type: 'bad', title: 'Scan&Go' });
+          if (!window.MM_API?.hasApi?.()) return toast('Start the backend API before Scan&Go checkout.', { type: 'bad', title: 'Scan&Go' });
+          if (!window.MM_API?.token?.()) return (window.location.href = `login.html?next=${encodeURIComponent('scan.html')}`);
+          const unpricedBackend = items.some((x) => Number(x.price || 0) <= 0);
+          if (unpricedBackend) return toast('Some items have Rs 0 price. Add real products (priced) before paying.', { type: 'bad', title: 'Scan&Go' });
+          toast('Creating receipt...', { type: 'ok', title: 'Scan&Go', ms: 1200 });
+          try {
+            const response = await window.MM_API.createScanReceipt({
+              store_id: storeId,
+              items: items.map((item) => ({
+                product_id: item.product_id || item.code || '',
+                code: item.code || '',
+                name: item.name || item.code || 'Scanned item',
+                price: Number(item.price || 0),
+                qty: Number(item.qty || 1)
+              }))
+            });
+            write([]);
+            window.location.href = `scan-receipt.html?token=${encodeURIComponent(response.receipt.token)}`;
+          } catch (error) {
+            toast(error.message || String(error), { type: 'bad', title: 'Scan&Go' });
           }
-
-          // Require priced items (Stripe session builds from DB scan_items)
-          const unpriced = items.some((x) => Number(x.price || 0) <= 0);
-          if (unpriced) return toast('Some items have Rs 0 price. Add real products (priced) before paying.', { type: 'bad', title: 'Scan&Go' });
-
-          const { data } = await client.auth.getSession();
-          const token = data?.session?.access_token || '';
-          if (!token) return (window.location.href = 'login.html');
-
-          const sid = await ensureScanSession();
-          if (!sid) return toast('Could not create scan session. Login required.', { type: 'bad', title: 'Scan&Go' });
-
-          toast('Redirecting to payment…', { type: 'ok', title: 'Scan&Go', ms: 1600 });
-          const resp = await fetch(`${functionsBase}/create-scan-checkout-session`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-            body: JSON.stringify({ scan_session_id: sid, success_path: '/scan-receipt.html', cancel_path: '/scan.html' })
-          });
-          const json = await resp.json().catch(() => ({}));
-          if (!resp.ok) return toast(json?.error || 'Payment init failed.', { type: 'bad', title: 'Scan&Go' });
-          if (json?.url) window.location.href = json.url;
-          else toast('Missing Stripe session URL.', { type: 'bad', title: 'Scan&Go' });
         });
 
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
-        ensureScanSession().catch(() => {});
         loadStoresForPicker().catch(() => {});
         loadCatalog().catch(() => {});
         render();
@@ -486,4 +458,3 @@
     </script>
   </body>
 </html>
-

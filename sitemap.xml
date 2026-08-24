@@ -5,6 +5,7 @@
   <url><loc>/products.html</loc></url>
   <url><loc>/deals.html</loc></url>
   <url><loc>/compare.html</loc></url>
+  <url><loc>/autoshelf.html</loc></url>
   <url><loc>/cart.html</loc></url>
   <url><loc>/orders.html</loc></url>
   <url><loc>/order.html</loc></url>
@@ -23,4 +24,3 @@
   <url><loc>/admin-dashboard.html</loc></url>
   <url><loc>/store-dashboard.html</loc></url>
 </urlset>
-
