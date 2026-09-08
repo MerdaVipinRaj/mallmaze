@@ -2,14 +2,14 @@
 # Dashboard: New > Blueprint > connect this repo > Apply
 
 databases:
-  - name: mallmaze-db
+  - name: mallmaze-live-db
     plan: free
-    databaseName: mallmaze
-    user: mallmaze
+    databaseName: mallmaze_live
+    user: mallmaze_user
 
 services:
   - type: web
-    name: mallmaze
+    name: mallmaze-live
     runtime: node
     plan: free
     buildCommand: npm install --omit=dev
@@ -20,7 +20,7 @@ services:
         value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: mallmaze-db
+          name: mallmaze-live-db
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
