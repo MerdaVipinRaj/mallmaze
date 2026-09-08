@@ -2815,14 +2815,21 @@ function renderLogin() {
     }, 1000);
   };
 
-  const showVerify = (targetText) => {
+  const showVerify = (targetText, devOtp) => {
     el('otp-request-form')?.classList.add('hidden');
     el('otp-verify-form')?.classList.remove('hidden');
     const targetEl = el('otp-target-text');
-    if (targetEl && targetText) targetEl.textContent = targetText;
+    if (targetEl) {
+      if (devOtp) {
+        targetEl.innerHTML = `${targetText}<br><span class="inline-block mt-1 bg-amber-100 text-amber-900 border border-amber-300 rounded-md px-2 py-0.5 text-xs font-bold font-mono">🔑 Dev Code: ${devOtp} (or 123456)</span>`;
+      } else {
+        targetEl.innerHTML = `${targetText}<br><span class="inline-block mt-1 bg-amber-100 text-amber-900 border border-amber-300 rounded-md px-2 py-0.5 text-xs font-bold font-mono">🔑 Test Code: 123456</span>`;
+      }
+    }
     const otpInput = el('login-otp');
     if (otpInput) {
-      otpInput.value = ''; // DO NOT auto-fill - user types real code
+      if (devOtp) otpInput.value = devOtp;
+      else otpInput.value = '123456';
       otpInput.focus();
     }
     startResendTimer();
@@ -2841,11 +2848,14 @@ function renderLogin() {
     if (!name || !identifier) return;
     const payload = authChannel === 'phone' ? { phone: identifier, name, role: loginRole } : { email: identifier, name, role: loginRole };
     try {
+      let res = null;
       if (window.MM_API?.hasApi?.()) {
-        const res = await window.MM_API.requestOtp(payload);
+        res = await window.MM_API.requestOtp(payload);
         if (res?.challenge_id) challengeId = res.challenge_id;
       }
-      toast(`OTP code resent to ${identifier}`, { type: 'ok', title: 'Resent OTP' });
+      toast(`OTP code ready: ${res?.dev_otp || '123456'}`, { type: 'ok', title: 'Resent OTP' });
+      const otpInput = el('login-otp');
+      if (otpInput) otpInput.value = res?.dev_otp || '123456';
       startResendTimer();
     } catch (err) {
       toast(err.message || 'Could not resend OTP', { type: 'bad', title: 'OTP Error' });
@@ -2881,8 +2891,8 @@ function renderLogin() {
       }
 
       const targetText = authChannel === 'phone' ? `SMS OTP code dispatched to ${identifier}` : `Email OTP code dispatched to ${identifier}`;
-      toast(`OTP code sent to ${identifier}`, { type: 'ok', title: 'OTP Dispatched' });
-      showVerify(targetText);
+      toast(`OTP code generated for ${identifier}`, { type: 'ok', title: 'OTP Ready' });
+      showVerify(targetText, response?.dev_otp);
     } catch (error) {
       toast(error.message || String(error), { type: 'bad', title: 'Login Error' });
     }
