@@ -535,6 +535,8 @@ function staticTarget(urlPath) {
   const allowedRootFiles = new Set([
     "index.html",
     "payments.html",
+    "inventory.html",
+    "statistic.html",
     "customers.html",
     "reports.html",
     "profit-loss.html",
