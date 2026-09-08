@@ -1,36 +1,1132 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Dashboard - MallMaze</title>
-    <link rel="stylesheet" href="assets/css/tailwind.css">
-    <link rel="stylesheet" href="assets/css/react-styles.css">
-  </head>
-  <body class="bg-white">
-    <nav></nav>
-    <main class="container mx-auto px-4 py-12">
-      <h1 class="text-4xl font-bold mb-8">Dashboard</h1><div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-    </main>
-    <footer class="bg-slate-900 text-white py-10 border-t border-slate-800 mt-14">
-      <div class="container mx-auto px-4">
-        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MallMaze - Mobile Merchant POS & Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #121620;
+      --bg-dark-hover: #1c2230;
+      --bg-main: #f7f6f0;
+      --bg-card: #ffffff;
+      --text-main: #131722;
+      --text-muted: #8c93a3;
+      --border-subtle: #eae7dc;
+      --badge-paid-bg: #fef3c7;
+      --badge-paid-text: #b45309;
+      --badge-delivered-bg: #ffedd5;
+      --badge-delivered-text: #c2410c;
+      --badge-completed-bg: #dcfce7;
+      --badge-completed-text: #15803d;
+      --badge-offline-bg: #e0e7ff;
+      --badge-offline-text: #4338ca;
+      --badge-online-bg: #dbeafe;
+      --badge-online-text: #1d4ed8;
+      --btn-track-bg: #121620;
+      --btn-refund-bg: #fef08a;
+      --btn-refund-hover: #fde047;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: #0b0e14;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      width: 100%;
+      max-width: 1540px;
+      height: 95vh;
+      min-height: 720px;
+      background-color: var(--bg-dark);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      position: relative;
+    }
+
+    /* Desktop Sidebar */
+    .sidebar {
+      width: 210px;
+      min-width: 210px;
+      background-color: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px 20px 16px;
+      border-right: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 20px 8px;
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      text-decoration: none;
+    }
+
+    .brand-icon { width: 22px; height: 22px; }
+    .brand-icon svg { width: 100%; height: 100%; stroke: #ffffff; }
+
+    .btn-side-home {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(234, 179, 8, 0.12);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      color: #facc15;
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 16px;
+      transition: all 0.15s ease;
+    }
+    .btn-side-home:hover { background: #eab308; color: #121620; }
+
+    .nav-group { display: flex; flex-direction: column; gap: 4px; }
+    .nav-divider { height: 1px; background: rgba(255, 255, 255, 0.06); margin: 12px 8px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .nav-item svg { width: 17px; height: 17px; stroke-width: 2; stroke: currentColor; flex-shrink: 0; }
+    .nav-item:hover { color: #ffffff; background-color: var(--bg-dark-hover); }
+    .nav-item.active { background-color: #ffffff; color: #121620; font-weight: 700; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+    .nav-item.active svg { stroke: #121620; }
+    .nav-spacer { flex: 1; }
+    .sidebar-footer { padding-top: 12px; }
+
+    /* Main Area */
+    .main-wrapper {
+      flex: 1;
+      background-color: var(--bg-main);
+      border-top-left-radius: 24px;
+      border-bottom-left-radius: 24px;
+      display: flex;
+      padding: 22px;
+      gap: 18px;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .orders-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #131722;
+      letter-spacing: -0.5px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-header-home {
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      background: #ffffff;
+      color: #121620;
+      border: 1px solid #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-offline-bill {
+      padding: 9px 15px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      background: #121620;
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+    .btn-offline-bill:hover { background: #272f3e; }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 4px;
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .user-info { display: flex; flex-direction: column; line-height: 1.2; }
+    .user-name { font-size: 13px; font-weight: 700; color: #131722; }
+    .user-email { font-size: 10.5px; color: #94a3b8; }
+
+    /* Filters Bar */
+    .filters-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .filter-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+    .dropdown-pill {
+      background: #f0eee5;
+      border: 1px solid transparent;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #334155;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .dropdown-pill:hover { background: #ffffff; border-color: #e2e8f0; }
+    .dropdown-pill.active-pill { background: #121620; color: #ffffff; }
+
+    /* Center Orders Table */
+    .table-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: auto;
+      padding-right: 2px;
+      min-width: 0;
+    }
+
+    .table-container::-webkit-scrollbar { width: 6px; height: 6px; }
+    .table-container::-webkit-scrollbar-thumb { background: #e2ded0; border-radius: 10px; }
+
+    .orders-table {
+      width: 100%;
+      min-width: 580px;
+      border-collapse: separate;
+      border-spacing: 0 4px;
+    }
+
+    .orders-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      padding: 8px 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .order-row {
+      background: transparent;
+      border-radius: 14px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .order-row td {
+      padding: 9px 10px;
+      font-size: 12.5px;
+      color: #1e293b;
+      vertical-align: middle;
+    }
+
+    .order-row td:first-child { border-top-left-radius: 14px; border-bottom-left-radius: 14px; padding-left: 12px; }
+    .order-row td:last-child { border-top-right-radius: 14px; border-bottom-right-radius: 14px; padding-right: 12px; text-align: right; }
+    .order-row:hover { background: rgba(255, 255, 255, 0.65); }
+    .order-row.selected { background-color: #ffffff !important; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05); }
+
+    .custom-checkbox {
+      width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid #cbd5e1;
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer; background: #ffffff;
+    }
+    .custom-checkbox.checked { background-color: #1e293b; border-color: #1e293b; }
+    .custom-checkbox svg { width: 11px; height: 11px; stroke: #ffffff; stroke-width: 3; display: none; }
+    .custom-checkbox.checked svg { display: block; }
+
+    .order-id { font-weight: 600; color: #475569; font-size: 12px; }
+    .customer-cell { display: flex; align-items: center; gap: 8px; }
+    .customer-thumb { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+    .customer-name { font-weight: 600; color: #0f172a; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; justify-content: center; padding: 3px 9px;
+      border-radius: 10px; font-size: 11px; font-weight: 700; line-height: 1;
+    }
+
+    .badge-paid { background-color: var(--badge-paid-bg); color: var(--badge-paid-text); }
+    .badge-delivered { background-color: var(--badge-delivered-bg); color: var(--badge-delivered-text); }
+    .badge-completed { background-color: var(--badge-completed-bg); color: var(--badge-completed-text); }
+    .badge-offline { background-color: var(--badge-offline-bg); color: var(--badge-offline-text); }
+    .badge-online { background-color: var(--badge-online-bg); color: var(--badge-online-text); }
+
+    .order-total { font-weight: 800; color: #0f172a; }
+    .order-date { color: #64748b; font-size: 12px; }
+
+    .row-menu-btn {
+      background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 6px;
+    }
+
+    /* Right Details Drawer */
+    .detail-panel {
+      width: 320px;
+      min-width: 320px;
+      background-color: var(--bg-card);
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-md);
+      overflow-y: auto;
+    }
+
+    .detail-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+    }
+    .detail-title { font-size: 16px; font-weight: 800; color: #131722; }
+
+    .close-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none; background: #f1f5f9; color: #64748b;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;
+    }
+
+    .detail-sub-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .detail-timestamp { font-size: 11px; color: #94a3b8; }
+
+    .customer-profile-card {
+      display: flex; flex-direction: column; align-items: center; margin-bottom: 14px;
+    }
+
+    .avatar-large-wrapper { position: relative; margin-bottom: 6px; }
+    .avatar-large {
+      width: 64px; height: 64px; border-radius: 50%; background: #fde047; padding: 3px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 12px rgba(253, 224, 71, 0.35);
+    }
+    .avatar-large img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .customer-hero-name { font-size: 14px; font-weight: 700; color: #131722; margin-bottom: 10px; }
+
+    .contact-actions { display: flex; align-items: center; gap: 8px; }
+    .contact-btn {
+      width: 32px; height: 32px; border-radius: 50%; background-color: #f4f4f0; border: none;
+      display: flex; align-items: center; justify-content: center; color: #334155; cursor: pointer;
+    }
+    .contact-btn svg { width: 14px; height: 14px; }
+
+    /* Shiprocket Box */
+    .delivery-partner-box {
+      background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; margin-bottom: 14px;
+    }
+    .delivery-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .delivery-title { font-size: 12px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 4px; }
+    .delivery-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 6px; background: #e0e7ff; color: #4338ca; }
+    .delivery-desc { font-size: 11px; color: #64748b; line-height: 1.35; margin-bottom: 8px; }
+
+    .btn-assign-rider {
+      width: 100%; padding: 8px 10px; border-radius: 8px; background: #4338ca; color: #ffffff;
+      font-size: 11.5px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+
+    .section-subtitle { font-size: 12px; font-weight: 700; color: #131722; margin-bottom: 8px; }
+    .order-items-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .item-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .item-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .item-icon-box {
+      width: 30px; height: 30px; border-radius: 6px; background: #f8fafc; border: 1px solid #f1f5f9;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .item-icon-box svg { width: 16px; height: 16px; }
+    .item-name { font-size: 11.5px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-price { font-size: 12px; font-weight: 700; color: #0f172a; flex-shrink: 0; }
+
+    .detail-total-row {
+      display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid #f1f5f9; margin-bottom: 14px;
+    }
+    .total-label { font-size: 12.5px; font-weight: 600; color: #64748b; }
+    .total-amount { font-size: 17.5px; font-weight: 800; color: #0f172a; }
+
+    .detail-ctas { display: flex; gap: 8px; margin-top: auto; }
+    .btn-track {
+      flex: 1; background-color: var(--btn-track-bg); color: #ffffff; border: none; border-radius: 10px;
+      padding: 10px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer;
+    }
+    .btn-refund {
+      flex: 1; background-color: var(--btn-refund-bg); color: #131722; border: none; border-radius: 10px;
+      padding: 10px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer;
+    }
+
+    /* Mobile Bottom Navigation Bar (Shown ONLY on Mobile Screens) */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 62px;
+      background: #121620;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 6px;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .mob-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .mob-nav-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+    .mob-nav-btn.active { color: #facc15; }
+    .mob-nav-btn.active svg { stroke: #facc15; }
+
+    /* Modals (Responsive Fullscreen on Mobile) */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 9999;
+      align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 12px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: #ffffff; border-radius: 20px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 22px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35); animation: popIn 0.2s ease;
+    }
+    @keyframes popIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px; }
+    .form-input, .form-select {
+      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 13px; font-weight: 600; outline: none;
+    }
+
+    .bill-items-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    .bill-items-table th { text-align: left; font-size: 11px; font-weight: 700; color: #64748b; padding: 6px 4px; border-bottom: 1px solid #e2e8f0; }
+    .bill-items-table td { padding: 6px 4px; vertical-align: middle; }
+
+    .btn-add-line {
+      background: #f8fafc; border: 1px dashed #94a3b8; color: #0f172a; font-weight: 700; font-size: 12px;
+      padding: 8px; border-radius: 10px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 12px;
+    }
+
+    .modal-btn-submit {
+      width: 100%; padding: 12px; background: #121620; color: #ffffff; border-radius: 12px; font-size: 13.5px; font-weight: 800; border: none; cursor: pointer;
+    }
+
+    .receipt-paper {
+      background: #fafafa; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 14px; font-size: 11.5px; line-height: 1.45; margin-bottom: 14px;
+    }
+
+    .toast {
+      position: fixed; bottom: 74px; right: 16px; left: 16px; background: #1e293b; color: #ffffff; padding: 12px 16px;
+      border-radius: 12px; font-size: 12.5px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transform: translateY(100px); opacity: 0; transition: all 0.25s ease; z-index: 9999; text-align: center;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ==========================================================
+       MOBILE OPTIMIZATIONS (Smartphones <= 860px)
+       ========================================================== */
+    @media (max-width: 860px) {
+      body { padding: 0; background: #121620; }
+      .app-container {
+        height: 100vh; min-height: 100vh; border-radius: 0; flex-direction: column; box-shadow: none; padding-bottom: 62px;
+      }
+
+      /* Hide Desktop Sidebar on Mobile */
+      .sidebar { display: none; }
+
+      /* Full Width Main Canvas */
+      .main-wrapper {
+        border-radius: 0; padding: 14px 12px 18px 12px; flex-direction: column; overflow-y: auto; gap: 12px;
+      }
+
+      .top-header { flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+      .page-title { font-size: 20px; }
+      .top-actions { width: 100%; justify-content: space-between; }
+      .btn-offline-bill { flex: 1; justify-content: center; font-size: 12px; padding: 9px 10px; }
+      .btn-header-home { padding: 9px 10px; font-size: 11.5px; }
+
+      /* Right Detail Drawer becomes Mobile Bottom Sheet */
+      .detail-panel {
+        display: none;
+        position: fixed;
+        inset: 0;
+        top: 15%;
+        width: 100%;
+        min-width: 100%;
+        border-radius: 24px 24px 0 0;
+        z-index: 5000;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        animation: slideUp 0.25s ease;
+      }
+      .detail-panel.mobile-open { display: flex; }
+      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+      /* Show Mobile Bottom Navigation Dock */
+      .mobile-bottom-nav { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Desktop Sidebar (Hidden on Mobile) -->
+    <aside class="sidebar">
+      <a href="dashboard.html" class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <span>MallMaze</span>
+      </a>
+
+      <!-- Home Link -->
+      <a href="index.html" class="btn-side-home">
+        <span>🌐 Storefront / Home</span>
+        <span>→</span>
+      </a>
+
+      <div class="nav-group">
+        <a class="nav-item active" href="dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" href="orders.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <span>Orders</span>
+        </a>
+        <a class="nav-item" href="inventory.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          <span>Stock & Products</span>
+        </a>
+        <a class="nav-item" href="profit-loss.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>Profit & Loss</span>
+        </a>
+        <a class="nav-item" href="payments.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span>Payments</span>
+        </a>
+        <a class="nav-item" href="customers.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Customers</span>
+        </a>
+      </div>
+
+      <div class="nav-spacer"></div>
+
+      <div class="sidebar-footer">
+        <a class="nav-item" href="register-store.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Store Status</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Center Workspace -->
+    <main class="main-wrapper">
+      <section class="orders-section">
+        
+        <!-- Header -->
+        <div class="top-header">
           <div>
-            <h3 class="font-display text-lg font-bold text-white">MallMaze</h3>
-            <p class="text-sm text-slate-400 mt-1">Manage your shopping, orders, and support.</p>
+            <h1 class="page-title">Store Dashboard</h1>
           </div>
-          <div class="flex flex-wrap gap-3 text-sm">
-            <a href="orders.html" class="text-slate-300 hover:text-white">Orders</a>
-            <a href="support.html" class="text-slate-300 hover:text-white">Support</a>
-            <a href="products.html" class="text-slate-300 hover:text-white">Shop</a>
+          <div class="top-actions">
+            <a href="index.html" class="btn-header-home" title="Go to website">
+              🌐 Storefront
+            </a>
+            <button class="btn-offline-bill" onclick="openMultiItemBillModal()">
+              ➕ New Offline Bill
+            </button>
           </div>
         </div>
-        <div class="border-t border-slate-800 pt-6 mt-6"><p class="text-sm text-slate-500">Â© 2026 MallMaze. All rights reserved.</p></div>
+
+        <!-- Filter Bar -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <button class="dropdown-pill active-pill" id="filterAllBtn" onclick="toggleStatusFilter('ALL')">All Orders</button>
+            <button class="dropdown-pill" onclick="toggleStatusFilter('Online')">Online Orders</button>
+            <button class="dropdown-pill" onclick="toggleStatusFilter('Offline')">Offline Counter</button>
+          </div>
+        </div>
+
+        <!-- Center Orders Table -->
+        <div class="table-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th style="width:30px;">
+                  <div class="custom-checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                </th>
+                <th>Order & Customer</th>
+                <th>Channel / Status</th>
+                <th>Amount (₹)</th>
+                <th>Time</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Right Details Drawer / Mobile Bottom Sheet -->
+      <aside class="detail-panel" id="detailPanel">
+        <div class="detail-header">
+          <h2 class="detail-title" id="panelOrderId">Order #IND-602992</h2>
+          <button class="close-btn" onclick="closeMobileDetailDrawer()">✕</button>
+        </div>
+
+        <div class="detail-sub-meta">
+          <span class="status-badge badge-paid" id="panelBadge">Paid</span>
+          <span class="detail-timestamp" id="panelTimestamp">26 Dec, 17:30 IST</span>
+        </div>
+
+        <!-- Customer Card -->
+        <div class="customer-profile-card">
+          <div class="avatar-large-wrapper">
+            <div class="avatar-large">
+              <img id="panelCustomerAvatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80" alt="Customer" />
+            </div>
+          </div>
+          <div class="customer-hero-name" id="panelCustomerName">Rajesh Verma</div>
+          
+          <div class="contact-actions">
+            <button class="contact-btn" title="Send WhatsApp Bill" onclick="sendWhatsAppBill()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            </button>
+            <button class="contact-btn" title="Print GST Tax Bill" onclick="printCurrentBill()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Shiprocket Delivery Section -->
+        <div class="delivery-partner-box" id="shiprocketBox">
+          <div class="delivery-header">
+            <span class="delivery-title">🚚 Shiprocket Courier</span>
+            <span class="delivery-badge" id="srBadge">Hyperlocal</span>
+          </div>
+          <p class="delivery-desc" id="srDesc">Direct 2-hour doorstep rider integration ready.</p>
+          <button class="btn-assign-rider" id="srBtn" onclick="assignShiprocketDelivery()">
+            📦 Assign Shiprocket Rider & Print Label
+          </button>
+        </div>
+
+        <h3 class="section-subtitle">Order Items</h3>
+        <div class="order-items-list" id="panelItemsList"></div>
+
+        <div class="detail-total-row">
+          <span class="total-label">Total Amount</span>
+          <span class="total-amount" id="panelTotalAmount">₹1,34,500</span>
+        </div>
+
+        <div class="detail-ctas">
+          <button class="btn-track" onclick="printCurrentBill()">🖨️ Tax Bill</button>
+          <button class="btn-refund" onclick="sendWhatsAppBill()">📲 WhatsApp</button>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Mobile Bottom Navigation Dock (Visible on Mobile) -->
+    <nav class="mobile-bottom-nav">
+      <a href="dashboard.html" class="mob-nav-btn active">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="orders.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Orders</span>
+      </a>
+      <a href="inventory.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        <span>Stock</span>
+      </a>
+      <a href="profit-loss.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        <span>P&L</span>
+      </a>
+      <a href="index.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <span>Website</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- MULTI-ITEM OFFLINE BILLING MODAL -->
+  <div class="modal-backdrop" id="multiBillModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">➕ Quick Mobile Counter Bill</h3>
+        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('multiBillModal')">✕</button>
       </div>
-    </footer>
-    <script src="assets/js/config.js" defer></script>
-    <script src="assets/js/api-client.js" defer></script>
-    <script src="assets/js/runtime-guard.js" defer></script>
-    <script src="assets/js/main.js?v=20260505-2" defer></script>
-  </body>
+
+      <form onsubmit="handleGenerateMultiBill(event)">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:10px;">
+          <div>
+            <label class="form-label">Customer Name</label>
+            <input type="text" id="mCustName" class="form-input" placeholder="e.g. Ramesh Kumar" />
+          </div>
+          <div>
+            <label class="form-label">Mobile (WhatsApp)</label>
+            <input type="text" id="mCustPhone" class="form-input" placeholder="+91 98201..." />
+          </div>
+        </div>
+
+        <table class="bill-items-table">
+          <thead>
+            <tr>
+              <th style="width:50%;">Product Title</th>
+              <th style="width:25%;">Price (₹)</th>
+              <th style="width:15%;">Qty</th>
+              <th style="width:10%;"></th>
+            </tr>
+          </thead>
+          <tbody id="billItemsTableBody"></tbody>
+        </table>
+
+        <button type="button" class="btn-add-line" onclick="addBillItemRow()">
+          ➕ Add Another Item / Custom Product
+        </button>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:10px;">
+          <div>
+            <label class="form-label">Payment Mode</label>
+            <select id="mPayMode" class="form-select">
+              <option>Cash in Hand (Counter)</option>
+              <option>UPI (Google Pay / PhonePe / Paytm)</option>
+              <option>Credit/Debit Card POS</option>
+              <option>Khata / Udhaar (Credit)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">GST Slab</label>
+            <select id="mGstRate" class="form-select" onchange="calculateMultiBillTotal()">
+              <option value="18">18% Standard GST</option>
+              <option value="12">12% Reduced GST</option>
+              <option value="0">0% Exempted</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; margin-bottom:12px; display:flex; justify-content:space-between; font-weight:800; font-size:14px;">
+          <span>Grand Total Bill:</span>
+          <span id="mGrandTotal" style="color:#15803d;">₹0</span>
+        </div>
+
+        <button type="submit" class="modal-btn-submit">Generate Bill & Print Receipt</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PRINT RECEIPT MODAL -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🧾 Customer Tax Bill</h3>
+        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('receiptModal')">✕</button>
+      </div>
+      <div class="receipt-paper" id="receiptContent"></div>
+      <div style="display:flex; gap:8px;">
+        <button style="flex:1; padding:11px; border-radius:10px; background:#121620; color:#fff; font-weight:700; font-size:12.5px; border:none; cursor:pointer;" onclick="window.print()">
+          🖨️ Print
+        </button>
+        <button style="flex:1; padding:11px; border-radius:10px; background:#fef08a; color:#121620; font-weight:700; font-size:12.5px; border:none; cursor:pointer;" onclick="sendWhatsAppBill()">
+          📲 WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="appToast">Notification message</div>
+
+  <script>
+    let storedOrders = localStorage.getItem("mallmaze_orders_data");
+    let ordersData = storedOrders ? JSON.parse(storedOrders) : [
+      {
+        id: "#MM-ONL-99201", isOffline: false, isOnline: true,
+        customer: { name: "Aditya Roy (Website)", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" },
+        status: "MallMaze Online", statusType: "online", total: "₹34,000", numericTotal: 34000, date: "Today", timestamp: "Just now", checked: true,
+        shiprocket: { assigned: false, tracking: "SR-IN-889021", rider: "Pending Rider Allocation" },
+        items: [{ name: "Bosch Heavy Duty Drill Machine (x1)", price: "₹34,000" }]
+      },
+      {
+        id: "#IND-602992", isOffline: false, isOnline: false,
+        customer: { name: "Rajesh Verma", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80" },
+        status: "Paid", statusType: "paid", total: "₹1,34,500", numericTotal: 134500, date: "26 Dec", timestamp: "26 Dec, 17:30 IST", checked: false,
+        shiprocket: { assigned: true, tracking: "SR-IN-602992", rider: "Rider Delivered" },
+        items: [{ name: "TIG-200 Industrial Inverter Welder", price: "₹54,000" }, { name: "Bosch Drill", price: "₹34,000" }]
+      },
+      {
+        id: "#OFF-782190", isOffline: true, isOnline: false,
+        customer: { name: "Ramesh Gupta (Counter)", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80" },
+        status: "Offline Cash", statusType: "offline", total: "₹54,000", numericTotal: 54000, date: "Today", timestamp: "Just now", checked: false,
+        shiprocket: { assigned: false, tracking: "N/A (Counter)", rider: "In-Store Customer" },
+        items: [{ name: "TIG-200 Welder", price: "₹54,000" }]
+      }
+    ];
+
+    let selectedOrderId = ordersData[0].id;
+    let currentFilterStatus = "ALL";
+
+    function saveOrders() {
+      localStorage.setItem("mallmaze_orders_data", JSON.stringify(ordersData));
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("ordersTableBody");
+      tbody.innerHTML = "";
+      
+      let filtered = ordersData.filter(o => {
+        if (currentFilterStatus === "ALL") return true;
+        if (currentFilterStatus === "Offline") return o.isOffline;
+        if (currentFilterStatus === "Online") return o.isOnline;
+        return o.status.toLowerCase().includes(currentFilterStatus.toLowerCase());
+      });
+
+      filtered.forEach((order) => {
+        const tr = document.createElement("tr");
+        tr.className = `order-row ${order.id === selectedOrderId ? "selected" : ""}`;
+        tr.onclick = (e) => {
+          if (e.target.closest('.custom-checkbox') || e.target.closest('.row-menu-btn')) return;
+          selectOrder(order.id);
+          // On mobile, open mobile bottom sheet
+          if (window.innerWidth <= 860) {
+            document.getElementById("detailPanel").classList.add("mobile-open");
+          }
+        };
+        const badgeClass = `badge-${order.statusType}`;
+
+        tr.innerHTML = `
+          <td>
+            <div class="custom-checkbox ${order.checked ? 'checked' : ''}" onclick="toggleRowCheck(event, '${order.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </td>
+          <td>
+            <div class="customer-cell">
+              <img src="${order.customer.avatar}" alt="${order.customer.name}" class="customer-thumb" />
+              <div>
+                <span class="customer-name">${order.customer.name}</span>
+                <div class="order-id">${order.id}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="status-badge ${badgeClass}">${order.status}</span></td>
+          <td><span class="order-total">${order.total}</span></td>
+          <td><span class="order-date">${order.date}</span></td>
+          <td>
+            <button class="row-menu-btn" title="Bill" onclick="event.stopPropagation(); printOrderBill('${order.id}')">🖨️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      updateSelectAllState();
+    }
+
+    function selectOrder(orderId) {
+      selectedOrderId = orderId;
+      renderTable();
+      renderDetailPanel();
+    }
+
+    function closeMobileDetailDrawer() {
+      document.getElementById("detailPanel").classList.remove("mobile-open");
+    }
+
+    function renderDetailPanel() {
+      const order = ordersData.find(o => o.id === selectedOrderId) || ordersData[0];
+      window.currentOrder = order;
+      document.getElementById("panelOrderId").innerText = `Order ${order.id}`;
+      document.getElementById("panelBadge").innerText = order.status;
+      document.getElementById("panelBadge").className = `status-badge badge-${order.statusType}`;
+      document.getElementById("panelTimestamp").innerText = order.timestamp;
+      document.getElementById("panelCustomerAvatar").src = order.customer.avatar;
+      document.getElementById("panelCustomerName").innerText = order.customer.name;
+
+      const sr = order.shiprocket || { assigned: false, tracking: "Pending", rider: "Not Assigned" };
+      if (order.isOffline) {
+        document.getElementById("srBadge").innerText = "Counter";
+        document.getElementById("srDesc").innerText = "Handed over directly at store counter.";
+        document.getElementById("srBtn").style.display = "none";
+      } else {
+        document.getElementById("srBadge").innerText = sr.assigned ? "Dispatched" : "Ready for Pickup";
+        document.getElementById("srDesc").innerHTML = `<strong>Tracking:</strong> ${sr.tracking} • <em>${sr.rider}</em>`;
+        document.getElementById("srBtn").style.display = "flex";
+        document.getElementById("srBtn").innerText = sr.assigned ? "✔ Rider Dispatched" : "📦 Assign Shiprocket Rider";
+      }
+
+      const itemsContainer = document.getElementById("panelItemsList");
+      itemsContainer.innerHTML = "";
+
+      order.items.forEach(item => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "item-row";
+        itemDiv.innerHTML = `
+          <div class="item-left">
+            <span class="item-name">${item.name}</span>
+          </div>
+          <span class="item-price">${item.price}</span>
+        `;
+        itemsContainer.appendChild(itemDiv);
+      });
+
+      document.getElementById("panelTotalAmount").innerText = order.total;
+    }
+
+    function assignShiprocketDelivery() {
+      const order = window.currentOrder || ordersData[0];
+      const trackingId = "SR-IN-" + Math.floor(100000 + Math.random() * 900000);
+      order.shiprocket = { assigned: true, tracking: trackingId, rider: "Shiprocket Express Rider Assigned" };
+      saveOrders();
+      renderDetailPanel();
+      showToast(`🚚 Shiprocket Rider Assigned! Tracking: ${trackingId}`);
+    }
+
+    function openMultiItemBillModal() {
+      const tbody = document.getElementById("billItemsTableBody");
+      tbody.innerHTML = "";
+      addBillItemRow();
+      calculateMultiBillTotal();
+      document.getElementById("multiBillModal").classList.add("open");
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+    function addBillItemRow() {
+      const tbody = document.getElementById("billItemsTableBody");
+      const tr = document.createElement("tr");
+      tr.className = "bill-item-row";
+      tr.innerHTML = `
+        <td><input type="text" class="form-input item-name-input" value="Bosch Drill Machine" required /></td>
+        <td><input type="number" class="form-input item-price-input" value="34000" min="0" oninput="calculateMultiBillTotal()" required /></td>
+        <td><input type="number" class="form-input item-qty-input" value="1" min="1" oninput="calculateMultiBillTotal()" required /></td>
+        <td style="text-align:right;"><button type="button" style="background:#fee2e2; border:none; color:#dc2626; border-radius:6px; width:24px; height:24px; cursor:pointer;" onclick="this.closest('tr').remove(); calculateMultiBillTotal();">✕</button></td>
+      `;
+      tbody.appendChild(tr);
+      calculateMultiBillTotal();
+    }
+
+    function calculateMultiBillTotal() {
+      let grandTotal = 0;
+      document.querySelectorAll(".bill-item-row").forEach(r => {
+        const price = parseFloat(r.querySelector(".item-price-input").value) || 0;
+        const qty = parseFloat(r.querySelector(".item-qty-input").value) || 0;
+        grandTotal += (price * qty);
+      });
+      document.getElementById("mGrandTotal").innerText = "₹" + grandTotal.toLocaleString('en-IN');
+      return grandTotal;
+    }
+
+    function handleGenerateMultiBill(e) {
+      e.preventDefault();
+      const custName = document.getElementById("mCustName").value.trim() || "Walk-in Counter Customer";
+      const payMode = document.getElementById("mPayMode").value;
+      const rows = document.querySelectorAll(".bill-item-row");
+
+      const items = [];
+      let grandTotal = 0;
+
+      rows.forEach(r => {
+        const name = r.querySelector(".item-name-input").value.trim();
+        const price = parseFloat(r.querySelector(".item-price-input").value) || 0;
+        const qty = parseFloat(r.querySelector(".item-qty-input").value) || 1;
+        const lineTotal = price * qty;
+        grandTotal += lineTotal;
+        items.push({ name: `${name} (x${qty})`, price: "₹" + lineTotal.toLocaleString('en-IN') });
+      });
+
+      const newId = "#OFF-" + Math.floor(100000 + Math.random() * 900000);
+      const newOrder = {
+        id: newId, isOffline: true, isOnline: false,
+        customer: { name: custName, avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80" },
+        status: `Offline (${payMode.split(" ")[0]})`, statusType: "offline",
+        total: "₹" + grandTotal.toLocaleString('en-IN'), numericTotal: grandTotal,
+        date: "Today", timestamp: "Just now", checked: true,
+        shiprocket: { assigned: false, tracking: "N/A (Counter)", rider: "In-Store Customer" },
+        items: items
+      };
+
+      ordersData.unshift(newOrder);
+      saveOrders();
+      closeModal("multiBillModal");
+      selectOrder(newId);
+      showToast(`✅ Bill of ₹${grandTotal.toLocaleString('en-IN')} created!`);
+      printCurrentBill();
+    }
+
+    function printCurrentBill() {
+      const order = window.currentOrder || ordersData[0];
+      const cgst = Math.round(order.numericTotal * 0.09);
+      const sgst = Math.round(order.numericTotal * 0.09);
+      const basePrice = order.numericTotal - (cgst + sgst);
+
+      const html = `
+        <div style="text-align:center; border-bottom:1px dashed #94a3b8; padding-bottom:6px; margin-bottom:6px;">
+          <strong style="font-size:14px; color:#0f172a;">MallMaze Partner Store</strong><br>
+          <span style="color:#64748b; font-size:11px;">Bandra West, Mumbai • GSTIN: 27AABCM9102K1Z9</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span><strong>Invoice:</strong> ${order.id}</span>
+          <span>${order.timestamp}</span>
+        </div>
+        <div style="margin-bottom:6px;"><strong>Customer:</strong> ${order.customer.name}</div>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:6px;">
+          ${order.items.map(it => `
+            <tr>
+              <td style="padding:3px 0;">${it.name}</td>
+              <td style="text-align:right; padding:3px 0; font-weight:700;">${it.price}</td>
+            </tr>
+          `).join('')}
+        </table>
+        <div style="border-top:1px dashed #94a3b8; padding-top:4px; font-size:11px;">
+          <div style="display:flex; justify-content:space-between;"><span>Taxable Base:</span><span>₹${basePrice.toLocaleString('en-IN')}</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>GST (18%):</span><span>₹${(cgst+sgst).toLocaleString('en-IN')}</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:13.5px; font-weight:800; color:#0f172a; margin-top:4px; padding-top:4px; border-top:1px solid #cbd5e1;">
+            <span>Grand Total:</span><span>${order.total}</span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("receiptContent").innerHTML = html;
+      document.getElementById("receiptModal").classList.add("open");
+    }
+
+    function printOrderBill(id) {
+      selectOrder(id);
+      printCurrentBill();
+    }
+
+    function sendWhatsAppBill() {
+      const order = window.currentOrder || ordersData[0];
+      showToast(`📲 WhatsApp bill sent for ${order.id}!`);
+    }
+
+    function toggleRowCheck(event, orderId) {
+      event.stopPropagation();
+      const order = ordersData.find(o => o.id === orderId);
+      if (order) {
+        order.checked = !order.checked;
+        renderTable();
+      }
+    }
+
+    function toggleSelectAll() {
+      const allChecked = ordersData.every(o => o.checked);
+      ordersData.forEach(o => o.checked = !allChecked);
+      renderTable();
+    }
+
+    function updateSelectAllState() {
+      const selectAll = document.getElementById("selectAllCheckbox");
+      const allChecked = ordersData.every(o => o.checked);
+      if (allChecked && ordersData.length > 0) selectAll.classList.add("checked");
+      else selectAll.classList.remove("checked");
+    }
+
+    function toggleStatusFilter(status) {
+      currentFilterStatus = status;
+      renderTable();
+      showToast(`Filter: ${status}`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("appToast");
+      toast.innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => { toast.classList.remove("show"); }, 2500);
+    }
+
+    window.addEventListener("storage", (e) => {
+      if (e.key === "mallmaze_orders_data" && e.newValue) {
+        ordersData = JSON.parse(e.newValue);
+        renderTable();
+        renderDetailPanel();
+        showToast("🔔 New Online Order received from website!");
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      renderTable();
+      renderDetailPanel();
+    });
+  </script>
+</body>
 </html>

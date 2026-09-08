@@ -1,6 +1,6 @@
 "use strict";
 
-const { recordStorePayouts } = require("./razorpay-route");
+const { recordStorePayouts, recordDeliveryPayout } = require("./razorpay-route");
 
 function deliveryPlanForOrder(order, env) {
   const total = order.totals?.totalPaise || order.total_paise || 0;
@@ -53,6 +53,7 @@ function markOrderPaid(order, db, paymentId) {
     db.delivery_jobs = [delivery, ...(db.delivery_jobs || [])];
   }
   if (Array.isArray(order.payout_splits) && order.payout_splits.length) {
+    recordDeliveryPayout(db, order, { mock: paymentId?.startsWith("pay_mock_") });
     recordStorePayouts(db, order, order.payout_splits, {
       mock: paymentId?.startsWith("pay_mock_"),
       transfers: order.payout_transfers || []

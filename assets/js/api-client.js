@@ -73,6 +73,9 @@
     },
     requestOtp: (payload) => request("/auth/otp/request", { method: "POST", body: payload }),
     verifyOtp: (payload) => request("/auth/otp/verify", { method: "POST", body: payload }),
+    demoLogin: (payload) => request("/auth/demo-login", { method: "POST", body: payload }),
+    ragSearch: (payload) => request("/rag/search", { method: "POST", body: payload }),
+    trackDelivery: (orderId) => request(`/delivery/track?order_id=${encodeURIComponent(String(orderId || ""))}`),
     registerStore: (payload) => request("/stores/register", { method: "POST", body: payload }),
     updateStoreBankDetails: (payload) => request("/stores/bank-details", { method: "POST", body: payload }),
     storePayouts: (storeId) => request(`/store/payouts?store_id=${encodeURIComponent(String(storeId || ""))}`),
@@ -120,6 +123,8 @@
     adminStores: (status) => request(`/admin/stores${status ? `?status=${encodeURIComponent(status)}` : ""}`),
     verifyStore: (payload) => request("/admin/stores/verify", { method: "POST", body: payload }),
     rejectStore: (payload) => request("/admin/stores/reject", { method: "POST", body: payload }),
+    createPosSale: (payload) => request("/pos/sale", { method: "POST", body: payload }),
+    createPosPurchase: (payload) => request("/pos/purchase", { method: "POST", body: payload }),
     moneyPaiseToRupees
   };
 })();

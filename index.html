@@ -34,6 +34,8 @@
     </script>
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <link rel="stylesheet" href="assets/css/react-styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+      <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
   </head>
   <body class="bg-white">
     <nav></nav>
@@ -61,50 +63,66 @@
     </section>
 
     <main class="bg-white">
-      <section class="container mx-auto px-4 -mt-10 md:-mt-12 relative z-10">
-        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <a href="products.html" class="mm-card mm-card-pad group flex items-start gap-4 hover:shadow-card-hover">
-            <div class="h-12 w-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18H3V5a2 2 0 0 1 2-2h9v13"/><path d="M16 18h2a2 2 0 0 0 2-2v-5l-3-5h-3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+      <section class="container mx-auto px-4 floating-glass-bar-wrap">
+        <div class="floating-glass-bar">
+          <!-- Fast Delivery -->
+          <a href="products.html" class="glass-action-btn group">
+            <div class="glass-btn-icon glass-icon-amber">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18H3V5a2 2 0 0 1 2-2h9v13"/><path d="M16 18h2a2 2 0 0 0 2-2v-5l-3-5h-3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
             </div>
-            <div class="min-w-0">
-              <p class="font-extrabold">Fast delivery</p>
-              <p class="text-sm text-muted-foreground mt-1">From nearby local stores with live tracking.</p>
-              <p class="text-sm font-semibold text-primary mt-2">Shop now -></p>
+            <div class="glass-btn-content">
+              <span class="glass-btn-title">Fast Delivery</span>
+              <span class="glass-btn-sub">Nearby stores with tracking</span>
             </div>
+            <div class="glass-btn-arrow">→</div>
           </a>
 
-          <a href="reservations.html" class="mm-card mm-card-pad group flex items-start gap-4 hover:shadow-card-hover">
-            <div class="h-12 w-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <!-- Reserve & Try -->
+          <a href="reservations.html" class="glass-action-btn group">
+            <div class="glass-btn-icon glass-icon-indigo">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             </div>
-            <div class="min-w-0">
-              <p class="font-extrabold">Reserve &amp; try</p>
-              <p class="text-sm text-muted-foreground mt-1">Hold items before visiting the store.</p>
-              <p class="text-sm font-semibold text-primary mt-2">Reserve -></p>
+            <div class="glass-btn-content">
+              <span class="glass-btn-title">Reserve & Try</span>
+              <span class="glass-btn-sub">Hold online, try in store</span>
             </div>
+            <div class="glass-btn-arrow">→</div>
           </a>
 
-          <a href="scan.html" class="mm-card mm-card-pad group flex items-start gap-4 hover:shadow-card-hover">
-            <div class="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V6a2 2 0 0 1 2-2h2"/><path d="M20 7V6a2 2 0 0 0-2-2h-2"/><path d="M4 17v1a2 2 0 0 0 2 2h2"/><path d="M20 17v1a2 2 0 0 1-2 2h-2"/><path d="M7 12h10"/></svg>
+          <!-- Scan&Go -->
+          <a href="scan.html" class="glass-action-btn group">
+            <div class="glass-btn-icon glass-icon-emerald">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V6a2 2 0 0 1 2-2h2"/><path d="M20 7V6a2 2 0 0 0-2-2h-2"/><path d="M4 17v1a2 2 0 0 0 2 2h2"/><path d="M20 17v1a2 2 0 0 1-2 2h-2"/><path d="M7 12h10"/></svg>
             </div>
-            <div class="min-w-0">
-              <p class="font-extrabold">Scan&amp;Go</p>
-              <p class="text-sm text-muted-foreground mt-1">Scan, pay, show QR receipt at exit.</p>
-              <p class="text-sm font-semibold text-primary mt-2">Start scanning -></p>
+            <div class="glass-btn-content">
+              <span class="glass-btn-title">Scan & Go</span>
+              <span class="glass-btn-sub">In-store barcode QR exit</span>
             </div>
+            <div class="glass-btn-arrow">→</div>
           </a>
 
-          <a href="compare.html" class="mm-card mm-card-pad group flex items-start gap-4 hover:shadow-card-hover">
-            <div class="h-12 w-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 5-6"/></svg>
+          <!-- Compare Prices -->
+          <a href="compare.html" class="glass-action-btn group">
+            <div class="glass-btn-icon glass-icon-cyan">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 5-6"/></svg>
             </div>
-            <div class="min-w-0">
-              <p class="font-extrabold">Compare prices</p>
-              <p class="text-sm text-muted-foreground mt-1">Find the best value across stores.</p>
-              <p class="text-sm font-semibold text-primary mt-2">Compare -></p>
+            <div class="glass-btn-content">
+              <span class="glass-btn-title">Compare Prices</span>
+              <span class="glass-btn-sub">Find best local store rates</span>
             </div>
+            <div class="glass-btn-arrow">→</div>
+          </a>
+
+          <!-- Merchant POS Portal -->
+          <a href="dashboard.html" class="glass-action-btn group" style="background: rgba(18, 22, 32, 0.85); border: 1.5px solid rgba(234, 179, 8, 0.4);">
+            <div class="glass-btn-icon" style="background: #eab308; color: #121620;">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+            </div>
+            <div class="glass-btn-content">
+              <span class="glass-btn-title" style="color: #ffffff;">Store POS & Portal</span>
+              <span class="glass-btn-sub" style="color: #facc15;">Partner billing & Shiprocket</span>
+            </div>
+            <div class="glass-btn-arrow" style="color: #facc15;">→</div>
           </a>
         </div>
       </section>
@@ -153,23 +171,25 @@
         -->
 
       <section class="container mx-auto px-4 py-10">
-        <div class="mb-5 flex items-end justify-between gap-4">
+        <div class="section-header-block">
           <div>
-            <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Local stores near you</h2>
-            <p class="section-subheading mt-1">Verified stores, direct storefronts, QR shopping, and delivery-ready products.</p>
+            <span class="section-tag-pill section-tag-amber">🏪 Verified Merchants</span>
+            <h2 class="section-header-title">Local stores near you</h2>
+            <p class="section-header-sub">Verified stores, direct storefronts, QR shopping, and delivery-ready products.</p>
           </div>
-          <a href="autoshelf.html" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">Create store <span aria-hidden="true">-></span></a>
+          <a href="autoshelf.html" class="section-action-btn">Explore Stores →</a>
         </div>
-        <div id="smartmall-stores-list" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"></div>
+        <div id="smartmall-stores-list" class="product-grid"></div>
       </section>
 
       <section class="container mx-auto px-4 py-10">
-        <div class="mb-5 flex items-end justify-between gap-4">
+        <div class="section-header-block">
           <div>
-            <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Recommended from local stores</h2>
-            <p class="section-subheading mt-1">Popular products, deals, and in-stock picks from store catalogs.</p>
+            <span class="section-tag-pill section-tag-indigo">✨ Curated Catalog</span>
+            <h2 class="section-header-title">Recommended from local stores</h2>
+            <p class="section-header-sub">Popular products, deals, and in-stock picks from store catalogs.</p>
           </div>
-          <a href="autoshelf.html#stores" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">View stores <span aria-hidden="true">-></span></a>
+          <a href="products.html" class="section-action-btn">Browse All Products →</a>
         </div>
         <div id="smartmall-products-list" class="product-grid"></div>
       </section>
@@ -184,28 +204,31 @@
             View All <span aria-hidden="true">-></span>
           </a>
         </div>
-        <div id="flash-deals-list" class="grid gap-4 md:grid-cols-3"></div>
+        <div id="flash-deals-list" class="product-grid"></div>
       </section>
 
       <section class="container mx-auto px-4 py-10">
-        <div class="mb-5 flex items-end justify-between gap-4">
+        <div class="section-header-block">
           <div>
-            <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Top deals</h2>
-            <p class="section-subheading mt-1">Best discounts across stores.</p>
+            <span class="section-tag-pill section-tag-emerald">🔥 Exclusive Offers</span>
+            <h2 class="section-header-title">Top deals</h2>
+            <p class="section-header-sub">Best discounts across stores.</p>
           </div>
-          <a href="deals.html" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-600 hover:underline">View all <span aria-hidden="true">-></span></a>
+          <a href="deals.html" class="section-action-btn">View All Deals →</a>
         </div>
-        <div id="top-deals-rail" class="flex gap-4 overflow-x-auto pb-2"></div>
+        <div id="top-deals-rail" class="product-grid"></div>
       </section>
 
       <section class="container mx-auto px-4 py-10">
-        <div class="mb-8 flex items-end justify-between">
+        <div class="section-header-block">
           <div>
-            <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Shop by Category</h2>
-            <p class="section-subheading mt-1">Find exactly what you're looking for</p>
+            <span class="section-tag-pill section-tag-indigo">🗂️ Curated Collections</span>
+            <h2 class="section-header-title">Shop by Category</h2>
+            <p class="section-header-sub">Find exactly what you're looking for across verified local store inventories.</p>
           </div>
+          <a href="products.html" class="section-action-btn">All Categories →</a>
         </div>
-        <div id="categories-list" class="category-grid"></div>
+        <div id="categories-list" class="category-rail"></div>
       </section>
 
       <section class="container mx-auto px-4 py-14">
@@ -253,16 +276,21 @@
         </div>
       </section>
 
-      <section class="container mx-auto px-4 py-12">
-        <div class="mb-8 flex items-end justify-between">
+      <section class="container mx-auto px-4 py-12" id="compare">
+        <div class="section-header-block">
           <div>
-            <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Smart Price Comparison</h2>
-            <p class="section-subheading mt-1">Compare prices across stores.</p>
+            <span class="section-tag-pill section-tag-amber">
+              <svg class="h-3.5 w-3.5 inline mr-1 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 5-6"/></svg>
+              REAL-TIME COMPARISON ENGINE
+            </span>
+            <h2 class="section-header-title">Smart Price Comparison</h2>
+            <p class="section-header-sub">Compare real-time prices, live store stock signals, and delivery speeds across nearby sellers.</p>
           </div>
+          <a href="compare.html" class="section-action-btn">Full Comparison Engine →</a>
         </div>
         <div class="spc-wrap">
           <form id="spc-form" class="spc-form" role="search">
-            <input id="spc-input" list="spc-products" type="text" placeholder="Select a product to compare prices across stores..." class="spc-input" />
+            <input id="spc-input" list="spc-products" type="text" placeholder="Type or select a product (e.g., Wireless Headphones, Smart Watch)..." class="spc-input" />
             <datalist id="spc-products"></datalist>
             <select id="spc-sort" class="spc-sort" aria-label="Sort comparison">
               <option value="value">Best Value</option>
@@ -270,13 +298,14 @@
               <option value="rating">Top Rated</option>
               <option value="delivery">Fastest Delivery</option>
             </select>
-            <button type="submit" class="spc-btn">Compare</button>
+            <button type="submit" class="spc-btn">Compare Now</button>
           </form>
           <div class="spc-chips">
             <button type="button" class="spc-chip" data-query="headphones">Headphones</button>
             <button type="button" class="spc-chip" data-query="watch">Smart Watch</button>
             <button type="button" class="spc-chip" data-query="makeup">Makeup Kit</button>
             <button type="button" class="spc-chip" data-query="shirt">Cotton Shirt</button>
+            <button type="button" class="spc-chip" data-query="shoes">Running Shoes</button>
           </div>
           <div id="spc-results" class="spc-results"></div>
         </div>

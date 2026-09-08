@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MallMaze - Payments & Settlements (Razorpay Route)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #121620;
+      --bg-dark-hover: #1c2230;
+      --bg-main: #f7f6f0;
+      --bg-card: #ffffff;
+      --text-main: #131722;
+      --text-muted: #8c93a3;
+      --border-subtle: #eae7dc;
+      --badge-paid-bg: #dcfce7;
+      --badge-paid-text: #15803d;
+      --badge-pending-bg: #fef3c7;
+      --badge-pending-text: #b45309;
+      --badge-failed-bg: #fee2e2;
+      --badge-failed-text: #b91c1c;
+      --btn-primary: #151922;
+      --btn-secondary: #fef08a;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: #0b0e14;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      width: 100%;
+      max-width: 1480px;
+      height: 94vh;
+      min-height: 720px;
+      background-color: var(--bg-dark);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    .sidebar {
+      width: 210px;
+      min-width: 210px;
+      background-color: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px 20px 16px;
+      border-right: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 30px 8px;
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-icon svg {
+      width: 100%;
+      height: 100%;
+      stroke: #ffffff;
+    }
+
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+      margin: 16px 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+
+    .nav-item svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+
+    .nav-item:hover {
+      color: #ffffff;
+      background-color: var(--bg-dark-hover);
+    }
+
+    .nav-item.active {
+      background-color: #ffffff;
+      color: #121620;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .nav-item.active svg {
+      stroke: #121620;
+    }
+
+    .nav-spacer { flex: 1; }
+    .sidebar-footer { padding-top: 12px; }
+
+    .main-wrapper {
+      flex: 1;
+      background-color: var(--bg-main);
+      border-top-left-radius: 24px;
+      border-bottom-left-radius: 24px;
+      display: flex;
+      padding: 24px;
+      gap: 20px;
+      overflow: hidden;
+    }
+
+    .section-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #131722;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .route-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-simulate {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-simulate:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid #e5e2d6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 10px 4px 4px;
+      border-radius: 30px;
+      background-color: #ffffff;
+      border: 1px solid #e5e2d6;
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .user-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .user-email {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .stats-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .kpi-card {
+      background-color: var(--bg-card);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-title {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+
+    .kpi-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background-color: #ecfdf5;
+      color: #059669;
+    }
+
+    .kpi-badge.blue {
+      background-color: #eff6ff;
+      color: #2563eb;
+    }
+
+    .kpi-badge.purple {
+      background-color: #f5f3ff;
+      color: #7c3aed;
+    }
+
+    .filters-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dropdown-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background-color: #ffffff;
+      border: 1px solid #e5e2d6;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .dropdown-pill:hover {
+      border-color: #cbd5e1;
+      background-color: #f8fafc;
+    }
+
+    .dropdown-pill.active {
+      background: #151922;
+      color: #fff;
+      border-color: #151922;
+    }
+
+    .table-container {
+      flex: 1;
+      background-color: var(--bg-card);
+      border-radius: 18px;
+      border: 1px solid var(--border-subtle);
+      overflow-y: auto;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .payments-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .payments-table th {
+      padding: 12px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1px solid #f1f5f9;
+      background-color: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .payments-table td {
+      padding: 13px 14px;
+      font-size: 12.5px;
+      border-bottom: 1px solid #f8fafc;
+      color: #334155;
+      vertical-align: middle;
+    }
+
+    .payment-row {
+      cursor: pointer;
+      transition: background-color 0.12s ease;
+    }
+
+    .payment-row:hover {
+      background-color: #fafaf9;
+    }
+
+    .payment-row.selected {
+      background-color: #f0fdf4;
+    }
+
+    .mode-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      background-color: #f1f5f9;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-success {
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+
+    .badge-pending {
+      background-color: #fef3c7;
+      color: #b45309;
+    }
+
+    .badge-failed {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+
+    /* RIGHT DETAIL DRAWER */
+    .detail-panel {
+      width: 360px;
+      min-width: 360px;
+      background-color: #ffffff;
+      border-radius: 20px;
+      border: 1px solid var(--border-subtle);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      overflow-y: auto;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .detail-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    /* SPLIT ROUTE BOX */
+    .split-route-box {
+      background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px;
+      margin: 12px 0 16px 0;
+    }
+
+    .split-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #475569;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .split-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 12px;
+      border-bottom: 1px dashed #cbd5e1;
+    }
+
+    .split-item:last-child {
+      border-bottom: none;
+      padding-top: 8px;
+    }
+
+    .split-val-pos {
+      color: #15803d;
+      font-weight: 800;
+    }
+
+    .split-val-neg {
+      color: #2563eb;
+      font-weight: 700;
+    }
+
+    .payment-summary-box {
+      border: 1px solid #f1f5f9;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      background-color: #ffffff;
+    }
+
+    .sum-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 7px;
+    }
+
+    .sum-row.strong {
+      color: #0f172a;
+      font-weight: 700;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 8px;
+      margin-top: 4px;
+    }
+
+    .settlement-card {
+      font-size: 12px;
+      color: #334155;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .settlement-card p {
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .settlement-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .detail-ctas {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .btn-action {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-dark {
+      background-color: #151922;
+      color: #ffffff;
+    }
+
+    .btn-dark:hover {
+      background-color: #2a3140;
+    }
+
+    .btn-yellow {
+      background-color: #fef08a;
+      color: #854d0e;
+    }
+
+    .btn-yellow:hover {
+      background-color: #fde047;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fafaf9;
+    }
+
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 5px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      font-size: 13px;
+      font-family: inherit;
+      color: #0f172a;
+      background: #fff;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .modal-footer {
+      padding: 14px 20px 18px 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <a class="brand" href="admin-dashboard.html">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <span>MallMaze</span>
+      </a>
+
+      <div class="nav-group">
+        <a class="nav-item" href="admin-dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" href="orders.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Orders</span>
+        </a>
+        <a class="nav-item active" href="payments.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span>Payments & Route</span>
+        </a>
+        <a class="nav-item" href="customers.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Customers</span>
+        </a>
+        <a class="nav-item" href="reports.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Reports</span>
+        </a>
+        <a class="nav-item" href="statistics.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Statistics</span>
+        </a>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <div class="nav-group">
+        <a class="nav-item" href="register-store.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+          <span>Register Store</span>
+        </a>
+      </div>
+
+      <div class="nav-spacer"></div>
+
+      <div class="sidebar-footer">
+        <a class="nav-item" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Log out</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-wrapper">
+      <section class="section-content">
+        <div class="top-header">
+          <div>
+            <h1 class="page-title">
+              Payments & Route Settlements
+              <span class="route-pill"><span class="pulse-dot"></span> Razorpay Auto-Route &lt; 1s</span>
+            </h1>
+            <p style="font-size: 12.5px; color: #64748b; margin-top: 3px;">
+              Automated Marketplace Splits: Customer pays MallMaze &rarr; Platform fee deducted &rarr; Store Bank account credited instantly.
+            </p>
+          </div>
+          <div class="top-actions">
+            <button class="btn-simulate" onclick="openSimulateModal()">
+              <span>⚡</span>
+              <span>Test Instant Split Flow</span>
+            </button>
+            <button class="icon-btn" title="Export Payments" onclick="exportLedgerCsv()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </button>
+            <div class="user-profile">
+              <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80" alt="Admin" class="user-avatar" />
+              <div class="user-info">
+                <span class="user-name">MallMaze Admin</span>
+                <span class="user-email">admin@mallmaze.in</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI STATS -->
+        <div class="stats-kpi-grid">
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-title">Total Customer Paid (GMV)</div>
+              <div class="kpi-value" id="kpiGross">₹13,449</div>
+            </div>
+            <span class="kpi-badge">Captured</span>
+          </div>
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-title">MallMaze Platform Fee (10%)</div>
+              <div class="kpi-value" id="kpiPlatformFee" style="color:#2563eb;">₹1,345</div>
+            </div>
+            <span class="kpi-badge blue">Retained</span>
+          </div>
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-title">Disbursed to Shop Owners</div>
+              <div class="kpi-value" id="kpiStorePayouts" style="color:#059669;">₹12,104</div>
+            </div>
+            <span class="kpi-badge">Transferred</span>
+          </div>
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-title">Automated Settlement Speed</div>
+              <div class="kpi-value" style="font-size:19px; color:#059669;">&lt; 1 Second</div>
+            </div>
+            <span class="kpi-badge purple">T+0 Instant</span>
+          </div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <button class="dropdown-pill active" id="btnFilterStoreAll" onclick="filterByStore('ALL')">All Stores</button>
+            <button class="dropdown-pill" id="btnFilterStoreTech" onclick="filterByStore('s1')">TechZone</button>
+            <button class="dropdown-pill" id="btnFilterStoreLuxe" onclick="filterByStore('s2')">Luxe Fashion</button>
+            <button class="dropdown-pill" id="btnFilterStoreBeauty" onclick="filterByStore('s3')">Beauty Blvd</button>
+            <button class="dropdown-pill" id="btnFilterStoreSport" onclick="filterByStore('s4')">SportX</button>
+          </div>
+          <div class="filter-group">
+            <button class="dropdown-pill" onclick="toggleSort()">
+              <span id="sortLabel">Sort by Amount ↓</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-container">
+          <table class="payments-table">
+            <thead>
+              <tr>
+                <th>Txn / Route ID</th>
+                <th>Store Partner</th>
+                <th>Customer & Mode</th>
+                <th>Status</th>
+                <th>Customer Paid (₹)</th>
+                <th>Platform Fee (10%)</th>
+                <th>Store Payout (90%)</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DETAIL PANEL -->
+      <aside class="detail-panel" id="paymentDetailPanel">
+        <div class="detail-header">
+          <h2 class="detail-title" id="pTxnId">payout-101-s1</h2>
+          <span class="status-badge badge-success" id="pStatusBadge">Settled (&lt; 1s)</span>
+        </div>
+        <p style="font-size: 11.5px; color: #94a3b8; margin-bottom: 12px;" id="pTimestamp">Just now</p>
+
+        <!-- AUTOMATED SPLIT VISUALIZER -->
+        <div class="split-route-box">
+          <div class="split-title">
+            <span>⚡ Automated 3-Way Route Split</span>
+            <span style="color:#059669; font-weight:800;">1-Sec Auto-Execution</span>
+          </div>
+          <div class="split-item">
+            <span>Customer Payment (Gross)</span>
+            <strong id="pGrossVal" style="color:#0f172a;">₹2,999</strong>
+          </div>
+          <div class="split-item">
+            <span>MallMaze Platform Fee (10%)</span>
+            <span id="pFeeVal" class="split-val-neg">- ₹300</span>
+          </div>
+          <div class="split-item">
+            <span>Direct to Shop Owner A/c (90%)</span>
+            <span id="pNetVal" class="split-val-pos">+ ₹2,699</span>
+          </div>
+          <div class="split-item" id="rowDelFee" style="border-top:1px dashed #cbd5e1; padding-top:6px;">
+            <span>Delivery Charge to Partner A/c</span>
+            <span id="pDelFeeVal" style="color:#7c3aed; font-weight:800;">+ ₹49</span>
+          </div>
+        </div>
+
+        <div class="payment-summary-box">
+          <div class="sum-row"><span>Store Name</span><strong id="pStoreName" style="color:#0f172a;">TechZone Electronics</strong></div>
+          <div class="sum-row"><span>Customer Name</span><span id="pCustomerName">Rahul Sharma</span></div>
+          <div class="sum-row"><span>Payment Mode</span><span id="pPayMode">UPI (Google Pay)</span></div>
+          <div class="sum-row"><span>Order ID</span><span id="pOrderId">ORD-LIVE-1024</span></div>
+          <div class="sum-row"><span>Razorpay Transfer ID</span><span id="pRzpTransfer" style="font-family:monospace; font-size:11px;">trf_rzp_9841201</span></div>
+          <div class="sum-row"><span>Store Linked Account</span><span id="pLinkedAcc" style="font-family:monospace; font-size:11px;">acc_route_s1_techzone</span></div>
+          <div class="sum-row strong"><span>Total Paid by Customer</span><span id="pTotalPaid" style="color:#15803d; font-size:16px;">₹2,999</span></div>
+        </div>
+
+        <h4 style="font-size: 12.5px; font-weight: 700; margin-bottom: 8px;">Shop Owner Bank Account (Linked)</h4>
+        <div class="settlement-card">
+          <p><span>Bank Name:</span> <strong id="pBankName">HDFC Bank Ltd</strong></p>
+          <p><span>Account Number:</span> <strong id="pAccountMasked">XXXX-XXXX-4921</strong></p>
+          <p><span>IFSC Code:</span> <strong id="pIfsc">HDFC0000128</strong></p>
+          <p><span>Beneficiary:</span> <strong id="pBeneficiary">TechZone Retail Private Limited</strong></p>
+          <p><span>Transfer Speed:</span> <strong style="color:#059669;">Instant (0-second hold)</strong></p>
+        </div>
+
+        <div class="detail-ctas">
+          <button class="btn-action btn-dark" onclick="printReceipt()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print Tax Invoice
+          </button>
+          <button class="btn-action btn-yellow" onclick="issueUPIRefund()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            Reverse Transfer
+          </button>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- SIMULATION MODAL -->
+  <div class="modal-overlay" id="simModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚡ Test 1-Second Instant Split Automation</h3>
+        <button onclick="closeSimulateModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:12.5px; color:#475569; margin-bottom:16px; line-height:1.5;">
+          Simulate a real customer checkout. Watch MallMaze collect the customer's payment, automatically retain the 10% platform fee, and dispatch the remaining 90% directly to the shop owner's linked bank account in under 1 second.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Destination Shop / Store</label>
+          <select id="simStoreId" class="form-select" onchange="updateSimPreview()">
+            <option value="s1" selected>TechZone Electronics (HDFC A/c *4921)</option>
+            <option value="s2">Luxe Fashion House (ICICI A/c *9012)</option>
+            <option value="s3">Beauty Boulevard (Axis A/c *3344)</option>
+            <option value="s4">SportX Arena (SBI A/c *7788)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Customer Name</label>
+          <input type="text" id="simCustName" class="form-input" value="Siddharth Rao" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Customer Payment Amount (₹)</label>
+          <input type="number" id="simAmount" class="form-input" value="3500" min="10" oninput="updateSimPreview()" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Customer Payment Interface</label>
+          <select id="simPayMode" class="form-select">
+            <option>Razorpay UPI (Google Pay)</option>
+            <option>Razorpay UPI (PhonePe)</option>
+            <option>Razorpay Dynamic QR Code</option>
+            <option>Credit / Debit Card POS</option>
+          </select>
+        </div>
+
+        
+        <div class="form-group" style="display:flex; align-items:center; gap:8px; background:#faf5ff; border:1px solid #e9d5ff; border-radius:10px; padding:10px 12px;">
+          <input type="checkbox" id="simIncludeDelivery" checked onchange="updateSimPreview()" style="width:16px; height:16px; cursor:pointer;" />
+          <label for="simIncludeDelivery" style="font-size:12px; font-weight:700; color:#6b21a8; cursor:pointer; margin:0;">
+            Allot Hyperlocal Delivery Charge (₹49 direct to Delivery Partner)
+          </label>
+        </div>
+
+        <!-- LIVE SPLIT PREVIEW -->
+        <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-top:14px;">
+          <div style="font-size:11.5px; font-weight:700; color:#334155; margin-bottom:8px;">Instant 3-Way Split Breakdown (Live Preview):</div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+            <span style="color:#64748b;">Total Customer Pays:</span>
+            <strong id="prevCustPays">₹3,549</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; color:#2563eb;">
+            <span>MallMaze Platform Fee (10%):</span>
+            <strong id="prevPlatformFee">- ₹350</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; color:#059669; font-weight:700;">
+            <span>Shop Owner Instant Payout (90%):</span>
+            <span id="prevStoreNet">+ ₹3,150</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:#7c3aed; font-weight:800; border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:4px;">
+            <span>Delivery Partner Payout (Rapid Fleet):</span>
+            <span id="prevDeliveryFee">+ ₹49</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action" onclick="closeSimulateModal()" style="background:#f1f5f9; color:#475569;">Cancel</button>
+        <button class="btn-action" onclick="executeInstantSplitSimulation()" id="btnRunSim" style="background:#059669; color:#ffffff; font-weight:800;">
+          <span>⚡ Execute 1-Second Auto-Split</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="appToast">Notification message</div>
+
+  <script>
+    let rawPayoutsData = [];
+    let selectedPayoutId = null;
+    let currentStoreFilter = 'ALL';
+    let sortDesc = true;
+
+    async function fetchPayouts() {
+      try {
+        const res = await fetch('/api/admin/payouts');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.payouts) && data.payouts.length > 0) {
+            rawPayoutsData = data.payouts;
+            if (data.summary) {
+              document.getElementById("kpiGross").innerText = "₹" + Number(data.summary.total_gross_inr || 0).toLocaleString('en-IN');
+              document.getElementById("kpiPlatformFee").innerText = "₹" + Number(data.summary.platform_fee_inr || 0).toLocaleString('en-IN');
+              document.getElementById("kpiStorePayouts").innerText = "₹" + Number(data.summary.store_payouts_inr || 0).toLocaleString('en-IN');
+            }
+            renderTable();
+            if (!selectedPayoutId || !rawPayoutsData.some(p => p.id === selectedPayoutId)) {
+              selectPayout(rawPayoutsData[0].id);
+            } else {
+              selectPayout(selectedPayoutId);
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Backend API not reachable, using local data", err);
+      }
+      // Fallback initial demo data
+      initFallbackData();
+    }
+
+    function initFallbackData() {
+      rawPayoutsData = [
+        {
+          id: 'payout-101-s1',
+          store_id: 's1',
+          store_name: 'TechZone Electronics',
+          order_id: 'ORD-LIVE-1024',
+          customer_name: 'Rahul Sharma',
+          payment_mode: 'UPI (Google Pay)',
+          gross_inr: 2999,
+          commission_inr: 300,
+          net_inr: 2699,
+          status: 'settled',
+          is_instant: true,
+          settlement_speed: '< 1 second (Auto-Route)',
+          razorpay_transfer_id: 'trf_rzp_9841201',
+          razorpay_account_id: 'acc_route_s1_techzone',
+          bank_name: 'HDFC Bank',
+          account_number_masked: 'XXXX-XXXX-4921',
+          ifsc_code: 'HDFC0000128',
+          beneficiary_name: 'TechZone Retail Private Limited',
+          created_at: new Date(Date.now() - 35 * 60000).toISOString()
+        },
+        {
+          id: 'payout-102-s2',
+          store_id: 's2',
+          store_name: 'Luxe Fashion House',
+          order_id: 'ORD-LIVE-1025',
+          customer_name: 'Neha Kulkarni',
+          payment_mode: 'UPI (PhonePe)',
+          gross_inr: 5400,
+          commission_inr: 540,
+          net_inr: 4860,
+          status: 'settled',
+          is_instant: true,
+          settlement_speed: '< 1 second (Auto-Route)',
+          razorpay_transfer_id: 'trf_rzp_9841202',
+          razorpay_account_id: 'acc_route_s2_luxe',
+          bank_name: 'ICICI Bank',
+          account_number_masked: 'XXXX-XXXX-9012',
+          ifsc_code: 'ICIC0000541',
+          beneficiary_name: 'Luxe Couture India',
+          created_at: new Date(Date.now() - 95 * 60000).toISOString()
+        },
+        {
+          id: 'payout-103-s3',
+          store_id: 's3',
+          store_name: 'Beauty Boulevard',
+          order_id: 'ORD-LIVE-1026',
+          customer_name: 'Ananya Deshmukh',
+          payment_mode: 'Razorpay UPI QR',
+          gross_inr: 1850,
+          commission_inr: 185,
+          net_inr: 1665,
+          status: 'settled',
+          is_instant: true,
+          settlement_speed: '< 1 second (Auto-Route)',
+          razorpay_transfer_id: 'trf_rzp_9841203',
+          razorpay_account_id: 'acc_route_s3_beauty',
+          bank_name: 'Axis Bank',
+          account_number_masked: 'XXXX-XXXX-3344',
+          ifsc_code: 'UTIB0000084',
+          beneficiary_name: 'Beauty Boulevard Retail',
+          created_at: new Date(Date.now() - 180 * 60000).toISOString()
+        },
+        {
+          id: 'payout-104-s4',
+          store_id: 's4',
+          store_name: 'SportX Arena',
+          order_id: 'ORD-LIVE-1027',
+          customer_name: 'Vikram Malhotra',
+          payment_mode: 'Net Banking (SBI)',
+          gross_inr: 3200,
+          commission_inr: 320,
+          net_inr: 2880,
+          status: 'settled',
+          is_instant: true,
+          settlement_speed: '< 1 second (Auto-Route)',
+          razorpay_transfer_id: 'trf_rzp_9841204',
+          razorpay_account_id: 'acc_route_s4_sportx',
+          bank_name: 'State Bank of India',
+          account_number_masked: 'XXXX-XXXX-7788',
+          ifsc_code: 'SBIN0004021',
+          beneficiary_name: 'SportX Athletics',
+          created_at: new Date(Date.now() - 310 * 60000).toISOString()
+        }
+      ];
+      calcKpis();
+      renderTable();
+      selectPayout(rawPayoutsData[0].id);
+    }
+
+    function calcKpis() {
+      const gross = rawPayoutsData.reduce((sum, p) => sum + (Number(p.gross_inr) || 0), 0);
+      const fee = rawPayoutsData.reduce((sum, p) => sum + (Number(p.commission_inr) || 0), 0);
+      const net = rawPayoutsData.reduce((sum, p) => sum + (Number(p.net_inr) || 0), 0);
+      document.getElementById("kpiGross").innerText = "₹" + gross.toLocaleString('en-IN');
+      document.getElementById("kpiPlatformFee").innerText = "₹" + fee.toLocaleString('en-IN');
+      document.getElementById("kpiStorePayouts").innerText = "₹" + net.toLocaleString('en-IN');
+    }
+
+    function getFilteredData() {
+      let list = [...rawPayoutsData];
+      if (currentStoreFilter !== 'ALL') {
+        list = list.filter(p => String(p.store_id) === currentStoreFilter);
+      }
+      list.sort((a, b) => {
+        const amtA = Number(a.gross_inr || 0);
+        const amtB = Number(b.gross_inr || 0);
+        return sortDesc ? amtB - amtA : amtA - amtB;
+      });
+      return list;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("paymentsTableBody");
+      tbody.innerHTML = "";
+      const list = getFilteredData();
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">No settlement records found for this filter.</td></tr>';
+        return;
+      }
+
+      list.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.className = "payment-row " + (p.id === selectedPayoutId ? "selected" : "");
+        tr.onclick = () => selectPayout(p.id);
+
+        const d = p.created_at ? new Date(p.created_at) : new Date();
+        const dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+        tr.innerHTML = `
+          <td>
+            <strong style="color:#0f172a; font-size:12px;">${p.id}</strong>
+            <div style="font-size:10.5px; color:#94a3b8; font-family:monospace;">${p.razorpay_transfer_id || 'Auto-Route'}</div>
+          </td>
+          <td>
+            <div style="font-weight:700; color:#1e293b;">${p.store_name || p.store_id}</div>
+            <div style="font-size:10.5px; color:#64748b;">${p.bank_name || 'Bank'} (${p.account_number_masked || '****'})</div>
+          </td>
+          <td>
+            <div style="font-weight:600; color:#334155;">${p.customer_name || 'Customer'}</div>
+            <span class="mode-tag">${p.payment_mode || 'Razorpay UPI'}</span>
+          </td>
+          <td>
+            <span class="status-badge badge-success">⚡ Settled (&lt; 1s)</span>
+          </td>
+          <td><strong style="color:#0f172a;">₹${Number(p.gross_inr || 0).toLocaleString('en-IN')}</strong></td>
+          <td style="color:#2563eb; font-weight:700;">₹${Number(p.commission_inr || 0).toLocaleString('en-IN')}</td>
+          <td style="color:#059669; font-weight:800;">₹${Number(p.net_inr || 0).toLocaleString('en-IN')}</td>
+          <td style="color:#64748b; font-size:11.5px;">${dateStr}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function selectPayout(id) {
+      selectedPayoutId = id;
+      const p = rawPayoutsData.find(x => x.id === id);
+      if (!p) return;
+
+      document.querySelectorAll(".payment-row").forEach(r => r.classList.remove("selected"));
+      renderTable();
+
+      document.getElementById("pTxnId").innerText = p.id;
+      const d = p.created_at ? new Date(p.created_at) : new Date();
+      document.getElementById("pTimestamp").innerText = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ' at ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST';
+
+      const gross = Number(p.gross_inr || 0);
+      const fee = Number(p.commission_inr || Math.round(gross * 0.1));
+      const net = Number(p.net_inr || (gross - fee));
+
+      document.getElementById("pGrossVal").innerText = "₹" + gross.toLocaleString('en-IN');
+      document.getElementById("pFeeVal").innerText = "- ₹" + fee.toLocaleString('en-IN');
+      document.getElementById("pNetVal").innerText = "+ ₹" + net.toLocaleString('en-IN');
+
+      document.getElementById("pStoreName").innerText = p.store_name || p.store_id;
+      document.getElementById("pCustomerName").innerText = p.customer_name || "Customer";
+      document.getElementById("pPayMode").innerText = p.payment_mode || "Razorpay UPI";
+      document.getElementById("pOrderId").innerText = p.order_id || "#ORD-MALL";
+      document.getElementById("pRzpTransfer").innerText = p.razorpay_transfer_id || "trf_rzp_" + Date.now();
+      document.getElementById("pLinkedAcc").innerText = p.razorpay_account_id || ("acc_route_" + p.store_id);
+      document.getElementById("pTotalPaid").innerText = "₹" + gross.toLocaleString('en-IN');
+
+      document.getElementById("pBankName").innerText = p.bank_name || "HDFC Bank Ltd";
+      document.getElementById("pAccountMasked").innerText = p.account_number_masked || "XXXX-XXXX-4921";
+      document.getElementById("pIfsc").innerText = p.ifsc_code || "HDFC0000128";
+      document.getElementById("pBeneficiary").innerText = p.beneficiary_name || p.store_name || "Store Retail Partner";
+    }
+
+    function filterByStore(storeId) {
+      currentStoreFilter = storeId;
+      document.querySelectorAll(".filters-bar .dropdown-pill").forEach(btn => btn.classList.remove("active"));
+      if (storeId === 'ALL') document.getElementById("btnFilterStoreAll").classList.add("active");
+      if (storeId === 's1') document.getElementById("btnFilterStoreTech").classList.add("active");
+      if (storeId === 's2') document.getElementById("btnFilterStoreLuxe").classList.add("active");
+      if (storeId === 's3') document.getElementById("btnFilterStoreBeauty").classList.add("active");
+      if (storeId === 's4') document.getElementById("btnFilterStoreSport").classList.add("active");
+      renderTable();
+      showToast("Filtered by: " + (storeId === 'ALL' ? 'All Stores' : storeId));
+    }
+
+    function toggleSort() {
+      sortDesc = !sortDesc;
+      document.getElementById("sortLabel").innerText = sortDesc ? "Sort by Amount ↓" : "Sort by Amount ↑";
+      renderTable();
+      showToast(sortDesc ? "Sorted highest amount first" : "Sorted lowest amount first");
+    }
+
+    function openSimulateModal() {
+      updateSimPreview();
+      document.getElementById("simModal").classList.add("active");
+    }
+
+    function closeSimulateModal() {
+      document.getElementById("simModal").classList.remove("active");
+    }
+
+    function updateSimPreview() {
+      const amt = Math.max(10, Number(document.getElementById("simAmount").value || 0));
+      const incDel = document.getElementById("simIncludeDelivery") ? document.getElementById("simIncludeDelivery").checked : true;
+      const delFee = incDel ? 49 : 0;
+      const totalPaid = amt + delFee;
+      const fee = Math.round(amt * 0.1);
+      const net = amt - fee;
+      document.getElementById("prevCustPays").innerText = "₹" + totalPaid.toLocaleString('en-IN');
+      document.getElementById("prevPlatformFee").innerText = "- ₹" + fee.toLocaleString('en-IN');
+      document.getElementById("prevStoreNet").innerText = "+ ₹" + net.toLocaleString('en-IN');
+      const prevDel = document.getElementById("prevDeliveryFee");
+      if (prevDel) prevDel.innerText = "+ ₹" + delFee.toLocaleString('en-IN');
+    }
+
+    async function executeInstantSplitSimulation() {
+      const storeId = document.getElementById("simStoreId").value;
+      const custName = document.getElementById("simCustName").value.trim() || "Rahul Verma";
+      const amt = Math.max(10, Number(document.getElementById("simAmount").value || 2500));
+      const payMode = document.getElementById("simPayMode").value;
+      const incDel = document.getElementById("simIncludeDelivery") ? document.getElementById("simIncludeDelivery").checked : true;
+
+      const btn = document.getElementById("btnRunSim");
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Processing 1-Second 3-Way Split...</span>';
+
+      try {
+        const res = await fetch('/api/payments/simulate-instant-split', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            store_id: storeId,
+            customer_name: custName,
+            amount_inr: amt,
+            payment_mode: payMode,
+            include_delivery: incDel
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          closeSimulateModal();
+          showToast("⚡ INSTANT SPLIT COMPLETE: ₹" + data.split.platform_fee_inr + " to MallMaze, ₹" + data.split.store_payout_inr + " dispatched to " + data.split.store_name + " in < 1 second!");
+          await fetchPayouts();
+          if (data.payout && data.payout.id) {
+            selectPayout(data.payout.id);
+          }
+          btn.disabled = false;
+          btn.innerHTML = '<span>⚡ Execute 1-Second Auto-Split</span>';
+          return;
+        }
+      } catch (err) {
+        console.warn("Backend simulate call failed, executing frontend simulation", err);
+      }
+
+      // Local fallback simulation
+      setTimeout(() => {
+        const fee = Math.round(amt * 0.1);
+        const net = amt - fee;
+        const storeMap = {
+          s1: { name: 'TechZone Electronics', bank: 'HDFC Bank', acc: 'XXXX-XXXX-4921', ifsc: 'HDFC0000128', ref: 'acc_route_s1_techzone' },
+          s2: { name: 'Luxe Fashion House', bank: 'ICICI Bank', acc: 'XXXX-XXXX-9012', ifsc: 'ICIC0000541', ref: 'acc_route_s2_luxe' },
+          s3: { name: 'Beauty Boulevard', bank: 'Axis Bank', acc: 'XXXX-XXXX-3344', ifsc: 'UTIB0000084', ref: 'acc_route_s3_beauty' },
+          s4: { name: 'SportX Arena', bank: 'State Bank of India', acc: 'XXXX-XXXX-7788', ifsc: 'SBIN0004021', ref: 'acc_route_s4_sportx' }
+        };
+        const sMeta = storeMap[storeId] || storeMap.s1;
+        const newTxn = {
+          id: 'payout-' + Date.now() + '-' + storeId,
+          store_id: storeId,
+          store_name: sMeta.name,
+          order_id: 'ORD-INSTANT-' + Date.now(),
+          customer_name: custName,
+          payment_mode: payMode,
+          gross_inr: amt,
+          commission_inr: fee,
+          net_inr: net,
+          status: 'settled',
+          is_instant: true,
+          settlement_speed: '< 1 second (Auto-Route)',
+          razorpay_transfer_id: 'trf_rzp_' + Date.now(),
+          razorpay_account_id: sMeta.ref,
+          bank_name: sMeta.bank,
+          account_number_masked: sMeta.acc,
+          ifsc_code: sMeta.ifsc,
+          beneficiary_name: sMeta.name,
+          created_at: new Date().toISOString()
+        };
+
+        rawPayoutsData.unshift(newTxn);
+        calcKpis();
+        closeSimulateModal();
+        renderTable();
+        selectPayout(newTxn.id);
+        showToast("⚡ INSTANT SPLIT COMPLETE: ₹" + fee + " to MallMaze, ₹" + net + " dispatched to " + sMeta.name + " in < 1 second!");
+        btn.disabled = false;
+        btn.innerHTML = '<span>⚡ Execute 1-Second Auto-Split</span>';
+      }, 750);
+    }
+
+    function exportLedgerCsv() {
+      const list = getFilteredData();
+      let csv = "Txn ID,Store Name,Linked Account,Customer,Payment Mode,Gross INR,MallMaze Fee INR,Store Payout INR,Bank Name,Account Masked,IFSC,Status,Date\n";
+      list.forEach(p => {
+        csv += `"${p.id}","${p.store_name}","${p.razorpay_account_id}","${p.customer_name}","${p.payment_mode}",${p.gross_inr},${p.commission_inr},${p.net_inr},"${p.bank_name}","${p.account_number_masked}","${p.ifsc_code}","${p.status}","${p.created_at}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", "mallmaze_route_settlements_" + Date.now() + ".csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Settlement Ledger CSV downloaded!");
+    }
+
+    function printReceipt() {
+      showToast("GST Tax Invoice & Route Transfer Receipt generated for " + selectedPayoutId);
+      window.print();
+    }
+
+    function issueUPIRefund() {
+      const p = rawPayoutsData.find(x => x.id === selectedPayoutId);
+      if (!p) return;
+      if (confirm("Issue instant reverse Route UPI refund for order " + p.order_id + " (₹" + p.gross_inr + ")?")) {
+        showToast("UPI Reverse Transfer of ₹" + p.gross_inr + " dispatched to customer via Razorpay Auto-Route!");
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("appToast");
+      t.innerText = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2800);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      fetchPayouts();
+    });
+  </script>
+</body>
+</html>

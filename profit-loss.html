@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MallMaze - Profit & Loss Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #121620;
+      --bg-dark-hover: #1c2230;
+      --bg-main: #f7f6f0;
+      --bg-card: #ffffff;
+      --text-main: #131722;
+      --text-muted: #8c93a3;
+      --border-subtle: #eae7dc;
+      --badge-income-bg: #dcfce7;
+      --badge-income-text: #15803d;
+      --badge-expense-bg: #fee2e2;
+      --badge-expense-text: #b91c1c;
+      --badge-paid-bg: #fef3c7;
+      --badge-paid-text: #b45309;
+      --btn-track-bg: #151922;
+      --btn-refund-bg: #fef08a;
+      --btn-refund-hover: #fde047;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: #0b0e14;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      width: 100%;
+      max-width: 1480px;
+      height: 94vh;
+      min-height: 720px;
+      background-color: var(--bg-dark);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 210px;
+      min-width: 210px;
+      background-color: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px 20px 16px;
+      border-right: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 30px 8px;
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      text-decoration: none;
+    }
+
+    .brand-icon { width: 22px; height: 22px; }
+    .brand-icon svg { width: 100%; height: 100%; stroke: #ffffff; }
+
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+      margin: 16px 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+
+    .nav-item svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+
+    .nav-item:hover {
+      color: #ffffff;
+      background-color: var(--bg-dark-hover);
+    }
+
+    .nav-item.active {
+      background-color: #ffffff;
+      color: #121620;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .nav-item.active svg { stroke: #121620; }
+    .nav-spacer { flex: 1; }
+    .sidebar-footer { padding-top: 12px; }
+
+    /* Main Area */
+    .main-wrapper {
+      flex: 1;
+      background-color: var(--bg-main);
+      border-top-left-radius: 24px;
+      border-bottom-left-radius: 24px;
+      display: flex;
+      padding: 24px;
+      gap: 20px;
+      overflow: hidden;
+    }
+
+    .orders-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #131722;
+      letter-spacing: -0.5px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-action-primary {
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-record-offline { background: #121620; color: #ffffff; }
+    .btn-record-offline:hover { background: #272f3e; }
+    .btn-add-expense { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .btn-add-expense:hover { background: #fecaca; }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 6px;
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+
+    .user-name { font-size: 13.5px; font-weight: 700; color: #131722; }
+    .user-email { font-size: 11px; color: #94a3b8; }
+
+    /* Top Executive KPI Grid */
+    .pnl-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .kpi-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+
+    .kpi-card.highlight {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+    }
+
+    .kpi-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; }
+    .kpi-val { font-size: 19px; font-weight: 800; color: #0f172a; margin-top: 3px; }
+    .kpi-val.inflow { color: #15803d; }
+    .kpi-val.outflow { color: #dc2626; }
+    .kpi-sub { font-size: 11px; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+    /* Filter Pills Bar */
+    .filters-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dropdown-pill {
+      background: #f0eee5;
+      border: 1px solid transparent;
+      padding: 6px 13px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .dropdown-pill:hover {
+      background: #ffffff;
+      border-color: #e2e8f0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .dropdown-pill.active-pill {
+      background: #121620;
+      color: #ffffff;
+    }
+
+    .dropdown-pill svg { width: 11px; height: 11px; stroke-width: 2.5; }
+
+    /* Center Table */
+    .table-container {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .table-container::-webkit-scrollbar { width: 6px; }
+    .table-container::-webkit-scrollbar-thumb { background: #e2ded0; border-radius: 10px; }
+
+    .orders-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 4px;
+    }
+
+    .orders-table th {
+      text-align: left;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #94a3b8;
+      padding: 8px 12px;
+      user-select: none;
+    }
+
+    .orders-table th.th-checkbox { width: 32px; padding-left: 12px; }
+    .orders-table th.th-action { width: 32px; text-align: right; padding-right: 14px; }
+
+    .order-row {
+      background: transparent;
+      border-radius: 14px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .order-row td {
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #1e293b;
+      vertical-align: middle;
+    }
+
+    .order-row td:first-child { border-top-left-radius: 14px; border-bottom-left-radius: 14px; padding-left: 12px; }
+    .order-row td:last-child { border-top-right-radius: 14px; border-bottom-right-radius: 14px; padding-right: 14px; text-align: right; }
+    .order-row:hover { background: rgba(255, 255, 255, 0.65); }
+    .order-row.selected { background-color: #ffffff !important; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05); }
+
+    .custom-checkbox {
+      width: 16px;
+      height: 16px;
+      border-radius: 5px;
+      border: 1.5px solid #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      background: #ffffff;
+    }
+
+    .custom-checkbox.checked { background-color: #1e293b; border-color: #1e293b; }
+    .custom-checkbox svg { width: 11px; height: 11px; stroke: #ffffff; stroke-width: 3; display: none; }
+    .custom-checkbox.checked svg { display: block; }
+
+    .order-id { font-weight: 600; color: #475569; font-size: 12.5px; }
+    .customer-cell { display: flex; align-items: center; gap: 10px; }
+    .customer-thumb { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+    .customer-name { font-weight: 600; color: #0f172a; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .badge-income { background-color: var(--badge-income-bg); color: var(--badge-income-text); }
+    .badge-expense { background-color: var(--badge-expense-bg); color: var(--badge-expense-text); }
+    .badge-paid { background-color: var(--badge-paid-bg); color: var(--badge-paid-text); }
+
+    .order-total { font-weight: 700; color: #0f172a; }
+    .order-total.negative { color: #dc2626; }
+    .order-total.positive { color: #15803d; }
+    .order-date { color: #64748b; font-size: 12.5px; }
+
+    .row-menu-btn {
+      background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 6px;
+    }
+    .row-menu-btn:hover { color: #0f172a; background-color: #f1f5f9; }
+
+    /* Right Details Drawer */
+    .detail-panel {
+      width: 320px;
+      min-width: 320px;
+      background-color: var(--bg-card);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-md);
+      overflow-y: auto;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .detail-title { font-size: 16.5px; font-weight: 700; color: #131722; }
+
+    .close-btn {
+      width: 26px; height: 26px; border-radius: 50%; border: none; background: #f1f5f9; color: #64748b;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+
+    .detail-sub-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .detail-timestamp { font-size: 11.5px; color: #94a3b8; }
+
+    .customer-profile-card {
+      display: flex; flex-direction: column; align-items: center; margin-bottom: 16px;
+    }
+
+    .avatar-large-wrapper { position: relative; margin-bottom: 8px; }
+    .avatar-large {
+      width: 68px; height: 68px; border-radius: 50%; background: #fde047; padding: 3px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 12px rgba(253, 224, 71, 0.35);
+    }
+    .avatar-large img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+    .customer-hero-name { font-size: 14.5px; font-weight: 700; color: #131722; margin-bottom: 10px; }
+
+    .contact-actions { display: flex; align-items: center; gap: 10px; }
+    .contact-btn {
+      width: 34px; height: 34px; border-radius: 50%; background-color: #f4f4f0; border: none;
+      display: flex; align-items: center; justify-content: center; color: #334155; cursor: pointer; transition: all 0.15s ease;
+    }
+    .contact-btn:hover { background-color: #1e293b; color: #ffffff; transform: translateY(-1px); }
+    .contact-btn svg { width: 15px; height: 15px; }
+
+    .advisor-tip-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 11.5px;
+      color: #334155;
+      line-height: 1.4;
+      margin-bottom: 14px;
+    }
+
+    .section-subtitle { font-size: 12.5px; font-weight: 700; color: #131722; margin-bottom: 10px; }
+
+    .order-items-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .item-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .item-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .item-icon-box {
+      width: 32px; height: 32px; border-radius: 8px; background: #f8fafc; border: 1px solid #f1f5f9;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .item-icon-box svg { width: 18px; height: 18px; }
+    .item-name { font-size: 12px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-price { font-size: 12.5px; font-weight: 700; color: #0f172a; flex-shrink: 0; }
+
+    .detail-total-row {
+      display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f1f5f9; margin-bottom: 16px;
+    }
+    .total-label { font-size: 13px; font-weight: 600; color: #64748b; }
+    .total-amount { font-size: 18px; font-weight: 800; color: #0f172a; }
+
+    .detail-ctas { display: flex; gap: 10px; margin-top: auto; }
+
+    .btn-track {
+      flex: 1; background-color: var(--btn-track-bg); color: #ffffff; border: none; border-radius: 12px;
+      padding: 11px 12px; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; justify-content: center;
+      gap: 6px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-track:hover { background-color: #272f3e; }
+    .btn-track svg { width: 14px; height: 14px; }
+
+    .btn-refund {
+      flex: 1; background-color: var(--btn-refund-bg); color: #131722; border: none; border-radius: 12px;
+      padding: 11px 12px; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+      gap: 6px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-refund:hover { background-color: var(--btn-refund-hover); }
+    .btn-refund svg { width: 14px; height: 14px; }
+
+    /* Modals */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 9999;
+      align-items: center; justify-content: center; backdrop-filter: blur(4px);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: #ffffff; border-radius: 20px; width: 100%; max-width: 460px; padding: 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3); animation: popIn 0.2s ease;
+    }
+    @keyframes popIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; }
+    .form-input, .form-select {
+      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 13px; font-weight: 600; outline: none;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .modal-btn-submit {
+      width: 100%; padding: 12px; background: #121620; color: #ffffff; border-radius: 12px; font-size: 13.5px; font-weight: 800; border: none; cursor: pointer;
+    }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: #ffffff; padding: 12px 20px;
+      border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      transform: translateY(100px); opacity: 0; transition: all 0.25s ease; z-index: 999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 1100px) { .detail-panel { display: none; } }
+    /* Mobile Bottom Navigation Dock */
+    .mobile-bottom-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 62px; background: #121620;
+      border-top: 1px solid rgba(255, 255, 255, 0.08); z-index: 1000; justify-content: space-around; align-items: center;
+      padding: 0 6px; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .mob-nav-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 3px; color: #94a3b8; text-decoration: none;
+      font-size: 10px; font-weight: 700; padding: 6px 10px; border-radius: 8px;
+    }
+    .mob-nav-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+    .mob-nav-btn.active { color: #facc15; }
+    .mob-nav-btn.active svg { stroke: #facc15; }
+
+    @media (max-width: 860px) {
+      body { padding: 0; background: #121620; }
+      .app-container { height: 100vh; min-height: 100vh; border-radius: 0; flex-direction: column; box-shadow: none; padding-bottom: 62px; }
+      .sidebar { display: none; }
+      .main-wrapper { border-radius: 0; padding: 14px 12px 18px 12px; flex-direction: column; overflow-y: auto; gap: 12px; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .kpi-card { padding: 10px 12px; }
+      .kpi-val { font-size: 16px; }
+      .top-header { flex-wrap: wrap; gap: 10px; }
+      .header-actions { width: 100%; justify-content: space-between; }
+      .btn-record-sale { flex: 1; justify-content: center; font-size: 12px; }
+      .detail-panel {
+        display: none; position: fixed; inset: 0; top: 15%; width: 100%; min-width: 100%;
+        border-radius: 24px 24px 0 0; z-index: 5000; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); animation: slideUp 0.25s ease;
+      }
+      .detail-panel.mobile-open { display: flex; }
+      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+      .mobile-bottom-nav { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <a href="dashboard.html" class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <span>MallMaze</span>
+      </a>
+
+      <!-- Home Redirect Link -->
+      <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;">
+        <span>🌐 Storefront / Home</span>
+        <span>→</span>
+      </a>
+
+      <div class="nav-group">
+        <a class="nav-item" href="dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" href="orders.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <span>Orders</span>
+        </a>
+        <a class="nav-item" href="inventory.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          <span>Stock & Products</span>
+        </a>
+        <a class="nav-item" href="payments.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span>Payments</span>
+        </a>
+        <a class="nav-item" href="customers.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Customers</span>
+        </a>
+        <a class="nav-item active" href="profit-loss.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>Profit & Loss</span>
+        </a>
+        <a class="nav-item" href="reports.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          <span>Reports</span>
+        </a>
+        <a class="nav-item" href="statistics.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Statistic</span>
+        </a>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <div class="nav-group">
+        <a class="nav-item" href="#notifications" onclick="showToast('4 Instant settlements ready for payout')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notification</span>
+        </a>
+        <a class="nav-item" href="#help" onclick="showToast('MallMaze Merchant Help & Support')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span>Help</span>
+        </a>
+        <a class="nav-item" href="#settings" onclick="showToast('Store Profile & Tax Settings')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings</span>
+        </a>
+      </div>
+
+      <div class="nav-spacer"></div>
+
+      <div class="sidebar-footer">
+        <a class="nav-item" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Log out</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Center Workspace -->
+    <main class="main-wrapper">
+      <section class="orders-section">
+        
+        <!-- Header -->
+        <div class="top-header">
+          <h1 class="page-title">Profit & Loss OS</h1>
+          <div class="top-actions">
+            <button class="btn-action-primary btn-record-offline" onclick="openModal('offlineModal')">
+              ➕ Record Offline / Cash Sale
+            </button>
+            <button class="btn-action-primary btn-add-expense" onclick="openModal('expenseModal')">
+              ➕ Log Shop Expense
+            </button>
+            <div class="user-profile">
+              <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80" alt="Priya Sharma" class="user-avatar" />
+              <div class="user-info">
+                <span class="user-name">Priya Sharma</span>
+                <span class="user-email">priya.sharma@mallmaze.in</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Top Executive KPI Cards -->
+        <div class="pnl-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Gross Sales Revenue</div>
+            <div class="kpi-val inflow" id="dispGross">₹48,92,400</div>
+            <div class="kpi-sub"><span style="color:#15803d; font-weight:700;">+18.4%</span> vs last month</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">Wholesale Cost (COGS)</div>
+            <div class="kpi-val" id="dispCogs">₹32,28,000</div>
+            <div class="kpi-sub">Direct inventory purchase</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">Shop Expenses (Khata)</div>
+            <div class="kpi-val outflow" id="dispExp">- ₹5,14,200</div>
+            <div class="kpi-sub">Rent, Payroll, Power, Tax</div>
+          </div>
+
+          <div class="kpi-card highlight">
+            <div class="kpi-label">Pure Take-Home Profit</div>
+            <div class="kpi-val inflow" id="dispNet">₹11,50,200</div>
+            <div class="kpi-sub" style="color:#15803d;"><strong>23.5% Net Margin in Hand</strong></div>
+          </div>
+        </div>
+
+        <!-- Filter Pills Bar -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <button class="dropdown-pill active-pill" id="filterAllBtn" onclick="filterLedger('ALL', this)">All Financial Heads</button>
+            <button class="dropdown-pill" onclick="filterLedger('INCOME', this)">🟢 Sales Inflow</button>
+            <button class="dropdown-pill" onclick="filterLedger('EXPENSE', this)">🔴 Shop Overhead</button>
+            <button class="dropdown-pill" onclick="togglePriceFilter()">
+              <span>₹10,000 – ₹20,00,000</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+          </div>
+
+          <div class="filter-group">
+            <button class="dropdown-pill" onclick="toggleSort()">
+              <span id="sortLabel">Sort by Value</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Center Unified Table -->
+        <div class="table-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th class="th-checkbox">
+                  <div class="custom-checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                </th>
+                <th>Financial Head</th>
+                <th>Channel / Category</th>
+                <th>Status / ITC</th>
+                <th>Amount (₹)</th>
+                <th>Period</th>
+                <th class="th-action"></th>
+              </tr>
+            </thead>
+            <tbody id="pnlTableBody">
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Right Selected Details Drawer -->
+      <aside class="detail-panel" id="detailPanel">
+        <div class="detail-header">
+          <h2 class="detail-title" id="panelOrderId">Offline Counter Sales</h2>
+          <button class="close-btn" onclick="showToast('Panel refreshed')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="detail-sub-meta">
+          <span class="status-badge badge-income" id="panelBadge">Sales Inflow</span>
+          <span class="detail-timestamp" id="panelTimestamp">January 2026</span>
+        </div>
+
+        <!-- Entity Card -->
+        <div class="customer-profile-card">
+          <div class="avatar-large-wrapper">
+            <div class="avatar-large">
+              <img id="panelCustomerAvatar" src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=150&auto=format&fit=crop&q=80" alt="Entity" />
+            </div>
+          </div>
+          <div class="customer-hero-name" id="panelCustomerName">Walk-in Counter Collections</div>
+          
+          <div class="contact-actions">
+            <button class="contact-btn" title="Export Ledger" onclick="showToast('Ledger export initiated')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </button>
+            <button class="contact-btn" title="GST Receipt" onclick="showToast('Generating GST Tax Receipt!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+            </button>
+            <button class="contact-btn" title="Share via WhatsApp" onclick="showToast('Summary sent via WhatsApp!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="advisor-tip-box" id="panelAdvisorTip">
+          💡 <strong>Business Guidance:</strong> Offline walk-in counter sales represent 37.8% of total revenue.
+        </div>
+
+        <h3 class="section-subtitle">Account Breakdown</h3>
+        <div class="order-items-list" id="panelItemsList"></div>
+
+        <div class="detail-total-row">
+          <span class="total-label">Total Amount</span>
+          <span class="total-amount" id="panelTotalAmount">+ ₹18,50,000</span>
+        </div>
+
+        <div class="detail-ctas">
+          <button class="btn-track" onclick="showToast('Syncing with Tally ERP...')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Sync Tally
+          </button>
+          <button class="btn-refund" onclick="showToast('Exporting Statement...')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            Export
+          </button>
+        </div>
+      </aside>
+    <!-- Mobile Bottom Navigation Dock (Visible on Mobile) -->
+    <nav class="mobile-bottom-nav">
+      <a href="dashboard.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="orders.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Orders</span>
+      </a>
+      <a href="inventory.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        <span>Stock</span>
+      </a>
+      <a href="profit-loss.html" class="mob-nav-btn active">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        <span>P&L</span>
+      </a>
+      <a href="index.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <span>Website</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- MODAL 1: MULTI-PRODUCT OFFLINE BILLING -->
+  <div class="modal-backdrop" id="offlineModal">
+    <div class="modal-box" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">➕ Quick Multi-Item Counter Bill</h3>
+        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('offlineModal')">✕</button>
+      </div>
+      <form onsubmit="handleMultiOfflineSale(event)">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div>
+            <label class="form-label">Customer Name</label>
+            <input type="text" id="offCustomer" class="form-input" placeholder="e.g. Ramesh Kumar" />
+          </div>
+          <div>
+            <label class="form-label">Payment Mode</label>
+            <select id="offPayMode" class="form-select">
+              <option>Cash in Hand (Counter)</option>
+              <option>UPI (Google Pay / PhonePe / Paytm)</option>
+              <option>Credit Card (POS Terminal)</option>
+              <option>Khata / Udhaar (Credit)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px;">Add Products (Presets or Custom Items):</div>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:10px;" id="pnlBillItemsTable">
+          <thead>
+            <tr style="border-bottom:1px solid #e2e8f0; font-size:11px; color:#64748b; text-align:left;">
+              <th style="padding:4px;">Product Title / Custom Item</th>
+              <th style="padding:4px; width:25%;">Price (₹)</th>
+              <th style="padding:4px; width:15%;">Qty</th>
+              <th style="width:10%;"></th>
+            </tr>
+          </thead>
+          <tbody id="pnlBillItemsBody">
+            <tr class="pnl-item-row">
+              <td style="padding:4px;"><input type="text" class="form-input pnl-item-name" value="Bosch Heavy Duty Drill Machine" required /></td>
+              <td style="padding:4px;"><input type="number" class="form-input pnl-item-price" value="34000" min="0" oninput="calcPnlModalTotal()" required /></td>
+              <td style="padding:4px;"><input type="number" class="form-input pnl-item-qty" value="1" min="1" oninput="calcPnlModalTotal()" required /></td>
+              <td style="padding:4px; text-align:right;"><button type="button" style="background:#fee2e2; border:none; color:#dc2626; border-radius:6px; width:24px; height:24px; cursor:pointer;" onclick="this.closest('tr').remove(); calcPnlModalTotal();">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button type="button" style="background:#f8fafc; border:1px dashed #94a3b8; color:#0f172a; font-weight:700; font-size:12px; padding:7px; border-radius:10px; cursor:pointer; width:100%; margin-bottom:14px;" onclick="addPnlBillRow()">
+          ➕ Add Another Item / Custom Product
+        </button>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 14px; margin-bottom:14px; display:flex; justify-content:space-between; font-weight:800; font-size:14px;">
+          <span>Grand Total Bill Amount:</span>
+          <span style="color:#15803d;" id="pnlModalGrandTotal">₹34,000</span>
+        </div>
+
+        <button type="submit" class="modal-btn-submit">Generate Bill & Update P&L</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ADD EXPENSE -->
+  <div class="modal-backdrop" id="expenseModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:17px; font-weight:800;">➕ Log Shop Expense (Rent/Salary)</h3>
+        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('expenseModal')">✕</button>
+      </div>
+      <form onsubmit="handleNewExpense(event)">
+        <div class="form-group">
+          <label class="form-label">Expense Title</label>
+          <input type="text" id="expTitle" class="form-input" placeholder="e.g. Staff Bonus, Packaging Bags, Repair" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="expCategory" class="form-select">
+              <option>Staff Salary & Wages</option>
+              <option>Shop Rent</option>
+              <option>Electricity & Utility</option>
+              <option>Supplier Wholesale Dues</option>
+              <option>Daily Maintenance & Tea</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (₹)</label>
+            <input type="number" id="expAmount" class="form-input" placeholder="₹ Amount" required />
+          </div>
+        </div>
+        <button type="submit" class="modal-btn-submit" style="background:#dc2626;">Save & Deduct from Profit</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="appToast">Notification message</div>
+
+  <script>
+    let grossRevenue = 4892400;
+    let cogs = 3228000;
+    let totalExpenses = 514200;
+
+    const pnlHeads = [
+      {
+        id: "#REV-OFFLINE-01", type: "INCOME",
+        name: "Offline Cash / Counter Bills", category: "Physical Walk-in Sales",
+        avatar: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=150&auto=format&fit=crop&q=80",
+        badge: "Cash Inflow", badgeType: "income", total: "+ ₹18,50,000", numericTotal: 1850000, period: "Monthly Total", checked: true,
+        advice: "🟢 <strong>Cash Flow Strength:</strong> Direct walk-in counter sales generate instantaneous daily cash liquidity for store operations.",
+        items: [
+          { name: "Counter Cash Transactions", price: "₹12,40,000" },
+          { name: "Direct Counter POS Card Swipes", price: "₹6,10,000" }
+        ]
+      },
+      {
+        id: "#REV-UPI-02", type: "INCOME",
+        name: "UPI & QR Code Payments", category: "Digital Counter Scans",
+        avatar: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=150&auto=format&fit=crop&q=80",
+        badge: "UPI Inflow", badgeType: "income", total: "+ ₹19,15,000", numericTotal: 1915000, period: "Monthly Total", checked: false,
+        advice: "📱 <strong>Digital Settlements:</strong> Google Pay, PhonePe, and Paytm auto-settled daily to your HDFC bank account.",
+        items: [
+          { name: "PhonePe QR Counter Scans", price: "₹9,80,000" },
+          { name: "Google Pay Merchant UPI", price: "₹7,15,000" },
+          { name: "Paytm Soundbox Payments", price: "₹2,20,000" }
+        ]
+      },
+      {
+        id: "#REV-ONLINE-03", type: "INCOME",
+        name: "MallMaze Online Delivery", category: "Hyperlocal App Marketplace",
+        avatar: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=150&auto=format&fit=crop&q=80",
+        badge: "Online Inflow", badgeType: "income", total: "+ ₹11,27,400", numericTotal: 1127400, period: "Monthly Total", checked: false,
+        advice: "🚀 <strong>Marketplace Synergy:</strong> 2-hour delivery through MallMaze expanded your customer orders across a 3.5km radius.",
+        items: [
+          { name: "Hyperlocal App Direct Orders", price: "₹8,40,000" },
+          { name: "B2C Catalog Deliveries", price: "₹2,87,400" }
+        ]
+      },
+      {
+        id: "#EXP-SALARY-01", type: "EXPENSE",
+        name: "Staff Salaries & Payroll", category: "Staff Wages (4 Members)",
+        avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&auto=format&fit=crop&q=80",
+        badge: "Payroll Outflow", badgeType: "expense", total: "- ₹1,80,000", numericTotal: -180000, period: "1 Jan 2026", checked: false,
+        advice: "⚡ <strong>Payroll Efficiency:</strong> Staff salaries represent 35.0% of total shop overhead. Revenue per technician is ₹12.2L/month.",
+        items: [
+          { name: "Senior Technician (Ramesh)", price: "₹55,000" },
+          { name: "Billing Clerk (Amit)", price: "₹45,000" },
+          { name: "Workshop Technician (Suresh)", price: "₹42,000" },
+          { name: "Logistics Assistant (Vijay)", price: "₹38,000" }
+        ]
+      },
+      {
+        id: "#EXP-RENT-02", type: "EXPENSE",
+        name: "Commercial Shop Rent", category: "Bandra West Showroom Lease",
+        avatar: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=80&auto=format&fit=crop&q=80",
+        badge: "18% ITC Eligible", badgeType: "expense", total: "- ₹1,50,000", numericTotal: -150000, period: "1 Jan 2026", checked: false,
+        advice: "💡 <strong>Tally Tax Note:</strong> Commercial rent invoice is eligible for 18% GST Input Tax Credit (saves ₹27,000 this month).",
+        items: [
+          { name: "Ground Floor Retail 1,200 sq.ft", price: "₹1,20,000" },
+          { name: "Basement Inventory Storage", price: "₹30,000" }
+        ]
+      },
+      {
+        id: "#EXP-GST-03", type: "EXPENSE",
+        name: "Output GST Tax Liability", category: "18% Output Pool (CGST+SGST)",
+        avatar: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=80&auto=format&fit=crop&q=80",
+        badge: "Tax Challan", badgeType: "expense", total: "- ₹1,45,800", numericTotal: -145800, period: "5 Jan 2026", checked: false,
+        advice: "✔ <strong>Tax Compliance:</strong> Monthly GSTR-3B tax return challan filed and reconciled with bank.",
+        items: [{ name: "CGST (9%) + SGST (9%) Pool", price: "₹1,45,800" }]
+      },
+      {
+        id: "#EXP-POWER-04", type: "EXPENSE",
+        name: "Commercial Electricity Bill", category: "Adani Commercial Power",
+        avatar: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=80&auto=format&fit=crop&q=80",
+        badge: "Utility Outflow", badgeType: "expense", total: "- ₹38,400", numericTotal: -38400, period: "7 Jan 2026", checked: false,
+        advice: "⚡ <strong>Efficiency Alert:</strong> Electricity rose +14% vs last month. Shift showroom display lights to LED to save ₹12,000.",
+        items: [{ name: "Commercial Tariff Rate Unit", price: "₹38,400" }]
+      }
+    ];
+
+    const itemIcons = {
+      drill: `<svg viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><path d="M14 4l3 3L8 16l-3-3L14 4z"></path></svg>`,
+      socket: `<svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>`,
+      receiver: `<svg viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><rect x="2" y="7" width="20" height="13" rx="2"></rect></svg>`
+    };
+
+    let selectedId = "#REV-OFFLINE-01";
+    let activeFilter = "ALL";
+    let sortAsc = false;
+
+    function renderPnLNumbers() {
+      const net = grossRevenue - cogs - totalExpenses;
+      const margin = ((net / grossRevenue) * 100).toFixed(1);
+      document.getElementById("dispGross").innerText = "₹" + grossRevenue.toLocaleString('en-IN');
+      document.getElementById("dispCogs").innerText = "₹" + cogs.toLocaleString('en-IN');
+      document.getElementById("dispExp").innerText = "- ₹" + totalExpenses.toLocaleString('en-IN');
+      document.getElementById("dispNet").innerText = `₹${net.toLocaleString('en-IN')} (${margin}%)`;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("pnlTableBody");
+      tbody.innerHTML = "";
+      
+      let filtered = pnlHeads.filter(item => {
+        if (activeFilter === "ALL") return true;
+        return item.type === activeFilter;
+      });
+
+      filtered.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.className = `order-row ${item.id === selectedId ? "selected" : ""}`;
+        tr.onclick = (e) => {
+          if (e.target.closest('.custom-checkbox') || e.target.closest('.row-menu-btn')) return;
+          selectItem(item.id);
+        };
+        const badgeClass = `badge-${item.badgeType}`;
+        const totalClass = item.numericTotal < 0 ? 'negative' : 'positive';
+
+        tr.innerHTML = `
+          <td>
+            <div class="custom-checkbox ${item.checked ? 'checked' : ''}" onclick="toggleRowCheck(event, '${item.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </td>
+          <td><span class="order-id">${item.name}</span></td>
+          <td>
+            <div class="customer-cell">
+              <img src="${item.avatar}" alt="${item.name}" class="customer-thumb" />
+              <span class="customer-name">${item.category}</span>
+            </div>
+          </td>
+          <td><span class="status-badge ${badgeClass}">${item.badge}</span></td>
+          <td><span class="order-total ${totalClass}">${item.total}</span></td>
+          <td><span class="order-date">${item.period}</span></td>
+          <td>
+            <button class="row-menu-btn" title="More options" onclick="event.stopPropagation(); showToast('Tally Voucher for ${item.name}')">···</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      updateSelectAllState();
+    }
+
+    function selectItem(id) {
+      selectedId = id;
+      renderTable();
+      renderDetailPanel();
+    }
+
+    function renderDetailPanel() {
+      const item = pnlHeads.find(o => o.id === selectedId) || pnlHeads[0];
+      window.currentItem = item;
+      document.getElementById("panelOrderId").innerText = item.name;
+      document.getElementById("panelBadge").innerText = item.badge;
+      document.getElementById("panelBadge").className = `status-badge badge-${item.badgeType}`;
+      document.getElementById("panelTimestamp").innerText = item.period;
+      document.getElementById("panelCustomerAvatar").src = item.avatar;
+      document.getElementById("panelCustomerName").innerText = item.category;
+      document.getElementById("panelAdvisorTip").innerHTML = item.advice;
+
+      const itemsContainer = document.getElementById("panelItemsList");
+      itemsContainer.innerHTML = "";
+
+      item.items.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "item-row";
+        div.innerHTML = `
+          <div class="item-left">
+            <div class="item-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="#121620" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+            <span class="item-name">${it.name}</span>
+          </div>
+          <span class="item-price">${it.price}</span>
+        `;
+        itemsContainer.appendChild(div);
+      });
+
+      document.getElementById("panelTotalAmount").innerText = item.total;
+    }
+
+    function filterLedger(type, btn) {
+      activeFilter = type;
+      document.querySelectorAll('.filters-bar .dropdown-pill').forEach(b => b.classList.remove('active-pill'));
+      btn.classList.add('active-pill');
+      renderTable();
+    }
+
+    function toggleRowCheck(event, id) {
+      event.stopPropagation();
+      const it = pnlHeads.find(o => o.id === id);
+      if (it) {
+        it.checked = !it.checked;
+        renderTable();
+      }
+    }
+
+    function toggleSelectAll() {
+      const allChecked = pnlHeads.every(o => o.checked);
+      pnlHeads.forEach(o => o.checked = !allChecked);
+      renderTable();
+    }
+
+    function updateSelectAllState() {
+      const selectAll = document.getElementById("selectAllCheckbox");
+      const allChecked = pnlHeads.every(o => o.checked);
+      if (allChecked && pnlHeads.length > 0) {
+        selectAll.classList.add("checked");
+      } else {
+        selectAll.classList.remove("checked");
+      }
+    }
+
+    function togglePriceFilter() {
+      showToast("Filtered by value: ₹10,000 – ₹20,00,000");
+    }
+
+    function toggleSort() {
+      sortAsc = !sortAsc;
+      pnlHeads.sort((a, b) => sortAsc ? a.numericTotal - b.numericTotal : b.numericTotal - a.numericTotal);
+      document.getElementById("sortLabel").innerText = sortAsc ? "Sort by Value ↑" : "Sort by Value ↓";
+      renderTable();
+      showToast(`Sorted by ${sortAsc ? 'Lowest value' : 'Highest value'}`);
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add("open"); }
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+    function addPnlBillRow() {
+      const tbody = document.getElementById("pnlBillItemsBody");
+      const tr = document.createElement("tr");
+      tr.className = "pnl-item-row";
+      tr.innerHTML = `
+        <td style="padding:4px;"><input type="text" class="form-input pnl-item-name" placeholder="Custom product name" value="Custom Tools / Equipment" required /></td>
+        <td style="padding:4px;"><input type="number" class="form-input pnl-item-price" value="15000" min="0" oninput="calcPnlModalTotal()" required /></td>
+        <td style="padding:4px;"><input type="number" class="form-input pnl-item-qty" value="1" min="1" oninput="calcPnlModalTotal()" required /></td>
+        <td style="padding:4px; text-align:right;"><button type="button" style="background:#fee2e2; border:none; color:#dc2626; border-radius:6px; width:24px; height:24px; cursor:pointer;" onclick="this.closest('tr').remove(); calcPnlModalTotal();">✕</button></td>
+      `;
+      tbody.appendChild(tr);
+      calcPnlModalTotal();
+    }
+
+    function calcPnlModalTotal() {
+      let total = 0;
+      document.querySelectorAll(".pnl-item-row").forEach(r => {
+        const p = parseFloat(r.querySelector(".pnl-item-price").value) || 0;
+        const q = parseFloat(r.querySelector(".pnl-item-qty").value) || 0;
+        total += (p * q);
+      });
+      document.getElementById("pnlModalGrandTotal").innerText = "₹" + total.toLocaleString('en-IN');
+      return total;
+    }
+
+    function handleMultiOfflineSale(e) {
+      e.preventDefault();
+      const cust = document.getElementById("offCustomer").value || "Walk-in Counter Customer";
+      const payMode = document.getElementById("offPayMode").value;
+      const rows = document.querySelectorAll(".pnl-item-row");
+
+      const items = [];
+      let grandTotal = 0;
+
+      rows.forEach(r => {
+        const name = r.querySelector(".pnl-item-name").value.trim();
+        const p = parseFloat(r.querySelector(".pnl-item-price").value) || 0;
+        const q = parseFloat(r.querySelector(".pnl-item-qty").value) || 1;
+        const lineTotal = p * q;
+        grandTotal += lineTotal;
+        items.push({ name: `${name} (x${q})`, price: "₹" + lineTotal.toLocaleString('en-IN') });
+      });
+
+      grossRevenue += grandTotal;
+      cogs += Math.round(grandTotal * 0.65);
+      renderPnLNumbers();
+
+      const newId = "#REV-OFFLINE-" + Math.floor(1000 + Math.random() * 9000);
+      pnlHeads.unshift({
+        id: newId, type: "INCOME",
+        name: `Multi-Item Bill: ${cust}`, category: `${payMode} (${items.length} items)`,
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80",
+        badge: "Cash Inflow", badgeType: "income", total: "+ ₹" + grandTotal.toLocaleString('en-IN'), numericTotal: grandTotal, period: "Just now", checked: true,
+        advice: `✔ <strong>Multi-Item Bill:</strong> Recorded ₹${grandTotal.toLocaleString('en-IN')} across ${items.length} items for ${cust}.`,
+        items: items
+      });
+
+      selectItem(newId);
+      closeModal('offlineModal');
+      showToast(`✅ Multi-item sale of ₹${grandTotal.toLocaleString('en-IN')} recorded into P&L!`);
+    }
+
+    function handleNewExpense(e) {
+      e.preventDefault();
+      const title = document.getElementById("expTitle").value;
+      const amt = parseInt(document.getElementById("expAmount").value, 10);
+      const cat = document.getElementById("expCategory").value;
+
+      totalExpenses += amt;
+      renderPnLNumbers();
+
+      const newId = "#EXP-" + Math.floor(1000 + Math.random() * 9000);
+      pnlHeads.unshift({
+        id: newId, type: "EXPENSE",
+        name: title, category: cat,
+        avatar: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=80&auto=format&fit=crop&q=80",
+        badge: "Expense Outflow", badgeType: "expense", total: "- ₹" + amt.toLocaleString('en-IN'), numericTotal: -amt, period: "Today", checked: true,
+        advice: `🔴 <strong>Tally Khata Entry:</strong> ₹${amt.toLocaleString('en-IN')} logged under ${cat}. Deducted from monthly take-home profit.`,
+        items: [{ name: title, price: "₹" + amt.toLocaleString('en-IN') }]
+      });
+
+      selectItem(newId);
+      closeModal('expenseModal');
+      showToast(`🔴 Expense of ₹${amt.toLocaleString('en-IN')} logged into Khata!`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("appToast");
+      toast.innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => { toast.classList.remove("show"); }, 2500);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      renderPnLNumbers();
+      renderTable();
+      renderDetailPanel();
+    });
+  </script>
+</body>
+</html>

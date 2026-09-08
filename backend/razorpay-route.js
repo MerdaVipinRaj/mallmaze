@@ -265,9 +265,11 @@ function buildOrderTransfers(splits, storeById, holdUntilUnix) {
           commission_paise: String(split.commission_paise)
         }
       };
-      if (holdUntilUnix) {
+      if (holdUntilUnix && Number(holdUntilUnix) > 0) {
         transfer.on_hold = true;
-        transfer.on_hold_until = holdUntilUnix;
+        transfer.on_hold_until = Number(holdUntilUnix);
+      } else {
+        transfer.on_hold = false;
       }
       return transfer;
     });
@@ -367,7 +369,62 @@ function attachBankToStore(store, bankBody, existingStore) {
   return bank;
 }
 
+
+function recordDeliveryPayout(db, order, meta = {}) {
+  const mock = Boolean(meta.mock);
+  const now = new Date().toISOString();
+  db.store_payouts = db.store_payouts || [];
+  const deliveryPaise = order.totals?.deliveryFeePaise || 0;
+  if (!deliveryPaise) return;
+
+  const existing = db.store_payouts.find(
+    (p) => p.order_id === order.id && p.recipient_type === "delivery_partner"
+  );
+  if (existing) return;
+
+  const partner = (db.delivery_partners && db.delivery_partners[0]) || {
+    name: "Rapid Express Fleet (Delivery Partner)",
+    payout_account_ref: "acc_route_delivery_fleet",
+    bank: {
+      bank_name: "Kotak Mahindra Bank",
+      account_number_masked: "XXXX-XXXX-8831",
+      ifsc_code: "KKBK0000214",
+      beneficiary_name: "Rapid Express Logistics Pvt Ltd"
+    }
+  };
+
+  db.store_payouts.unshift({
+    id: `del-payout-${Date.now()}`,
+    recipient_type: "delivery_partner",
+    store_id: "delivery_partner",
+    store_name: partner.name || "Rapid Express Fleet",
+    order_id: order.id,
+    customer_id: order.customer_id || "",
+    customer_name: order.customer_name || (order.delivery ? order.delivery.name : "Customer"),
+    payment_mode: order.payment_method || "Razorpay UPI",
+    gross_paise: deliveryPaise,
+    commission_paise: 0,
+    net_payable_paise: deliveryPaise,
+    gross_inr: Math.round(deliveryPaise / 100),
+    commission_inr: 0,
+    net_inr: Math.round(deliveryPaise / 100),
+    status: "settled",
+    is_instant: true,
+    settlement_speed: "< 1 second (Auto-Route)",
+    razorpay_transfer_id: `trf_${mock ? "mock" : "route"}_${Date.now()}_del`,
+    razorpay_account_id: meta.account || partner.payout_account_ref || "acc_route_delivery_fleet",
+    bank_name: partner.bank?.bank_name || "Kotak Mahindra Bank",
+    account_number_masked: partner.bank?.account_number_masked || "XXXX-XXXX-8831",
+    ifsc_code: partner.bank?.ifsc_code || "KKBK0000214",
+    beneficiary_name: partner.bank?.beneficiary_name || "Rapid Express Logistics Pvt Ltd",
+    settled_at: now,
+    created_at: now,
+    updated_at: now
+  });
+}
+
 module.exports = {
+  recordDeliveryPayout,
   validateBankDetails,
   extractBankFromBody,
   attachBankToStore,

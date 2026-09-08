@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MallMaze - Statistics & Growth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #121620;
+      --bg-dark-hover: #1c2230;
+      --bg-main: #f7f6f0;
+      --bg-card: #ffffff;
+      --text-main: #131722;
+      --text-muted: #8c93a3;
+      --border-subtle: #eae7dc;
+      --btn-primary: #151922;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: #0b0e14; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; overflow-x: hidden; }
+
+    .app-container {
+      display: flex; width: 100%; max-width: 1480px; height: 94vh; min-height: 720px;
+      background-color: var(--bg-dark); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    .sidebar { width: 210px; min-width: 210px; background-color: var(--bg-dark); display: flex; flex-direction: column; padding: 24px 16px 20px 16px; border-right: 1px solid rgba(255, 255, 255, 0.03); }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 30px 8px; color: #ffffff; font-size: 17px; font-weight: 700; text-decoration: none; }
+    .brand-icon { width: 22px; height: 22px; }
+    .brand-icon svg { width: 100%; height: 100%; stroke: #ffffff; }
+
+    .nav-group { display: flex; flex-direction: column; gap: 6px; }
+    .nav-divider { height: 1px; background: rgba(255, 255, 255, 0.06); margin: 16px 8px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 14px;
+      color: var(--text-muted); font-size: 13.5px; font-weight: 500; text-decoration: none; transition: all 0.18s ease; cursor: pointer;
+    }
+    .nav-item svg { width: 17px; height: 17px; stroke-width: 2; stroke: currentColor; flex-shrink: 0; }
+    .nav-item:hover { color: #ffffff; background-color: var(--bg-dark-hover); }
+    .nav-item.active { background-color: #ffffff; color: #121620; font-weight: 700; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+    .nav-item.active svg { stroke: #121620; }
+    .nav-spacer { flex: 1; }
+    .sidebar-footer { padding-top: 12px; }
+
+    .main-wrapper {
+      flex: 1; background-color: var(--bg-main); border-top-left-radius: 24px; border-bottom-left-radius: 24px;
+      display: flex; padding: 24px; gap: 20px; overflow: hidden;
+    }
+
+    .section-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 4px; }
+    .top-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .page-title { font-size: 26px; font-weight: 700; color: #131722; letter-spacing: -0.5px; }
+
+    .stats-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    .kpi-card { background: #ffffff; border-radius: 16px; padding: 16px; box-shadow: var(--shadow-sm); }
+    .kpi-title { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+    .kpi-value { font-size: 22px; font-weight: 800; color: #0f172a; }
+
+    .chart-container {
+      background: #ffffff; border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm); margin-bottom: 20px;
+    }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .chart-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+
+    .bar-chart {
+      display: flex; align-items: flex-end; justify-content: space-between; height: 180px; padding-top: 20px; gap: 12px;
+    }
+
+    .bar-col {
+      flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;
+    }
+
+    .bar-pillar {
+      width: 100%; max-width: 44px; background: #121620; border-radius: 8px 8px 0 0; transition: all 0.3s; position: relative; cursor: pointer;
+    }
+    .bar-pillar:hover { background: #facc15; }
+    .bar-label { font-size: 11px; color: #64748b; font-weight: 600; margin-top: 8px; }
+    .bar-val { font-size: 10.5px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+
+    .detail-panel {
+      width: 330px; min-width: 330px; background-color: var(--bg-card); border-radius: 20px;
+      padding: 20px; display: flex; flex-direction: column; box-shadow: var(--shadow-md); overflow-y: auto;
+    }
+
+    .detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .detail-title { font-size: 16.5px; font-weight: 700; color: #131722; }
+
+    .stat-list-item {
+      display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+    }
+    .stat-list-item:last-child { border-bottom: none; }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: #ffffff; padding: 12px 20px;
+      border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      transform: translateY(100px); opacity: 0; transition: all 0.25s ease; z-index: 999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 1100px) { .detail-panel { display: none; } }
+    @media (max-width: 768px) {
+      .sidebar { width: 64px; min-width: 64px; padding: 16px 8px; }
+      .brand span, .nav-item span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <span>MallMaze</span>
+      </a>
+
+      <!-- Home Redirect Link in Sidebar -->
+      <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;" title="Go to MallMaze Customer Storefront">
+        <span>🌐 Storefront / Home</span>
+        <span>→</span>
+      </a>
+
+      <div class="nav-group">
+        <a class="nav-item" href="dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" href="orders.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <span>Orders</span>
+        </a>
+        <a class="nav-item" href="payments.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span>Payments</span>
+        </a>
+        <a class="nav-item" href="customers.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Customers</span>
+        </a>
+        <a class="nav-item" href="profit-loss.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>Profit & Loss</span>
+        </a>
+        <a class="nav-item" href="reports.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Reports</span>
+        </a>
+        <a class="nav-item active" href="statistics.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Statistic</span>
+        </a>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <div class="nav-group">
+        <a class="nav-item" href="#notifications" onclick="showToast('Peak sales velocity alerts')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notification</span>
+        </a>
+        <a class="nav-item" href="#help" onclick="showToast('Analytics & KPI documentation')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span>Help</span>
+        </a>
+        <a class="nav-item" href="#settings" onclick="showToast('Thresholds & Targets Settings')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings</span>
+        </a>
+      </div>
+
+      <div class="nav-spacer"></div>
+
+      <div class="sidebar-footer">
+        <a class="nav-item" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Log out</span>
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-wrapper">
+      <section class="section-content">
+        <div class="top-header">
+          <h1 class="page-title">Growth & Statistics (INR)</h1>
+          <button class="dropdown-pill" onclick="showToast('Range: Last 6 Months (FY 25-26)')">
+            <span>Last 6 Months</span>
+          </button>
+        </div>
+
+        <div class="stats-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-title">Monthly Run-Rate</div>
+            <div class="kpi-value" style="color:#15803d;">₹52,40,000</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">YoY Revenue Growth</div>
+            <div class="kpi-value">+34.8%</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Average Margin per Order</div>
+            <div class="kpi-value" style="color:#b45309;">24.5%</div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-header">
+            <div class="chart-title">Monthly Revenue Trend (in Lakhs ₹)</div>
+            <span style="font-size:12px; color:#64748b;">Aug 2025 - Jan 2026</span>
+          </div>
+
+          <div class="bar-chart">
+            <div class="bar-col">
+              <span class="bar-val">₹28L</span>
+              <div class="bar-pillar" style="height: 55%;" onclick="showToast('Aug: ₹28,40,000')"></div>
+              <span class="bar-label">Aug</span>
+            </div>
+            <div class="bar-col">
+              <span class="bar-val">₹32L</span>
+              <div class="bar-pillar" style="height: 62%;" onclick="showToast('Sep: ₹32,10,000')"></div>
+              <span class="bar-label">Sep</span>
+            </div>
+            <div class="bar-col">
+              <span class="bar-val">₹39L</span>
+              <div class="bar-pillar" style="height: 75%;" onclick="showToast('Oct (Diwali Peak): ₹39,80,000')"></div>
+              <span class="bar-label">Oct</span>
+            </div>
+            <div class="bar-col">
+              <span class="bar-val">₹42L</span>
+              <div class="bar-pillar" style="height: 82%;" onclick="showToast('Nov: ₹42,50,000')"></div>
+              <span class="bar-label">Nov</span>
+            </div>
+            <div class="bar-col">
+              <span class="bar-val">₹45L</span>
+              <div class="bar-pillar" style="height: 88%;" onclick="showToast('Dec: ₹45,20,000')"></div>
+              <span class="bar-label">Dec</span>
+            </div>
+            <div class="bar-col">
+              <span class="bar-val" style="color:#ca8a04; font-weight:800;">₹48.9L</span>
+              <div class="bar-pillar" style="height: 96%; background:#ca8a04;" onclick="showToast('Jan (Current): ₹48,92,400')"></div>
+              <span class="bar-label" style="font-weight:700; color:#0f172a;">Jan</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="detail-panel">
+        <div class="detail-header">
+          <h2 class="detail-title">Regional Insights</h2>
+        </div>
+        <p style="font-size:12px; color:#64748b; margin-bottom:16px;">Top Indian states by POS GMV:</p>
+
+        <div class="stat-list-item">
+          <div>
+            <strong style="color:#0f172a;">Maharashtra</strong>
+            <div style="font-size:11px; color:#94a3b8;">Mumbai, Pune, Nagpur</div>
+          </div>
+          <strong style="color:#15803d;">₹18.4 Lakhs (38%)</strong>
+        </div>
+
+        <div class="stat-list-item">
+          <div>
+            <strong style="color:#0f172a;">Karnataka</strong>
+            <div style="font-size:11px; color:#94a3b8;">Bengaluru, Mysuru</div>
+          </div>
+          <strong style="color:#15803d;">₹12.2 Lakhs (25%)</strong>
+        </div>
+
+        <div class="stat-list-item">
+          <div>
+            <strong style="color:#0f172a;">Delhi NCR</strong>
+            <div style="font-size:11px; color:#94a3b8;">New Delhi, Noida, Gurugram</div>
+          </div>
+          <strong style="color:#15803d;">₹9.8 Lakhs (20%)</strong>
+        </div>
+
+        <div class="stat-list-item">
+          <div>
+            <strong style="color:#0f172a;">Telangana</strong>
+            <div style="font-size:11px; color:#94a3b8;">Hyderabad, Secunderabad</div>
+          </div>
+          <strong style="color:#15803d;">₹5.6 Lakhs (11%)</strong>
+        </div>
+
+        <div class="stat-list-item">
+          <div>
+            <strong style="color:#0f172a;">Other States</strong>
+            <div style="font-size:11px; color:#94a3b8;">Tamil Nadu, Gujarat</div>
+          </div>
+          <strong style="color:#64748b;">₹2.9 Lakhs (6%)</strong>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="toast" id="appToast"></div>
+
+  <script>
+    function showToast(msg) {
+      const t = document.getElementById("appToast");
+      t.innerText = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2500);
+    }
+  </script>
+</body>
+</html>

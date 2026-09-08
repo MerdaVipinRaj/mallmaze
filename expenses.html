@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MallMaze POS - Tally Khata & Expenses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0f131c;
+      --bg-dark-hover: #1b2230;
+      --bg-main: #f6f5ef;
+      --bg-card: #ffffff;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --danger: #dc2626;
+      --success: #15803d;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: #080a0f; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 14px; overflow-x: hidden; }
+
+    .app-container {
+      display: flex; width: 100%; max-width: 1540px; height: 96vh; min-height: 760px;
+      background-color: var(--bg-dark); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar { width: 220px; min-width: 220px; background-color: var(--bg-dark); display: flex; flex-direction: column; padding: 22px 16px; border-right: 1px solid rgba(255, 255, 255, 0.04); }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 24px 8px; color: #ffffff; font-size: 18px; font-weight: 800; text-decoration: none; }
+    .brand-icon { width: 24px; height: 24px; }
+    .brand-icon svg { width: 100%; height: 100%; stroke: #ffffff; }
+
+    .nav-group { display: flex; flex-direction: column; gap: 4px; }
+    .nav-divider { height: 1px; background: rgba(255, 255, 255, 0.06); margin: 12px 8px; }
+    .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #475569; padding: 6px 12px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 11px; padding: 9px 12px; border-radius: 12px;
+      color: #94a3b8; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.15s ease; cursor: pointer;
+    }
+    .nav-item svg { width: 17px; height: 17px; stroke-width: 2; stroke: currentColor; flex-shrink: 0; }
+    .nav-item:hover { color: #ffffff; background-color: var(--bg-dark-hover); }
+    .nav-item.active { background-color: #ffffff; color: #0f131c; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .nav-item.active svg { stroke: #0f131c; }
+
+    .main-wrapper {
+      flex: 1; background-color: var(--bg-main); border-top-left-radius: 24px; border-bottom-left-radius: 24px;
+      display: flex; padding: 22px; gap: 20px; overflow: hidden;
+    }
+
+    .section-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 4px; }
+    .top-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .header-left h1 { font-size: 24px; font-weight: 800; color: #0f172a; }
+
+    .stats-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .kpi-card { background: #ffffff; border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-sm); }
+    .kpi-title { font-size: 11.5px; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+    .kpi-value { font-size: 20px; font-weight: 800; color: #0f172a; }
+
+    .white-card { background: #ffffff; border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm); margin-bottom: 20px; }
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+
+    .expense-table { width: 100%; border-collapse: collapse; }
+    .expense-table th { text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; padding: 8px 10px; border-bottom: 1px solid #f1f5f9; }
+    .expense-table td { padding: 12px 10px; font-size: 13px; color: #1e293b; border-bottom: 1px solid #f8fafc; }
+    .expense-table tr:hover td { background: #fbfbf9; }
+
+    .btn-action-trigger {
+      padding: 9px 15px; border-radius: 12px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; border: none; background: #dc2626; color: #ffffff;
+    }
+    .btn-action-trigger:hover { background: #b91c1c; }
+
+    .detail-panel {
+      width: 350px; min-width: 350px; background-color: var(--bg-card); border-radius: 20px;
+      padding: 20px; display: flex; flex-direction: column; box-shadow: var(--shadow-md); overflow-y: auto;
+    }
+
+    /* Modal */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-backdrop.open { display: flex; }
+    .modal-box { background: #ffffff; border-radius: 20px; width: 100%; max-width: 460px; padding: 24px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3); }
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; }
+    .form-input, .form-select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 13px; outline: none; }
+    .modal-btn-submit { width: 100%; padding: 12px; background: #dc2626; color: #ffffff; border-radius: 12px; font-size: 13.5px; font-weight: 800; border: none; cursor: pointer; }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: #ffffff; padding: 12px 20px;
+      border-radius: 12px; font-size: 13px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transform: translateY(100px); opacity: 0; transition: all 0.25s ease; z-index: 99999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 1100px) { .detail-panel { display: none; } }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        </div>
+        <span>MallMaze</span>
+      </a>
+
+      <div class="nav-group">
+        <span class="nav-label">Store Operations</span>
+        <a class="nav-item" href="dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span>Dashboard & P&L</span>
+        </a>
+        <a class="nav-item" href="orders.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <span>Billing & Orders</span>
+        </a>
+        <a class="nav-item" href="payments.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span>UPI & Settlements</span>
+        </a>
+        <a class="nav-item" href="customers.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+          <span>Customers (Khata)</span>
+        </a>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <div class="nav-group">
+        <span class="nav-label">Tally & Compliance</span>
+        <a class="nav-item active" href="expenses.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>Expenses & Khata</span>
+        </a>
+        <a class="nav-item" href="inventory.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          <span>Products & Stock</span>
+        </a>
+        <a class="nav-item" href="reports.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          <span>GST Tax Reports</span>
+        </a>
+        <a class="nav-item" href="statistics.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Growth Stats</span>
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-wrapper">
+      <section class="section-content">
+        <div class="top-header">
+          <div class="header-left">
+            <h1>Shop Expenses & Tally Khata</h1>
+            <p>Track store salaries, commercial rents, electricity bills, supplier payments, and tea expenses</p>
+          </div>
+          <button class="btn-action-trigger" onclick="openExpenseModal()">
+            + Log New Shop Expense
+          </button>
+        </div>
+
+        <div class="stats-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-title">Total Monthly Outflow</div>
+            <div class="kpi-value" style="color:#dc2626;" id="dispTotalExp">₹5,14,200</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Staff Payroll (4 Members)</div>
+            <div class="kpi-value">₹1,80,000</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Shop Rent (Bandra West)</div>
+            <div class="kpi-value">₹1,50,000</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Utility & Maintenance</div>
+            <div class="kpi-value">₹38,400</div>
+          </div>
+        </div>
+
+        <div class="white-card">
+          <div class="card-head">
+            <strong style="font-size:15px; color:#0f172a;">Complete Ledger Entries (January 2026)</strong>
+            <span style="font-size:12px; color:#64748b;">Auto-synced with P&L statement</span>
+          </div>
+
+          <table class="expense-table">
+            <thead>
+              <tr>
+                <th>Expense Head</th>
+                <th>Category</th>
+                <th>Payment Mode</th>
+                <th>Date</th>
+                <th>Amount (₹)</th>
+              </tr>
+            </thead>
+            <tbody id="expenseTableBody">
+              <tr>
+                <td><strong>Shop Main Floor Rent</strong></td>
+                <td>Shop Rent</td>
+                <td>HDFC Netbanking</td>
+                <td>1 Jan 2026</td>
+                <td><strong style="color:#dc2626;">₹1,50,000</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Staff Salaries (Technicians + Billing)</strong></td>
+                <td>Staff Salary</td>
+                <td>Direct Bank Transfer (IMPS)</td>
+                <td>1 Jan 2026</td>
+                <td><strong style="color:#dc2626;">₹1,80,000</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Output GST Pool Transfer (18%)</strong></td>
+                <td>Tax Liability</td>
+                <td>GST Portal Challan</td>
+                <td>5 Jan 2026</td>
+                <td><strong style="color:#dc2626;">₹1,45,800</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Adani Commercial Power Bill</strong></td>
+                <td>Electricity & Utility</td>
+                <td>UPI Auto-Debit</td>
+                <td>7 Jan 2026</td>
+                <td><strong style="color:#dc2626;">₹38,400</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="detail-panel">
+        <h2 style="font-size:16.5px; font-weight:800; margin-bottom:14px;">Expense Optimization</h2>
+        <div style="background:#f8fafc; border:1px solid #f1f5f9; border-radius:14px; padding:14px; margin-bottom:16px; font-size:12px; line-height:1.45;">
+          💡 <strong>Cost-Saving Recommendation:</strong>
+          Your overhead represents <strong>10.5%</strong> of gross revenue. Claiming GST Input Tax Credit (ITC) on commercial rent and electricity invoices can save your store <strong>₹33,912</strong> this quarter.
+        </div>
+
+        <h3 style="font-size:13px; font-weight:700; margin-bottom:10px;">Quick Category Breakdown</h3>
+        <div style="font-size:12.5px; color:#475569; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between;"><span>Salaries</span><strong>35.0%</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Rent</span><strong>29.2%</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>GST Pool</span><strong>28.3%</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Power & Utilities</span><strong>7.5%</strong></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Expense Modal -->
+  <div class="modal-backdrop" id="expModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:17px; font-weight:800;">Log Shop Expense</h3>
+        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeExpenseModal()">✕</button>
+      </div>
+      <form onsubmit="saveExpense(event)">
+        <div class="form-group">
+          <label class="form-label">Expense Title</label>
+          <input type="text" id="mExpTitle" class="form-input" placeholder="e.g. Staff Bonus, Packaging Bags" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="mExpCat" class="form-select">
+            <option>Staff Salary & Wages</option>
+            <option>Shop Rent</option>
+            <option>Electricity & Utility</option>
+            <option>Supplier Wholesale Purchase</option>
+            <option>Tea & Daily Expenses</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount (₹)</label>
+          <input type="number" id="mExpAmount" class="form-input" placeholder="₹ Amount" required />
+        </div>
+        <button type="submit" class="modal-btn-submit">Record Expense into Khata</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="appToast"></div>
+
+  <script>
+    function openExpenseModal() { document.getElementById("expModal").classList.add("open"); }
+    function closeExpenseModal() { document.getElementById("expModal").classList.remove("open"); }
+
+    function saveExpense(e) {
+      e.preventDefault();
+      const title = document.getElementById("mExpTitle").value;
+      const cat = document.getElementById("mExpCat").value;
+      const amt = parseInt(document.getElementById("mExpAmount").value, 10);
+
+      const tbody = document.getElementById("expenseTableBody");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>${title}</strong></td>
+        <td>${cat}</td>
+        <td>UPI / Bank Transfer</td>
+        <td>Today</td>
+        <td><strong style="color:#dc2626;">₹${amt.toLocaleString('en-IN')}</strong></td>
+      `;
+      tbody.prepend(tr);
+
+      closeExpenseModal();
+      showToast(`Expense of ₹${amt.toLocaleString('en-IN')} logged into Khata!`);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("appToast");
+      t.innerText = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2500);
+    }
+  </script>
+</body>
+</html>

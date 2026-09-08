@@ -40,9 +40,18 @@ for (const file of ["assets/js/config.js", "assets/js/api-client.js", "assets/js
 const htmlFiles = fs.readdirSync(root).filter((name) => name.endsWith(".html"));
 for (const file of htmlFiles) {
   const html = read(file);
-  if (!html.includes('assets/js/api-client.js') && !["offline.html", "sw-reset.html"].includes(file)) {
-    fail(`${file} is missing assets/js/api-client.js`);
+  const activeHtml = html.replace(/<!--[\s\S]*?-->/g, '');
+
+  if (!activeHtml.includes('assets/js/api-client.js') && !["offline.html", "sw-reset.html"].includes(file)) {
+    fail(`${file} is missing active assets/js/api-client.js`);
   }
+  if (!activeHtml.includes('favicon.ico')) {
+    fail(`${file} is missing favicon link`);
+  }
+  if (!activeHtml.includes('name="description"') && !activeHtml.includes("name='description'")) {
+    fail(`${file} is missing meta description`);
+  }
+
   const bannedBrowserScripts = ["supa" + "base-js", "supa" + "base-client.js"];
   if (bannedBrowserScripts.some((pattern) => html.includes(pattern))) {
     fail(`${file} still loads legacy external DB browser scripts`);
@@ -61,5 +70,5 @@ for (const file of htmlFiles) {
 }
 
 if (!process.exitCode) {
-  console.log(`Build check passed: ${htmlFiles.length} HTML files and ${requiredFiles.length} required assets verified.`);
+  console.log(`Build check passed: ${htmlFiles.length} HTML files and ${requiredFiles.length} required assets verified with favicons and metadata.`);
 }

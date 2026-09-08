@@ -176,18 +176,76 @@ function storeAnalytics(db, storeId) {
   const orders = (db.orders || []).filter((o) => (o.items || []).some((it) => String(it.store_id) === String(storeId)));
   const reservations = (db.reservations || []).filter((r) => String(r.store_id) === String(storeId));
   const products = (db.products || []).filter((p) => String(p.store_id) === String(storeId));
-  const revenue = orders.reduce((sum, o) => {
-    const lines = (o.items || []).filter((it) => String(it.store_id) === String(storeId));
-    return sum + lines.reduce((s, it) => s + Number(it.line_total_paise || 0), 0);
-  }, 0);
+
+  let revenuePaise = 0;
+  let cogsPaise = 0;
   const productSales = new Map();
+
   for (const o of orders) {
     for (const it of o.items || []) {
       if (String(it.store_id) !== String(storeId)) continue;
       const key = String(it.product_id || it.name);
-      productSales.set(key, (productSales.get(key) || 0) + Number(it.qty || 1));
+      const qty = Math.max(1, Number(it.qty || 1));
+      productSales.set(key, (productSales.get(key) || 0) + qty);
+
+      const lineTotalPaise = Number(it.line_total_paise || (Number(it.price_inr || 0) * 100 * qty));
+      revenuePaise += lineTotalPaise;
+
+      const prod = products.find((p) => String(p.id) === key);
+      const costPaise = Number(it.cost_price_paise || (Number(prod?.cost_price_inr ?? Math.round(Number(prod?.price_inr || 0) * 0.65)) * 100));
+      cogsPaise += costPaise * qty;
     }
   }
+
+  const revenueInr = Math.round(revenuePaise / 100);
+  const cogsInr = Math.round(cogsPaise / 100);
+  const grossProfitInr = revenueInr - cogsInr;
+  const profitMarginPct = revenueInr > 0 ? Math.round((grossProfitInr / revenueInr) * 100) : 0;
+
+  let totalRetailValueInr = 0;
+  let totalCostValueInr = 0;
+  let inStockCount = 0;
+  let lowStockCount = 0;
+  let outOfStockCount = 0;
+
+  const productPnlList = products.map((p) => {
+    const sellingPrice = Math.max(0, Number(p.price_inr || p.price || 0));
+    const costPrice = Math.max(0, Number(p.cost_price_inr ?? p.cost_price ?? Math.round(sellingPrice * 0.65)));
+    const stockQty = Math.max(0, Number(p.stock_qty ?? p.stockCount ?? 0));
+    const qtySold = productSales.get(String(p.id)) || 0;
+
+    totalRetailValueInr += stockQty * sellingPrice;
+    totalCostValueInr += stockQty * costPrice;
+
+    if (stockQty <= 0) outOfStockCount++;
+    else if (stockQty <= 3) lowStockCount++;
+    else inStockCount++;
+
+    const unitProfit = sellingPrice - costPrice;
+    const marginPct = sellingPrice > 0 ? Math.round((unitProfit / sellingPrice) * 100) : 0;
+    const prodRevenue = qtySold * sellingPrice;
+    const prodCogs = qtySold * costPrice;
+    const prodTotalProfit = qtySold * unitProfit;
+
+    return {
+      id: p.id,
+      name: p.name,
+      category: p.category || "General",
+      stock_qty: stockQty,
+      selling_price_inr: sellingPrice,
+      cost_price_inr: costPrice,
+      unit_profit_inr: unitProfit,
+      margin_pct: marginPct,
+      qty_sold: qtySold,
+      revenue_inr: prodRevenue,
+      cogs_inr: prodCogs,
+      total_profit_inr: prodTotalProfit,
+      is_loss: costPrice > sellingPrice
+    };
+  });
+
+  const potentialProfitInr = totalRetailValueInr - totalCostValueInr;
+
   const topProducts = [...productSales.entries()]
     .map(([id, qty]) => {
       const p = products.find((x) => String(x.id) === id);
@@ -202,7 +260,21 @@ function storeAnalytics(db, storeId) {
     active_products: products.filter((p) => p.is_active !== false).length,
     order_count: orders.length,
     reservation_count: reservations.length,
-    revenue_inr: Math.round(revenue / 100),
+    revenue_inr: revenueInr,
+    cogs_inr: cogsInr,
+    gross_profit_inr: grossProfitInr,
+    profit_margin_pct: profitMarginPct,
+    inventory_valuation: {
+      total_retail_value_inr: totalRetailValueInr,
+      total_cost_value_inr: totalCostValueInr,
+      potential_profit_inr: potentialProfitInr
+    },
+    stock_summary: {
+      in_stock_count: inStockCount,
+      low_stock_count: lowStockCount,
+      out_of_stock_count: outOfStockCount
+    },
+    product_pnl_list: productPnlList,
     top_products: topProducts,
     low_stock: products.filter((p) => Number(p.stock_qty || 0) > 0 && Number(p.stock_qty || 0) <= 3).slice(0, 10)
   };
