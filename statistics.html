@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
   <title>MallMaze - Statistics & Growth</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,6 +26,7 @@
     body { background-color: #0b0e14; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; overflow-x: hidden; }
 
     .app-container {
+      min-width: 1200px !important;
       display: flex; width: 100%; max-width: 1480px; height: 94vh; min-height: 720px;
       background-color: var(--bg-dark); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
     }
@@ -105,12 +106,18 @@
     }
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    @media (max-width: 1100px) { .detail-panel { display: none; } }
-    @media (max-width: 768px) {
+    @media (max-width: 0px) /* disabled mobile collapse */ { .detail-panel { display: none; } }
+    @media (max-width: 0px) /* disabled mobile collapse */ {
       .sidebar { width: 64px; min-width: 64px; padding: 16px 8px; }
       .brand span, .nav-item span { display: none; }
     }
   </style>
+
+  <meta name="description" content="MallMaze - Statistics & Growth - MallMaze unified local commerce." />
+
+  <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
+
+  <script src="assets/js/api-client.js" defer></script>
 </head>
 <body>
 

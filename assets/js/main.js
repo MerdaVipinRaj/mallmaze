@@ -20,7 +20,7 @@ var read = window.read || ((k, f) => {
 });
 var write = window.write || ((k, v) => localStorage.setItem(k, JSON.stringify(v)));
 var el = window.el || ((id) => document.getElementById(id));
-var money = window.money || ((n) => `Rs ${Math.round(Number(n || 0)).toLocaleString('en-IN')}`);
+var money = window.money || ((n) => `₹${Math.round(Number(n || 0)).toLocaleString('en-IN')}`);
 window.read = read;
 window.write = write;
 window.el = el;
@@ -525,7 +525,7 @@ function renderNavbar() {
   ];
   const locationValue = state.location || 'Hyderabad';
   const navItem = (href, label, active) =>
-    `<a href="${href}" class="sm-nav-link rounded-full px-4 py-2 text-sm font-medium transition ${active ? 'active' : ''}">${label}</a>`;
+    `<a href="${href}" class="sm-subnav-link ${active ? 'active' : ''}">${label}</a>`;
   const citiesMarkup = CITIES.map((c) => {
     const active = c.city === locationValue;
     return `
@@ -538,75 +538,78 @@ function renderNavbar() {
 
   nav.className = 'sm-header';
   nav.innerHTML = `
-    <div class="container mx-auto flex min-h-16 items-center justify-between gap-3 px-4 py-2">
-      <div class="sm-left flex items-center gap-3 shrink-0">
-        <a href="index.html" class="sm-logo font-extrabold text-xl tracking-tight text-amber-500 hover:text-amber-600 transition">MallMaze</a>
-        <div class="sm-location-wrap">
-          <button type="button" id="sm-location-btn" class="sm-location-btn flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition" aria-haspopup="true" aria-expanded="false">
-            <span class="sm-location-main flex items-center gap-1">${icon('pin')}<span id="sm-selected-city">${locationValue}</span></span>
-            <span class="sm-location-arrow">${icon('chevronDown')}</span>
-          </button>
-          <div id="sm-location-panel" class="sm-location-panel" role="menu" aria-hidden="true">
-            <div class="sm-location-head">
-              <p class="sm-location-title">Select Your City</p>
-              <p class="sm-location-sub">Choose your shopping location</p>
+    <div class="sm-header-shell">
+      <!-- ROW 1: Brand Logo, Location, Badged Actions -->
+      <div class="sm-top-row">
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <a href="index.html" class="sm-brand-link" aria-label="MallMaze Home">
+            <div class="sm-brand-icon">M</div>
+            <div class="flex flex-col">
+              <span class="sm-brand-title">MallMaze</span>
             </div>
-            <div class="sm-city-list">${citiesMarkup}</div>
-            <button type="button" id="sm-detect-city" class="sm-detect-city mt-2 w-full rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-900">Use my current location</button>
+          </a>
+
+          <!-- Location Selector -->
+          <div class="sm-location-wrap relative">
+            <button type="button" id="sm-location-btn" class="sm-location-btn-v2" aria-haspopup="true" aria-expanded="false" title="Select City">
+              ${icon('pin')}
+              <span class="sm-loc-text" id="sm-selected-city">${locationValue}</span>
+              ${icon('chevronDown')}
+            </button>
+            <div id="sm-location-panel" class="sm-location-panel" role="menu" aria-hidden="true">
+              <div class="sm-location-head">
+                <p class="sm-location-title">Select Your City</p>
+                <p class="sm-location-sub">Browse products & stores near you</p>
+              </div>
+              <div class="sm-city-list">${citiesMarkup}</div>
+              <button type="button" id="sm-detect-city" class="sm-detect-city mt-2 w-full rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 transition">Use my current location</button>
+            </div>
           </div>
+        </div>
+
+        <!-- Action Icons: Wishlist, Cart, Account -->
+        <div class="sm-actions-group">
+          <a href="wishlist.html" class="sm-action-icon-link" aria-label="Wishlist" title="Wishlist">
+            ${icon('heart')}
+            ${state.wishlist.length > 0 ? `<span class="sm-badge-num">${state.wishlist.length}</span>` : ''}
+          </a>
+          <a href="cart.html" class="sm-action-icon-link" aria-label="Shopping Cart" title="Cart">
+            ${icon('cart')}
+            ${state.cart.length > 0 ? `<span class="sm-badge-num">${state.cart.length}</span>` : ''}
+          </a>
+          ${state.user ? `
+            <a href="dashboard.html" class="sm-auth-btn-pill" title="My Account">
+              <span>Account</span>
+            </a>
+          ` : `
+            <a href="login.html" class="sm-auth-btn-pill" title="Sign In">
+              <span>Sign In</span>
+            </a>
+          `}
         </div>
       </div>
 
-      <div class="sm-nav hidden md:flex items-center gap-1">
+      <!-- ROW 2: Prominent Search Bar -->
+      <div class="sm-search-row">
+        <form id="sm-nav-search-form" class="w-full" onsubmit="event.preventDefault();">
+          <div class="sm-search-bar-wrap">
+            ${icon('search')}
+            <input type="search" id="sm-nav-search-input" placeholder="Search products, brands, stores..." autocomplete="off" />
+          </div>
+        </form>
+      </div>
+
+      <!-- ROW 3: Secondary Desktop Navigation Strip -->
+      <div class="sm-subnav-desktop">
         ${navItem('index.html', 'Home', file === 'index.html')}
         ${navItem('products.html', 'Shop', file === 'products.html' || file === 'product.html')}
         ${navItem('deals.html', 'Deals', file === 'deals.html')}
-        ${navItem('scan.html', 'Scan&Go', file === 'scan.html')}
         ${navItem('autoshelf.html', 'Local Stores', file === 'autoshelf.html' || file === 'store.html')}
-      </div>
-
-      <div class="sm-right flex items-center gap-2 shrink-0">
-        <a href="wishlist.html" class="sm-icon-btn relative rounded-full p-2 text-slate-700 hover:bg-slate-100 transition" aria-label="Wishlist">
-          ${icon('heart')}
-          <span class="sm-count absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">${state.wishlist.length}</span>
-        </a>
-        <a href="cart.html" class="sm-icon-btn relative rounded-full p-2 text-slate-700 hover:bg-slate-100 transition" aria-label="Cart">
-          ${icon('cart')}
-          <span class="sm-count absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">${state.cart.length}</span>
-        </a>
-
-        <!-- Account / Sign In -->
-        ${state.user ? `
-          <a href="login.html" class="sm-sign-btn inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-800 transition">
-            <span>👤 Account (${escapeHtml(String(state.user.name || 'User').split(' ')[0])})</span>
-          </a>
-        ` : `
-          <a href="login.html" class="sm-sign-btn inline-flex items-center gap-1.5 rounded-full bg-amber-600 hover:bg-amber-700 px-4.5 py-2 text-xs font-bold text-white shadow-sm transition">
-            <span>Sign In</span>
-          </a>
-        `}
+        ${navItem('scan.html', 'Scan & Go', file === 'scan.html')}
+        ${navItem('compare.html', 'Compare Prices', file === 'compare.html')}
       </div>
     </div>
   `;
-
-  // Mark active icon links for accessibility
-  const setActive = (href) => {
-    const a = nav.querySelector(`a[href="${href}"]`);
-    if (!a) return;
-    a.setAttribute('aria-current', 'page');
-  };
-  if (file === 'index.html' || file === 'dashboard.html') setActive('index.html');
-  if (file === 'malls.html' || file === 'mall.html') setActive('malls.html');
-  if (file === 'products.html' || file === 'product.html') setActive('products.html');
-  if (file === 'deals.html') setActive('deals.html');
-  if (file === 'compare.html') setActive('compare.html');
-  if (file === 'scan.html') setActive('scan.html');
-  if (file === 'autoshelf.html') setActive('autoshelf.html');
-  if (file === 'orders.html') setActive('orders.html');
-  if (file === 'notifications.html') setActive('notifications.html');
-  if (file === 'support.html') setActive('support.html');
-  if (file === 'store.html') setActive('malls.html');
-  if (file === 'order.html') setActive('orders.html');
 
   const locWrap = nav.querySelector('.sm-location-wrap');
   const locBtn = el('sm-location-btn');
@@ -624,7 +627,44 @@ function renderNavbar() {
     locPanel?.setAttribute('aria-hidden', 'false');
   };
 
-  locBtn?.addEventListener('click', () => {
+
+  // Injected Mobile Bottom Navigation Bar
+  let bottomNav = document.getElementById('mm-mobile-bottom-nav');
+  if (!bottomNav) {
+    bottomNav = document.createElement('nav');
+    bottomNav.id = 'mm-mobile-bottom-nav';
+    bottomNav.className = 'mm-mobile-bottom-nav';
+    bottomNav.setAttribute('aria-label', 'Mobile Bottom Navigation');
+    document.body.appendChild(bottomNav);
+  }
+  bottomNav.innerHTML = `
+    <a href="index.html" class="mm-bottom-nav-item ${file === 'index.html' ? 'active' : ''}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="products.html" class="mm-bottom-nav-item ${(file === 'products.html' || file === 'product.html') ? 'active' : ''}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span>Shop</span>
+    </a>
+    <a href="deals.html" class="mm-bottom-nav-item ${file === 'deals.html' ? 'active' : ''}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span>Deals</span>
+    </a>
+    <a href="wishlist.html" class="mm-bottom-nav-item ${file === 'wishlist.html' ? 'active' : ''}">
+      <div class="relative flex items-center justify-center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        ${state.wishlist && state.wishlist.length > 0 ? `<span class="mm-bottom-badge">${state.wishlist.length}</span>` : ''}
+      </div>
+      <span>Wishlist</span>
+    </a>
+    <a href="${state.user ? 'dashboard.html' : 'login.html'}" class="mm-bottom-nav-item ${(file === 'login.html' || file === 'dashboard.html') ? 'active' : ''}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>${state.user ? 'Account' : 'Sign In'}</span>
+    </a>
+  `;
+
+  locBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
     const isOpen = locPanel?.classList.contains('open');
     if (isOpen) closePanel();
     else openPanel();
@@ -634,7 +674,7 @@ function renderNavbar() {
     btn.addEventListener('click', () => {
       const nextCity = btn.getAttribute('data-city') || 'Hyderabad';
       state.location = nextCity;
-      cityLabel.textContent = nextCity;
+      if (cityLabel) cityLabel.textContent = nextCity;
       persist();
       closePanel();
       window.location.reload();
@@ -648,7 +688,6 @@ function renderNavbar() {
     if (!locWrap || !locPanel?.classList.contains('open')) return;
     if (!locWrap.contains(e.target)) closePanel();
   };
-
   window.__smLocEscapeKey = (e) => {
     if (e.key === 'Escape') closePanel();
   };
@@ -661,7 +700,7 @@ function renderNavbar() {
       toast('Location not supported on this device.', { type: 'bad', title: 'Location' });
       return;
     }
-    toast('Detecting your city…', { type: 'ok', title: 'Location', ms: 1500 });
+    toast('Detecting your city...', { type: 'ok', title: 'Location', ms: 1500 });
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const result = window.MM_API?.detectLocation
@@ -678,6 +717,25 @@ function renderNavbar() {
     }, () => toast('Location permission denied.', { type: 'bad', title: 'Location' }), { enableHighAccuracy: false, timeout: 12000 });
   });
 
+  // Bind Navbar search form
+  const navSearchForm = nav.querySelector('#sm-nav-search-form');
+  const navSearchInput = nav.querySelector('#sm-nav-search-input');
+  if (navSearchForm && navSearchInput) {
+    navSearchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const q = String(navSearchInput.value || '').trim();
+      if (!q) { navSearchInput.focus(); return; }
+      if (location.pathname.endsWith('products.html')) {
+        const pageSearch = document.getElementById('search-input');
+        if (pageSearch) {
+          pageSearch.value = q;
+          pageSearch.dispatchEvent(new Event('input', { bubbles: true }));
+          return;
+        }
+      }
+      window.location.href = `products.html?search=${encodeURIComponent(q)}`;
+    });
+  }
 }
 
 async function trySyncAuthFromLegacyRemote() {
@@ -843,35 +901,38 @@ function productCard(p) {
   const trust = trustForProduct(p);
   const discountPct = p.originalPrice > p.price ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
   const wishActive = state.wishlist.some((w) => w.id === p.id);
-  const reviewsText = Number(p.reviews || 0) > 0 ? `${Number(p.reviews || 0).toLocaleString('en-IN')} reviews` : 'Verified store';
+  const ratingVal = (p.rating || 4.5).toFixed(1);
+  const storeLabel = `${escapeHtml(p.storeName || 'Store')}${p.mallName ? ' · ' + escapeHtml(p.mallName) : ''}`;
+  
   return `
-    <a href="product.html?id=${encodeURIComponent(String(p.id))}" class="group block overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:shadow-card-hover hover:-translate-y-1">
-      <div class="relative aspect-square overflow-hidden bg-muted">
-        <div class="mm-badges">
-          ${discountPct ? `<span class="mm-badge gold">${discountPct}% OFF</span>` : ''}
-          ${trustBadge(trust, 'compact')}
-        </div>
-        <div class="mm-card-actions">
-          <button class="mm-icon-btn ${wishActive ? 'active' : ''} wishlist-toggle" type="button" aria-pressed="${wishActive ? 'true' : 'false'}" aria-label="${wishActive ? 'Remove from wishlist' : 'Save to wishlist'}" data-id="${escapeHtml(p.id)}">${icon('heart')}</button>
-        </div>
-        <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" class="h-full w-full object-cover" width="420" height="420" loading="lazy" decoding="async" />
-        <div class="absolute bottom-0 left-0 right-0 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
-          <button class="add-to-cart-btn flex w-full items-center justify-center gap-2 bg-gradient-gold py-2.5 text-xs font-bold text-primary-foreground" data-id="${escapeHtml(p.id)}" aria-label="Add ${escapeHtml(p.name)} to cart">${icon('cart')} <span>Add to Cart</span></button>
-        </div>
+    <a href="product.html?id=${encodeURIComponent(String(p.id))}" class="mm-card-product product-card-link group" data-id="${escapeHtml(p.id)}">
+      <div class="mm-card-media">
+        ${discountPct > 0 ? `<span class="mm-card-discount-pill">${discountPct}% OFF</span>` : ''}
+        <button class="mm-card-wish-btn wishlist-toggle ${wishActive ? 'active' : ''}" type="button" aria-pressed="${wishActive ? 'true' : 'false'}" aria-label="${wishActive ? 'Remove from wishlist' : 'Save to wishlist'}" data-id="${escapeHtml(p.id)}">
+          ${icon('heart')}
+        </button>
+        <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" width="360" height="360" loading="lazy" decoding="async" />
       </div>
-      <div class="p-3.5">
-        <p class="mb-0.5 truncate text-[11px] font-medium text-muted-foreground">${escapeHtml(p.storeName)} &middot; ${escapeHtml(p.mallName)}</p>
-        <h3 class="mb-1.5 line-clamp-2 text-sm font-bold leading-tight">${escapeHtml(p.name)}</h3>
-        <div class="flex items-center justify-between gap-2">
-          <div class="mb-2"><span class="text-lg font-extrabold">${money(p.price)}</span>${p.originalPrice > p.price ? ` <span class="text-xs text-muted-foreground line-through">${money(p.originalPrice)}</span>` : ''}</div>
-          <div class="text-right text-xs font-semibold text-slate-600">
-            <span>${(p.rating || 0).toFixed(1)} &#9733;</span>
-            <span class="block text-[10px] font-medium text-muted-foreground">${escapeHtml(reviewsText)}</span>
+      <div class="mm-card-body">
+        <div class="mm-card-store-line" title="${storeLabel}">
+          ${icon('pin')}
+          <span>${storeLabel}</span>
+        </div>
+        <h3 class="mm-card-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</h3>
+        <div class="flex items-center justify-between gap-1 mt-0.5">
+          <div class="mm-card-price-wrap">
+            <span class="mm-card-current-price">${money(p.price)}</span>
+            ${p.originalPrice > p.price ? `<span class="mm-card-mrp-price">${money(p.originalPrice)}</span>` : ''}
+          </div>
+          <div class="mm-card-rating-chip" title="${ratingVal} Stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span>${ratingVal}</span>
           </div>
         </div>
-        <div class="sm-trust-line">
-          <span>${escapeHtml(trust.promise)}</span>
-          <span>${trust.sellableStock > 0 ? `${trust.sellableStock} sellable` : trust.action}</span>
+        <div class="mm-card-cta">
+          <button class="add-to-cart-btn" type="button" data-id="${escapeHtml(p.id)}" aria-label="Add ${escapeHtml(p.name)} to cart">
+            ${icon('cart')} <span>Add to Cart</span>
+          </button>
         </div>
       </div>
     </a>
@@ -1565,7 +1626,7 @@ function renderProducts(data) {
     categoryInput.value = params.get('category') || '';
   }
   if (searchInput) searchInput.value = params.get('search') || '';
-  if (sortInput) sortInput.value = params.get('sort') || 'reco';
+  if (sortInput) { const sVal = params.get('sort'); sortInput.value = (sVal === 'reco' || !sVal) ? 'rec' : sVal; }
   if (priceInput) priceInput.value = params.get('price') || '';
   let trustFilter = params.get('trust') || '';
 
@@ -1754,7 +1815,7 @@ function renderProducts(data) {
         || (key === 'discount' && sort === 'discount')
         || (key === 'rating' && sort === 'rating_desc')
         || (key === 'price-low' && price === '0-999');
-      b.classList.toggle('mm-chip-active', active);
+      b.classList.toggle('mm-chip-active', active); b.classList.toggle('active', active);
       b.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
 
@@ -1792,8 +1853,8 @@ function renderProducts(data) {
 
   document.querySelectorAll('.mm-chip[data-q]').forEach((b) => b.addEventListener('click', () => {
     const k = String(b.getAttribute('data-q') || '');
-    if (k === 'discount') { if (sortInput) sortInput.value = sortInput.value === 'discount' ? 'reco' : 'discount'; }
-    if (k === 'rating') { if (sortInput) sortInput.value = sortInput.value === 'rating_desc' ? 'reco' : 'rating_desc'; }
+    if (k === 'discount') { if (sortInput) sortInput.value = sortInput.value === 'discount' ? 'rec' : 'discount'; }
+    if (k === 'rating') { if (sortInput) sortInput.value = sortInput.value === 'rating_desc' ? 'rec' : 'rating_desc'; }
     if (k === 'price-low') { if (priceInput) priceInput.value = priceInput.value === '0-999' ? '' : '0-999'; }
     if (k === 'fast') { trustFilter = trustFilter === 'rapid' ? '' : 'rapid'; }
     draw(true);
@@ -7365,6 +7426,8 @@ async function init() {
   document.addEventListener('click', (e) => {
     const b = e.target.closest('.add-to-cart-btn');
     if (!b) return;
+    e.preventDefault();
+    e.stopPropagation();
     const id = b.getAttribute('data-id');
     const product = scoped(window.appData).products.find((p) => p.id === id);
     if (!product) return toast('Product not available in selected location.', { type: 'bad' });

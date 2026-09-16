@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
   <title>MallMaze - Store Dashboard</title>
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,6 +50,7 @@
     }
 
     .app-container {
+      min-width: 1200px !important;
       display: flex;
       width: 100%;
       max-width: 1480px;
@@ -784,7 +785,7 @@
       opacity: 1;
     }
 
-    @media (max-width: 1100px) {
+    @media (max-width: 0px) /* disabled mobile collapse */ {
       .detail-panel {
         display: none;
       }
@@ -799,7 +800,7 @@
       }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 0px) /* disabled mobile collapse */ {
       .sidebar {
         width: 64px;
         min-width: 64px;
@@ -822,6 +823,12 @@
       }
     }
   </style>
+
+  <meta name="description" content="MallMaze - Store Dashboard - MallMaze unified local commerce." />
+
+  <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
+
+  <script src="assets/js/api-client.js" defer></script>
 </head>
 <body>
 

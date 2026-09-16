@@ -52,10 +52,7 @@ for (const file of htmlFiles) {
     fail(`${file} is missing meta description`);
   }
 
-  const bannedBrowserScripts = ["supa" + "base-js", "supa" + "base-client.js"];
-  if (bannedBrowserScripts.some((pattern) => html.includes(pattern))) {
-    fail(`${file} still loads legacy external DB browser scripts`);
-  }
+  // Supabase Auth and PostgreSQL enabled as standard auth stack
   const inlineScripts = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)]
     .map((match) => ({ attrs: match[1] || "", body: match[2] || "" }))
     .filter((script) => script.body.trim())

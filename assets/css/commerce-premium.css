@@ -1,0 +1,665 @@
+/* ============================================================
+   MALLMAZE COMMERCE PREMIUM DESIGN SYSTEM
+   Mobile-First, 2-Column Product Grid, Compact E-Commerce UI
+   ============================================================ */
+
+:root {
+  --mm-navy: #101a35;
+  --mm-navy-dark: #0a1020;
+  --mm-navy-light: #1c2b54;
+  --mm-gold: #f5a900;
+  --mm-gold-light: #ffbf35;
+  --mm-gold-dark: #d98b00;
+  --mm-cream: #fffdf8;
+  --mm-bg: #f6f7f9;
+  --mm-card: #ffffff;
+  --mm-text: #111827;
+  --mm-text-muted: #64748b;
+  --mm-border: #e5e7eb;
+  --mm-teal: #087f73;
+  --mm-success: #16803c;
+  --mm-error: #d92d20;
+  --mm-radius-sm: 8px;
+  --mm-radius-md: 12px;
+  --mm-radius-lg: 16px;
+  --mm-radius-full: 9999px;
+  --mm-shadow-card: 0 1px 3px rgba(16, 26, 53, 0.05), 0 4px 12px rgba(16, 26, 53, 0.04);
+  --mm-shadow-hover: 0 8px 24px rgba(16, 26, 53, 0.09);
+  --mm-shadow-gold: 0 4px 16px rgba(245, 169, 0, 0.28);
+}
+
+/* ==========================================
+   GLOBAL LAYOUT & OVERFLOW PROTECTION
+   ========================================== */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--mm-bg);
+  color: var(--mm-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   MANDATORY 2-COLUMN MOBILE PRODUCT GRID
+   (Supports 320px, 360px, 375px, 390px, 412px, 430px)
+   ========================================== */
+.product-grid,
+#products-list.product-grid,
+#top-deals-list.product-grid,
+#top-deals-rail.product-grid,
+#recommended-list.product-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 0 1.5rem 0 !important;
+  list-style: none !important;
+}
+
+@media (min-width: 641px) {
+  .product-grid,
+  #products-list.product-grid,
+  #top-deals-list.product-grid,
+  #top-deals-rail.product-grid,
+  #recommended-list.product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid,
+  #products-list.product-grid,
+  #top-deals-list.product-grid,
+  #top-deals-rail.product-grid,
+  #recommended-list.product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .product-grid,
+  #products-list.product-grid,
+  #top-deals-list.product-grid,
+  #top-deals-rail.product-grid,
+  #recommended-list.product-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+  }
+}
+
+/* Card child wrapper inside grid */
+.product-grid > a,
+#products-list.product-grid > a,
+#top-deals-list.product-grid > a,
+#top-deals-rail.product-grid > a,
+#recommended-list.product-grid > a,
+.product-card-link {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  justify-self: stretch !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* ==========================================
+   PRODUCT CARD DESIGN
+   ========================================== */
+.mm-card-product {
+  background: #ffffff !important;
+  border: 1px solid var(--mm-border) !important;
+  border-radius: var(--mm-radius-md) !important;
+  box-shadow: var(--mm-shadow-card) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  position: relative !important;
+  text-decoration: none !important;
+}
+.mm-card-product:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--mm-shadow-hover) !important;
+  border-color: rgba(245, 169, 0, 0.4) !important;
+}
+
+/* Card Image Area (Consistent 1/1 Aspect Ratio) */
+.mm-card-media {
+  position: relative !important;
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  background: #f8fafc !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.mm-card-media img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.35s ease !important;
+}
+.mm-card-product:hover .mm-card-media img {
+  transform: scale(1.04) !important;
+}
+
+/* Discount Pill Badge */
+.mm-card-discount-pill {
+  position: absolute !important;
+  top: 6px !important;
+  left: 6px !important;
+  background: var(--mm-error) !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  padding: 2px 6px !important;
+  border-radius: 5px !important;
+  z-index: 2 !important;
+  box-shadow: 0 2px 6px rgba(217, 45, 32, 0.3) !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Wishlist Toggle Button (Accessible Touch Target) */
+.mm-card-wish-btn {
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(4px) !important;
+  border: 1px solid rgba(16, 26, 53, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #64748b !important;
+  cursor: pointer !important;
+  z-index: 3 !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+}
+.mm-card-wish-btn:hover {
+  background: #ffffff !important;
+  color: var(--mm-error) !important;
+  transform: scale(1.08) !important;
+}
+.mm-card-wish-btn.active {
+  color: var(--mm-error) !important;
+  background: #ffffff !important;
+}
+.mm-card-wish-btn svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+/* Product Card Body */
+.mm-card-body {
+  padding: 8px 8px 10px 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  gap: 3px !important;
+}
+@media (min-width: 641px) {
+  .mm-card-body {
+    padding: 10px 10px 12px 10px !important;
+    gap: 4px !important;
+  }
+}
+
+/* Store & Location Line */
+.mm-card-store-line {
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  color: var(--mm-text-muted) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+.mm-card-store-line svg {
+  width: 11px !important;
+  height: 11px !important;
+  color: var(--mm-teal) !important;
+  flex-shrink: 0 !important;
+}
+
+/* Product Title (Max 2 lines) */
+.mm-card-name {
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  color: var(--mm-text) !important;
+  margin: 0 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  min-height: 31px !important;
+}
+@media (min-width: 641px) {
+  .mm-card-name {
+    font-size: 13.5px !important;
+    min-height: 34px !important;
+  }
+}
+
+/* Rating Pill */
+.mm-card-rating-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  background: #fef9c3 !important;
+  color: #854d0e !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  padding: 1px 5px !important;
+  border-radius: 4px !important;
+  width: fit-content !important;
+}
+.mm-card-rating-chip svg {
+  width: 10px !important;
+  height: 10px !important;
+  fill: #eab308 !important;
+}
+
+/* Price & MRP Row */
+.mm-card-price-wrap {
+  display: flex !important;
+  align-items: baseline !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+  margin-top: 2px !important;
+}
+.mm-card-current-price {
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  color: var(--mm-navy) !important;
+}
+@media (min-width: 641px) {
+  .mm-card-current-price {
+    font-size: 16px !important;
+  }
+}
+.mm-card-mrp-price {
+  font-size: 11px !important;
+  color: var(--mm-text-muted) !important;
+  text-decoration: line-through !important;
+}
+.mm-card-pct-off {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: var(--mm-success) !important;
+}
+
+/* Add to Cart Action Button */
+.mm-card-cta {
+  margin-top: auto !important;
+  padding-top: 6px !important;
+  width: 100% !important;
+}
+.mm-card-cta button {
+  width: 100% !important;
+  min-height: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, var(--mm-gold), var(--mm-gold-light)) !important;
+  color: var(--mm-navy) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  border: 1px solid rgba(245, 169, 0, 0.4) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 6px rgba(245, 169, 0, 0.18) !important;
+}
+.mm-card-cta button:hover {
+  background: var(--mm-gold) !important;
+  box-shadow: var(--mm-shadow-gold) !important;
+  transform: translateY(-1px) !important;
+}
+.mm-card-cta button.added {
+  background: var(--mm-success) !important;
+  color: #ffffff !important;
+  border-color: var(--mm-success) !important;
+}
+
+/* ==========================================
+   MALLMAZE E-COMMERCE HEADER
+   ========================================== */
+nav.sm-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 85 !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid var(--mm-border) !important;
+  box-shadow: 0 2px 10px rgba(16, 26, 53, 0.05) !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+.sm-header-shell {
+  max-width: 1380px !important;
+  margin: 0 auto !important;
+  padding: 8px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 7px !important;
+}
+@media (min-width: 768px) {
+  .sm-header-shell {
+    padding: 10px 16px !important;
+    gap: 8px !important;
+  }
+}
+
+/* Header Row 1: Brand Logo, Location, Actions */
+.sm-top-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+.sm-brand-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  text-decoration: none !important;
+  flex-shrink: 0 !important;
+}
+.sm-brand-icon {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
+  background: linear-gradient(135deg, var(--mm-navy), var(--mm-navy-light)) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--mm-gold) !important;
+  font-weight: 900 !important;
+  font-size: 16px !important;
+  box-shadow: 0 2px 6px rgba(16, 26, 53, 0.2) !important;
+}
+.sm-brand-title {
+  font-size: 19px !important;
+  font-weight: 900 !important;
+  color: var(--mm-navy) !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Location Selector Button */
+.sm-location-btn-v2 {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: #f8fafc !important;
+  border: 1px solid var(--mm-border) !important;
+  padding: 5px 9px !important;
+  border-radius: var(--mm-radius-full) !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: var(--mm-text) !important;
+  cursor: pointer !important;
+  max-width: 145px !important;
+  transition: all 0.2s ease !important;
+}
+.sm-location-btn-v2:hover {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+.sm-location-btn-v2 svg {
+  width: 12px !important;
+  height: 12px !important;
+  color: var(--mm-gold-dark) !important;
+  flex-shrink: 0 !important;
+}
+.sm-loc-text {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Actions Group */
+.sm-actions-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  flex-shrink: 0 !important;
+}
+.sm-action-icon-link {
+  position: relative !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 9px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--mm-navy) !important;
+  background: transparent !important;
+  transition: background 0.15s ease !important;
+  text-decoration: none !important;
+}
+.sm-action-icon-link:hover {
+  background: #f1f5f9 !important;
+}
+.sm-action-icon-link svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+.sm-badge-num {
+  position: absolute !important;
+  top: 1px !important;
+  right: 1px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  border-radius: 8px !important;
+  background: var(--mm-error) !important;
+  color: #ffffff !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 4px !important;
+  border: 1.5px solid #ffffff !important;
+}
+
+/* Account / Sign In */
+.sm-auth-btn-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  height: 32px !important;
+  padding: 0 10px !important;
+  border-radius: var(--mm-radius-full) !important;
+  background: var(--mm-navy) !important;
+  color: #ffffff !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  transition: background 0.2s ease !important;
+}
+.sm-auth-btn-pill:hover {
+  background: var(--mm-navy-light) !important;
+}
+
+/* Header Row 2: Search Input Bar */
+.sm-search-row {
+  width: 100% !important;
+}
+.sm-search-bar-wrap {
+  display: flex !important;
+  align-items: center !important;
+  background: #f8fafc !important;
+  border: 1.5px solid var(--mm-border) !important;
+  border-radius: 11px !important;
+  padding: 0 10px !important;
+  height: 40px !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+}
+.sm-search-bar-wrap:focus-within {
+  background: #ffffff !important;
+  border-color: var(--mm-gold) !important;
+  box-shadow: 0 0 0 3px rgba(245, 169, 0, 0.15) !important;
+}
+.sm-search-bar-wrap svg {
+  width: 15px !important;
+  height: 15px !important;
+  color: #94a3b8 !important;
+  flex-shrink: 0 !important;
+}
+.sm-search-bar-wrap input {
+  flex: 1 !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--mm-text) !important;
+  padding: 0 8px !important;
+}
+.sm-search-bar-wrap input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Secondary Desktop Navigation Strip */
+.sm-subnav-desktop {
+  display: none !important;
+}
+@media (min-width: 768px) {
+  .sm-subnav-desktop {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding-top: 4px !important;
+    border-top: 1px solid #f1f5f9 !important;
+  }
+  .sm-subnav-link {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: var(--mm-text-muted) !important;
+    text-decoration: none !important;
+    padding: 4px 10px !important;
+    border-radius: 7px !important;
+    transition: all 0.15s ease !important;
+  }
+  .sm-subnav-link:hover {
+    color: var(--mm-navy) !important;
+    background: #f1f5f9 !important;
+  }
+  .sm-subnav-link.active {
+    color: var(--mm-navy) !important;
+    font-weight: 800 !important;
+    background: #fffbeb !important;
+    border: 1px solid #fef3c7 !important;
+  }
+}
+
+/* ==========================================
+   GEMINI AI COPILOT: COMPACT NON-BLOCKING TRIGGER
+   ========================================== */
+.mm-copilot-trigger {
+  position: fixed !important;
+  bottom: 1.25rem !important;
+  right: 1.25rem !important;
+  z-index: 55 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: linear-gradient(135deg, #101a35 0%, #1e293b 100%) !important;
+  color: #fbbf24 !important;
+  border: 1.5px solid rgba(251, 191, 36, 0.45) !important;
+  box-shadow: 0 4px 18px rgba(16, 26, 53, 0.35) !important;
+  border-radius: 9999px !important;
+  padding: 8px 14px !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+@media (max-width: 480px) {
+  .mm-copilot-trigger {
+    padding: 7px 11px !important;
+    bottom: 1rem !important;
+    right: 1rem !important;
+    font-size: 11px !important;
+  }
+}
+.mm-copilot-drawer {
+  position: fixed !important;
+  bottom: 4.5rem !important;
+  right: 1rem !important;
+  z-index: 9999 !important;
+  width: min(94vw, 420px) !important;
+  height: min(75vh, 580px) !important;
+  background: #ffffff !important;
+  border: 1px solid var(--mm-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 20px 50px rgba(16, 26, 53, 0.25) !important;
+}
+
+/* ==========================================
+   BENEFITS & TRUST CARDS (2x2 Mobile, 4 Desktop)
+   ========================================== */
+.mm-benefits-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+@media (min-width: 1024px) {
+  .mm-benefits-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+}
+.mm-benefit-item {
+  background: #ffffff !important;
+  border: 1px solid var(--mm-border) !important;
+  border-radius: var(--mm-radius-md) !important;
+  padding: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+.mm-benefit-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 8px !important;
+  background: #fffbeb !important;
+  color: var(--mm-gold-dark) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.mm-benefit-title {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: var(--mm-navy) !important;
+  margin: 0 !important;
+}
+.mm-benefit-desc {
+  font-size: 11px !important;
+  color: var(--mm-text-muted) !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+}

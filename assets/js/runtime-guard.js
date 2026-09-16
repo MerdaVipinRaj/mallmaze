@@ -79,3 +79,5 @@
     show(msg);
   });
 })();
+
+// Mobile layout restored

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
   <title>MallMaze - Mobile Merchant POS & Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +48,7 @@
     }
 
     .app-container {
+      min-width: 1200px !important;
       display: flex;
       width: 100%;
       max-width: 1540px;
@@ -499,7 +500,7 @@
     /* ==========================================================
        MOBILE OPTIMIZATIONS (Smartphones <= 860px)
        ========================================================== */
-    @media (max-width: 860px) {
+    @media (max-width: 0px) /* disabled mobile collapse */ {
       body { padding: 0; background: #121620; }
       .app-container {
         height: 100vh; min-height: 100vh; border-radius: 0; flex-direction: column; box-shadow: none; padding-bottom: 62px;
@@ -539,6 +540,12 @@
       .mobile-bottom-nav { display: flex; }
     }
   </style>
+
+  <meta name="description" content="MallMaze - Mobile Merchant POS & Dashboard - MallMaze unified local commerce." />
+
+  <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
+
+  <script src="assets/js/api-client.js" defer></script>
 </head>
 <body>
 

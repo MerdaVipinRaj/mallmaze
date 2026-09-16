@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
     <title>MallMaze - Local Stores</title>
     <meta name="description" content="Create local store websites for nearby shops and manage each store banner, QR, verification, and products manually." />
     <link rel="stylesheet" href="assets/css/tailwind.css">
@@ -1164,7 +1164,7 @@
       const APP_STOCK_KEY = "mm_stock";
       const CART_KEY = "mm_cart";
       const WISHLIST_KEY = "mm_wishlist";
-      const VIRTUAL_MALL_ID = "smartmall-local-stores";
+      const VIRTUAL_MALL_ID = "mallmaze-local-stores";
       const fallbackBanner = "assets/media/hero-mall.jpg";
       const fallbackProduct = "assets/media/hero-mall.jpg";
 
@@ -1183,7 +1183,7 @@
 
       function writeStores(stores) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stores));
-        syncSmartMallData(stores);
+        syncMallMazeData(stores);
       }
 
       function readJson(key, fallback) {
@@ -1304,7 +1304,7 @@
         const data = await window.MM_API.autoshelfStores();
         const stores = (data.stores || []).map(backendStoreToLocal);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stores));
-        syncSmartMallData(stores);
+        syncMallMazeData(stores);
         return true;
       }
 
@@ -1438,7 +1438,7 @@
         return wishlist.some((item) => String(item.id) === String(productId));
       }
 
-      function syncSmartMallData(stores) {
+      function syncMallMazeData(stores) {
         const existingMalls = readJson(APP_MALLS_KEY, []).filter((mall) => mall.id !== VIRTUAL_MALL_ID);
         const existingStores = readJson(APP_STORES_KEY, []).filter((store) => !store.virtualSource);
         const existingProducts = readJson(APP_PRODUCTS_KEY, []).filter((product) => !product.virtualSource);
@@ -1446,7 +1446,7 @@
 
         const virtualMall = {
           id: VIRTUAL_MALL_ID,
-          name: "SmartMall Local Stores",
+          name: "MallMaze Local Stores",
           location: "Nearby local market",
           image: fallbackBanner,
           rating: 4.6,
@@ -1495,7 +1495,7 @@
             stockCount,
             variants: [],
             storeName: store.name,
-            mallName: "SmartMall Local Stores",
+            mallName: "MallMaze Local Stores",
             deliveryTime: "Local pickup",
             badge: product.enhanced ? "Enhanced" : "Local",
             virtualSource: true
@@ -1953,7 +1953,7 @@
                 <div class="vs-hero-stats">
                   <div class="vs-hero-stat"><strong>${stores.length}</strong><span>local stores created</span></div>
                   <div class="vs-hero-stat"><strong>${verifiedStores}</strong><span>verified storefronts</span></div>
-                  <div class="vs-hero-stat"><strong>${allProducts.length}</strong><span>products visible on SmartMall</span></div>
+                  <div class="vs-hero-stat"><strong>${allProducts.length}</strong><span>products visible on MallMaze</span></div>
                 </div>
                 <div class="vs-search-panel" role="search" aria-label="Search local stores and products">
                   <div class="vs-search-grid">
@@ -2110,7 +2110,7 @@
               <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <h2 class="font-display text-3xl font-bold text-slate-900">Products from created stores</h2>
-                  <p class="mt-2 text-sm text-muted-foreground">Every product manually uploaded inside a store also appears here and on the main SmartMall page.</p>
+                  <p class="mt-2 text-sm text-muted-foreground">Every product manually uploaded inside a store also appears here and on the main MallMaze page.</p>
                 </div>
                 <span class="vs-count-pill">${allProducts.length} products</span>
               </div>

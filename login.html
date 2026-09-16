@@ -2,42 +2,666 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="Sign in to MallMaze using OTP to track orders, manage wishlist, and save delivery addresses." />
-
-    <title>MallMaze - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sign in or register for MallMaze to discover products from verified local stores, reserve items, and track orders." />
+    <title>MallMaze - Sign In / Register</title>
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <link rel="stylesheet" href="assets/css/react-styles.css">
     <link rel="stylesheet" href="assets/css/styles.css">
-      <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
-      <meta property="og:title" content="MallMaze - Login / Sign Up" />
-    <meta property="og:description" content="Sign in to MallMaze using OTP to track orders, manage wishlist, and save delivery addresses." />
+    <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
+    <meta property="og:title" content="MallMaze - Sign In / Register" />
+    <meta property="og:description" content="Sign in to your MallMaze account with Supabase Auth." />
     <meta property="og:type" content="website" />
+    <style>
+      .auth-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        box-shadow: 0 12px 36px rgba(16, 26, 53, 0.08);
+        padding: 2rem;
+        max-width: 480px;
+        width: 100%;
+        margin: 0 auto;
+        transition: all 0.2s ease;
+      }
+      @media (max-width: 640px) {
+        .auth-card {
+          padding: 1.5rem 1.25rem;
+          border-radius: 16px;
+        }
+      }
+      .auth-input-group {
+        position: relative;
+        margin-bottom: 1rem;
+      }
+      .auth-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.35rem;
+      }
+      .auth-input {
+        width: 100%;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 0.7rem 0.9rem;
+        font-size: 0.9rem;
+        color: #0f172a;
+        background: #f8fafc;
+        outline: none;
+        transition: all 0.2s ease;
+      }
+      .auth-input:focus {
+        background: #ffffff;
+        border-color: #f5a900;
+        box-shadow: 0 0 0 3px rgba(245, 169, 0, 0.18);
+      }
+      .auth-input.has-error {
+        border-color: #ef4444;
+        background: #fff5f5;
+      }
+      .auth-btn-primary {
+        width: 100%;
+        background: linear-gradient(135deg, #f5a900, #ffbf35);
+        color: #101a35;
+        font-size: 0.95rem;
+        font-weight: 800;
+        border-radius: 12px;
+        padding: 0.85rem;
+        border: 1px solid rgba(245, 169, 0, 0.4);
+        box-shadow: 0 4px 12px rgba(245, 169, 0, 0.25);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+      .auth-btn-primary:hover:not(:disabled) {
+        background: #f5a900;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(245, 169, 0, 0.35);
+      }
+      .auth-btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .auth-btn-secondary {
+        width: 100%;
+        background: #f1f5f9;
+        color: #334155;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border-radius: 12px;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+      }
+      .auth-btn-secondary:hover:not(:disabled) {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .pw-toggle-btn {
+        position: absolute;
+        right: 12px;
+        top: 34px;
+        background: transparent;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 2px;
+      }
+      .auth-alert {
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .auth-alert-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+      }
+      .auth-alert-success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #15803d;
+      }
+      .auth-tab-pill {
+        display: inline-flex;
+        padding: 4px;
+        background: #f1f5f9;
+        border-radius: 12px;
+        width: 100%;
+        margin-bottom: 1.5rem;
+      }
+      .auth-tab-btn {
+        flex: 1;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border-radius: 9px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .auth-tab-btn.active {
+        background: #ffffff;
+        color: #101a35;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      }
+      .username-feedback {
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        font-weight: 600;
+      }
+      .username-feedback.ok { color: #16a34a; }
+      .username-feedback.err { color: #dc2626; }
+    </style>
   </head>
-  <body class="bg-white">
+  <body class="bg-slate-50 min-h-screen flex flex-col justify-between">
     <nav></nav>
-    <main class="container mx-auto px-4 py-12">
-      <div id="login-container"></div>
+
+    <main class="container mx-auto px-4 py-8 sm:py-12 flex-1 flex items-center justify-center">
+      <div class="auth-card">
+        <!-- Toast / Notification Banner -->
+        <div id="auth-alert" class="hidden auth-alert"></div>
+
+        <!-- TAB NAVIGATION (Sign In / Register) -->
+        <div class="auth-tab-pill" id="auth-tabs">
+          <button type="button" class="auth-tab-btn active" id="tab-signin-btn" onclick="switchAuthView('signin')">Sign In</button>
+          <button type="button" class="auth-tab-btn" id="tab-signup-btn" onclick="switchAuthView('signup')">Create Account</button>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW 1: SIGN IN FORM                          -->
+        <!-- ============================================== -->
+        <div id="view-signin">
+          <div class="mb-5">
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Welcome back</h1>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">Sign in to continue shopping from trusted local stores.</p>
+          </div>
+
+          <form id="signin-form" onsubmit="handleSignInSubmit(event)">
+            <div class="auth-input-group">
+              <label class="auth-label" for="signin-email">Email address</label>
+              <input type="email" id="signin-email" class="auth-input" placeholder="e.g. user@gmail.com" autocomplete="email" required />
+            </div>
+
+            <div class="auth-input-group">
+              <div class="flex items-center justify-between mb-1">
+                <label class="auth-label" for="signin-password" style="margin:0;">Password</label>
+                <button type="button" class="text-xs font-bold text-amber-700 hover:underline" onclick="switchAuthView('forgot')">Forgot password?</button>
+              </div>
+              <input type="password" id="signin-password" class="auth-input" placeholder="Enter your password" autocomplete="current-password" required />
+              <button type="button" class="pw-toggle-btn" onclick="togglePasswordVisibility('signin-password', this)" aria-label="Toggle password visibility">👁</button>
+            </div>
+
+            <button type="submit" id="signin-submit-btn" class="auth-btn-primary mt-2">
+              <span id="signin-btn-text">Sign In</span>
+            </button>
+          </form>
+
+          <p class="text-center text-xs text-slate-500 mt-5">
+            Don't have an account? 
+            <button type="button" class="font-bold text-amber-700 hover:underline" onclick="switchAuthView('signup')">Create Account</button>
+          </p>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: CREATE ACCOUNT (REGISTRATION)         -->
+        <!-- ============================================== -->
+        <div id="view-signup" class="hidden">
+          <div class="mb-5">
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Create your account</h1>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">Join MallMaze to discover verified local stores, order delivery, and save favorites.</p>
+          </div>
+
+          <form id="signup-form" onsubmit="handleSignUpSubmit(event)">
+            <div class="auth-input-group">
+              <label class="auth-label" for="signup-fullname">Full Name</label>
+              <input type="text" id="signup-fullname" class="auth-input" placeholder="e.g. Virat Kumar" autocomplete="name" required />
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-label" for="signup-email">Gmail / Email address</label>
+              <input type="email" id="signup-email" class="auth-input" placeholder="e.g. virat.kumar@gmail.com" autocomplete="email" required />
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-label" for="signup-username">Username</label>
+              <input type="text" id="signup-username" class="auth-input" placeholder="e.g. viratk" autocomplete="username" maxlength="20" required oninput="handleUsernameInput(this)" />
+              <div id="username-feedback" class="username-feedback"></div>
+              <p class="text-[11px] text-slate-500 mt-0.5">3–20 characters, letters, numbers, and underscores only.</p>
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-label" for="signup-password">Create Password</label>
+              <input type="password" id="signup-password" class="auth-input" placeholder="At least 6 characters" autocomplete="new-password" required minlength="6" />
+              <button type="button" class="pw-toggle-btn" onclick="togglePasswordVisibility('signup-password', this)" aria-label="Toggle password visibility">👁</button>
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-label" for="signup-confirm-password">Confirm Password</label>
+              <input type="password" id="signup-confirm-password" class="auth-input" placeholder="Repeat your password" autocomplete="new-password" required minlength="6" />
+              <button type="button" class="pw-toggle-btn" onclick="togglePasswordVisibility('signup-confirm-password', this)" aria-label="Toggle password visibility">👁</button>
+            </div>
+
+            <button type="submit" id="signup-submit-btn" class="auth-btn-primary mt-2">
+              <span id="signup-btn-text">Create Account</span>
+            </button>
+          </form>
+
+          <p class="text-center text-xs text-slate-500 mt-5">
+            Already have an account? 
+            <button type="button" class="font-bold text-amber-700 hover:underline" onclick="switchAuthView('signin')">Sign In</button>
+          </p>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW 3: CHECK YOUR EMAIL (VERIFICATION SCREEN) -->
+        <!-- ============================================== -->
+        <div id="view-verification" class="hidden text-center py-4">
+          <div class="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-2xl mb-4 border border-amber-200">
+            ✉️
+          </div>
+          <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Check your email</h2>
+          <p class="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed">
+            We've sent a verification link to <br/><b id="verify-email-display" class="text-slate-900 font-bold"></b>.<br/>
+            Please open your inbox and click the link to verify your MallMaze account.
+          </p>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-900 font-medium mb-5 text-left">
+            💡 <b>Tip:</b> If you don't see the email within a minute, check your Spam or Promotions tab.
+          </div>
+
+          <div class="flex flex-col gap-2.5">
+            <button type="button" id="resend-verify-btn" class="auth-btn-secondary" onclick="handleResendVerification()">
+              <span id="resend-btn-text">Resend Verification Email</span>
+            </button>
+            <button type="button" class="text-xs font-bold text-slate-600 hover:text-slate-900 py-1" onclick="switchAuthView('signin')">
+              ← Back to Sign In
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW 4: FORGOT PASSWORD FORM                  -->
+        <!-- ============================================== -->
+        <div id="view-forgot" class="hidden">
+          <div class="mb-5">
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Reset your password</h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">Enter your registered email and we'll send you a password reset link.</p>
+          </div>
+
+          <form id="forgot-form" onsubmit="handleForgotSubmit(event)">
+            <div class="auth-input-group">
+              <label class="auth-label" for="forgot-email">Registered Email address</label>
+              <input type="email" id="forgot-email" class="auth-input" placeholder="e.g. user@gmail.com" required />
+            </div>
+
+            <button type="submit" id="forgot-submit-btn" class="auth-btn-primary mt-2">
+              <span id="forgot-btn-text">Send Reset Link</span>
+            </button>
+          </form>
+
+          <p class="text-center text-xs text-slate-500 mt-5">
+            <button type="button" class="font-bold text-slate-700 hover:underline" onclick="switchAuthView('signin')">← Back to Sign In</button>
+          </p>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW 5: SET NEW PASSWORD FORM (RECOVERY)       -->
+        <!-- ============================================== -->
+        <div id="view-recovery" class="hidden">
+          <div class="mb-5">
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Create new password</h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">Please enter a new, secure password for your MallMaze account.</p>
+          </div>
+
+          <form id="recovery-form" onsubmit="handleRecoverySubmit(event)">
+            <div class="auth-input-group">
+              <label class="auth-label" for="new-password">New Password</label>
+              <input type="password" id="new-password" class="auth-input" placeholder="At least 6 characters" required minlength="6" />
+              <button type="button" class="pw-toggle-btn" onclick="togglePasswordVisibility('new-password', this)" aria-label="Toggle password visibility">👁</button>
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-label" for="confirm-new-password">Confirm New Password</label>
+              <input type="password" id="confirm-new-password" class="auth-input" placeholder="Repeat your new password" required minlength="6" />
+              <button type="button" class="pw-toggle-btn" onclick="togglePasswordVisibility('confirm-new-password', this)" aria-label="Toggle password visibility">👁</button>
+            </div>
+
+            <button type="submit" id="recovery-submit-btn" class="auth-btn-primary mt-2">
+              <span id="recovery-btn-text">Update Password</span>
+            </button>
+          </form>
+        </div>
+
+      </div>
     </main>
+
     <footer class="bg-slate-900 text-white py-10 border-t border-slate-800 mt-14">
       <div class="container mx-auto px-4">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 class="font-display text-lg font-bold text-white">MallMaze</h3>
-            <p class="text-sm text-slate-400 mt-1">Sign in to sync orders and receipts.</p>
+            <p class="text-sm text-slate-400 mt-1">Local store shopping: delivery + Scan&Go.</p>
           </div>
           <div class="flex flex-wrap gap-3 text-sm">
             <a href="index.html" class="text-slate-300 hover:text-white">Home</a>
             <a href="products.html" class="text-slate-300 hover:text-white">Products</a>
-            <a href="scan.html" class="text-slate-300 hover:text-white">Scan&Go</a>
+            <a href="deals.html" class="text-slate-300 hover:text-white">Deals</a>
+            <a href="cart.html" class="text-slate-300 hover:text-white">Cart</a>
           </div>
         </div>
-        <div class="border-t border-slate-800 pt-6 mt-6"><p class="text-sm text-slate-500">Â© 2026 MallMaze. All rights reserved.</p></div>
+        <div class="border-t border-slate-800 pt-6 mt-6"><p class="text-sm text-slate-500">© 2026 MallMaze. All rights reserved.</p></div>
       </div>
     </footer>
-    <script src="assets/js/config.js" defer></script>
-    <script src="assets/js/api-client.js" defer></script>
-    <script src="assets/js/runtime-guard.js" defer></script>
-    <script src="assets/js/main.js?v=marketplace-20260614" defer></script>
+
+    <!-- Scripts: Supabase JS library, config, client, auth service, and app scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/api-client.js"></script>
+    <script src="assets/js/runtime-guard.js"></script>
+    <script src="assets/js/main.js?v=marketplace-20260614"></script>
+
+    <!-- Client-Side Page Logic -->
+    <script>
+      let lastRegisteredEmail = '';
+      let resendTimer = null;
+      let usernameTimeout = null;
+
+      function showAlert(message, type) {
+        const el = document.getElementById('auth-alert');
+        if (!el) return;
+        el.className = 'auth-alert ' + (type === 'success' ? 'auth-alert-success' : 'auth-alert-error');
+        el.innerHTML = (type === 'success' ? '✓ ' : '⚠️ ') + message;
+        el.classList.remove('hidden');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function clearAlert() {
+        const el = document.getElementById('auth-alert');
+        if (el) el.classList.add('hidden');
+      }
+
+      function togglePasswordVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        if (input.type === 'password') {
+          input.type = 'text';
+          btn.innerText = '🔒';
+        } else {
+          input.type = 'password';
+          btn.innerText = '👁';
+        }
+      }
+
+      function switchAuthView(view) {
+        clearAlert();
+        const views = ['signin', 'signup', 'verification', 'forgot', 'recovery'];
+        views.forEach(v => {
+          const dom = document.getElementById('view-' + v);
+          if (dom) dom.classList.add('hidden');
+        });
+
+        const target = document.getElementById('view-' + view);
+        if (target) target.classList.remove('hidden');
+
+        const tabs = document.getElementById('auth-tabs');
+        if (view === 'signin' || view === 'signup') {
+          if (tabs) tabs.classList.remove('hidden');
+          document.getElementById('tab-signin-btn')?.classList.toggle('active', view === 'signin');
+          document.getElementById('tab-signup-btn')?.classList.toggle('active', view === 'signup');
+        } else {
+          if (tabs) tabs.classList.add('hidden');
+        }
+      }
+
+      async function handleUsernameInput(input) {
+        const val = input.value.trim();
+        const fb = document.getElementById('username-feedback');
+        if (!fb) return;
+
+        if (usernameTimeout) clearTimeout(usernameTimeout);
+        if (!val) {
+          fb.innerText = '';
+          return;
+        }
+
+        const v = window.MM_AUTH ? window.MM_AUTH.validateUsername(val) : { valid: true };
+        if (!v.valid) {
+          fb.className = 'username-feedback err';
+          fb.innerText = '⚠️ ' + v.message;
+          return;
+        }
+
+        fb.className = 'username-feedback';
+        fb.innerText = 'Checking availability...';
+
+        usernameTimeout = setTimeout(async () => {
+          if (!window.MM_AUTH) return;
+          const res = await window.MM_AUTH.checkUsernameAvailable(val);
+          if (res.available) {
+            fb.className = 'username-feedback ok';
+            fb.innerText = '✓ Username is available';
+          } else {
+            fb.className = 'username-feedback err';
+            fb.innerText = '⚠️ ' + (res.message || 'Username already taken');
+          }
+        }, 350);
+      }
+
+      async function handleSignInSubmit(e) {
+        e.preventDefault();
+        clearAlert();
+        const email = document.getElementById('signin-email').value.trim();
+        const password = document.getElementById('signin-password').value;
+        const btn = document.getElementById('signin-submit-btn');
+        const btnText = document.getElementById('signin-btn-text');
+
+        if (!email) return showAlert('Please enter your email address.', 'error');
+        if (!password) return showAlert('Please enter your password.', 'error');
+
+        btn.disabled = true;
+        btnText.innerText = 'Signing in...';
+
+        try {
+          const res = await window.MM_AUTH.signIn({ email, password });
+          if (res.error) {
+            btn.disabled = false;
+            btnText.innerText = 'Sign In';
+            if (res.error.unconfirmed) {
+              lastRegisteredEmail = email;
+              document.getElementById('verify-email-display').innerText = email;
+              switchAuthView('verification');
+              showAlert(res.error.message, 'error');
+            } else {
+              showAlert(res.error.message || 'Failed to sign in. Please check your credentials.', 'error');
+            }
+            return;
+          }
+
+          showAlert('Signed in successfully! Redirecting...', 'success');
+          setTimeout(() => {
+            const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+            window.location.href = redirectParam || 'account.html';
+          }, 800);
+        } catch (err) {
+          btn.disabled = false;
+          btnText.innerText = 'Sign In';
+          showAlert(err.message || 'An unexpected error occurred. Please try again.', 'error');
+        }
+      }
+
+      async function handleSignUpSubmit(e) {
+        e.preventDefault();
+        clearAlert();
+        const fullName = document.getElementById('signup-fullname').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const username = document.getElementById('signup-username').value.trim();
+        const password = document.getElementById('signup-password').value;
+        const confirmPassword = document.getElementById('signup-confirm-password').value;
+        const btn = document.getElementById('signup-submit-btn');
+        const btnText = document.getElementById('signup-btn-text');
+
+        if (!fullName) return showAlert('Please enter your full name.', 'error');
+        if (!email) return showAlert('Please enter your Gmail / Email address.', 'error');
+        if (!username) return showAlert('Please choose a username.', 'error');
+        if (password.length < 6) return showAlert('Password must be at least 6 characters long.', 'error');
+        if (password !== confirmPassword) return showAlert('Passwords do not match. Please verify.', 'error');
+
+        btn.disabled = true;
+        btnText.innerText = 'Creating account...';
+
+        try {
+          const res = await window.MM_AUTH.signUp({ email, password, fullName, username });
+          if (res.error) {
+            btn.disabled = false;
+            btnText.innerText = 'Create Account';
+            return showAlert(res.error.message || 'Registration failed. Please try again.', 'error');
+          }
+
+          lastRegisteredEmail = email;
+          document.getElementById('verify-email-display').innerText = email;
+
+          if (res.requiresVerification) {
+            switchAuthView('verification');
+            startResendTimer();
+          } else {
+            showAlert('Registration successful! Redirecting to your account...', 'success');
+            setTimeout(() => { window.location.href = 'account.html'; }, 900);
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btnText.innerText = 'Create Account';
+          showAlert(err.message || 'Unable to complete registration. Please try again.', 'error');
+        }
+      }
+
+      function startResendTimer() {
+        let count = 60;
+        const btn = document.getElementById('resend-verify-btn');
+        const btnText = document.getElementById('resend-btn-text');
+        if (!btn || !btnText) return;
+
+        btn.disabled = true;
+        btnText.innerText = 'Resend Verification Email (' + count + 's)';
+
+        if (resendTimer) clearInterval(resendTimer);
+        resendTimer = setInterval(() => {
+          count--;
+          if (count <= 0) {
+            clearInterval(resendTimer);
+            btn.disabled = false;
+            btnText.innerText = 'Resend Verification Email';
+          } else {
+            btnText.innerText = 'Resend Verification Email (' + count + 's)';
+          }
+        }, 1000);
+      }
+
+      async function handleResendVerification() {
+        if (!lastRegisteredEmail) return showAlert('Please enter your email to resend verification.', 'error');
+        startResendTimer();
+        try {
+          const res = await window.MM_AUTH.resendVerification(lastRegisteredEmail);
+          if (res.error) {
+            showAlert(res.error.message || 'Could not resend email. Please try again in a moment.', 'error');
+          } else {
+            showAlert('Verification link resent to ' + lastRegisteredEmail + '. Please check your inbox.', 'success');
+          }
+        } catch (e) {
+          showAlert(e.message, 'error');
+        }
+      }
+
+      async function handleForgotSubmit(e) {
+        e.preventDefault();
+        clearAlert();
+        const email = document.getElementById('forgot-email').value.trim();
+        const btn = document.getElementById('forgot-submit-btn');
+        const btnText = document.getElementById('forgot-btn-text');
+
+        if (!email) return showAlert('Please enter your registered email address.', 'error');
+        btn.disabled = true;
+        btnText.innerText = 'Sending link...';
+
+        try {
+          const res = await window.MM_AUTH.resetPassword(email);
+          btn.disabled = false;
+          btnText.innerText = 'Send Reset Link';
+          if (res.error) {
+            showAlert(res.error.message || 'Could not send reset link. Please verify your email.', 'error');
+          } else {
+            showAlert('Password reset link sent! Check your inbox to choose a new password.', 'success');
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btnText.innerText = 'Send Reset Link';
+          showAlert(err.message || 'Something went wrong.', 'error');
+        }
+      }
+
+      async function handleRecoverySubmit(e) {
+        e.preventDefault();
+        clearAlert();
+        const p1 = document.getElementById('new-password').value;
+        const p2 = document.getElementById('confirm-new-password').value;
+        const btn = document.getElementById('recovery-submit-btn');
+        const btnText = document.getElementById('recovery-btn-text');
+
+        if (p1.length < 6) return showAlert('Password must be at least 6 characters long.', 'error');
+        if (p1 !== p2) return showAlert('Passwords do not match.', 'error');
+
+        btn.disabled = true;
+        btnText.innerText = 'Updating password...';
+
+        try {
+          const res = await window.MM_AUTH.updatePassword(p1);
+          btn.disabled = false;
+          btnText.innerText = 'Update Password';
+          if (res.error) {
+            showAlert(res.error.message || 'Could not update password. Link may have expired.', 'error');
+          } else {
+            showAlert('Password updated successfully! Redirecting...', 'success');
+            setTimeout(() => { window.location.href = 'account.html'; }, 1000);
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btnText.innerText = 'Update Password';
+          showAlert(err.message, 'error');
+        }
+      }
+
+      // Check URL params for recovery or verification redirects
+      document.addEventListener('DOMContentLoaded', function () {
+        const hash = window.location.hash || '';
+        const params = new URLSearchParams(window.location.search);
+
+        if (hash.includes('type=recovery') || params.get('reset') === 'true') {
+          switchAuthView('recovery');
+          showAlert('Please enter your new password below.', 'success');
+        } else if (params.get('verified') === 'true') {
+          switchAuthView('signin');
+          showAlert('🎉 Email verified successfully! You can now sign in to your MallMaze account.', 'success');
+        } else if (params.get('view') === 'signup') {
+          switchAuthView('signup');
+        }
+      });
+    </script>
   </body>
 </html>
