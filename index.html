@@ -40,23 +40,24 @@
   <body class="bg-white">
     <nav></nav>
 
-    <section class="relative overflow-hidden bg-slate-950 text-white">
+    <section class="relative overflow-hidden bg-black text-white" style="background-color: #000000;">
       <div class="absolute inset-0">
-        <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-20">
+        <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-60" style="opacity: 0.6;">
           <source src="assets/media/mall-hero-video.mp4" type="video/mp4">
         </video>
-        <div class="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/75 to-slate-950/95"></div>
+        <div class="absolute inset-0 bg-black/40" style="background-color: rgba(0, 0, 0, 0.45);"></div>
       </div>
-      <div class="container relative mx-auto px-4 py-6 sm:py-10 md:py-12">
+      <div class="container relative mx-auto px-4 py-8 sm:py-12 md:py-14">
         <div class="mx-auto max-w-4xl text-center">
-          <div class="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/15 px-3.5 py-1 text-xs font-bold text-amber-300 mb-4 backdrop-blur-sm">
-            <span>✨</span> Discover Verified Local Stores
+          <div class="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/15 px-3.5 py-1 text-xs font-bold text-amber-300 mb-4 backdrop-blur-sm shadow-sm">
+            <svg class="h-3.5 w-3.5 text-amber-400 inline" viewBox="0 0 24 24" fill="currentColor"><path d="m12 3.5 2.6 5.2 5.7.8-4.1 4 1 5.7L12 16.6l-5.2 2.6 1-5.7-4.1-4 5.7-.8z"/></svg>
+            Discover Verified Local Stores
           </div>
-          <h1 class="mb-4 font-display font-extrabold leading-tight text-white text-4xl sm:text-5xl md:text-7xl lg:text-8xl">
+          <h1 class="mb-4 font-display font-extrabold leading-tight text-white text-4xl sm:text-5xl md:text-7xl lg:text-8xl drop-shadow-md">
             <span class="block">Local Stores,</span>
             <span class="block text-amber-400">One Platform.</span>
           </h1>
-          <p class="mx-auto max-w-2xl text-white/90 text-sm sm:text-base md:text-xl mb-6">Shop from verified local stores in your city. Smart search finds the best size, fit, color and price — reserve at the store or get fast delivery.</p>
+          <p class="mx-auto max-w-2xl text-white/90 text-sm sm:text-base md:text-xl mb-6 drop-shadow">Shop from verified local stores in your city. Smart search finds the best size, fit, color and price &mdash; reserve at the store or get fast delivery.</p>
           <form class="mx-auto max-w-2xl flex items-center gap-2 rounded-2xl bg-white/10 border border-white/20 p-1.5 backdrop-blur-md shadow-lg" role="search">
             <svg class="ml-3 h-4 w-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input type="text" id="search-hero" placeholder="Search products, brands, or nearby stores..." class="flex-1 bg-transparent border-none text-white placeholder:text-slate-300 focus:outline-none px-2 text-sm font-medium" />
@@ -365,47 +366,52 @@
         </div>
       </section>
 
-      <section class="partner-cta-section py-20">
+      </main>
+
+    <!-- UNIFIED FULL BOTTOM CONTAINER: Business Partners + Footer in One Seamless Box -->
+    <footer class="bg-slate-900 text-white border-t border-slate-800" style="background-color: #0f172a;">
+      <!-- For Business Partners Section -->
+      <section class="partner-cta-section py-14 sm:py-16 border-b border-slate-800/80" style="background-color: #0f172a;">
         <div class="container mx-auto px-4 text-center">
           <p class="partner-pill mb-4 inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="m12 3.5 2.6 5.2 5.7.8-4.1 4 1 5.7L12 16.6l-5.2 2.6 1-5.7-4.1-4 5.7-.8z"/></svg>
             For Business Partners
           </p>
-          <h2 class="partner-title mb-4 font-display text-3xl font-bold md:text-5xl">
+          <h2 class="partner-title mb-4 font-display text-3xl font-bold md:text-5xl text-white">
             Own a Store? <span class="partner-title-accent">Partner with Us</span>
           </h2>
-          <p class="partner-sub mx-auto mb-8 max-w-lg">
+          <p class="partner-sub mx-auto mb-8 max-w-lg text-slate-300">
             Create your store page, upload products, accept QR/order payments, and manage stock from one dashboard.
           </p>
           <div class="flex flex-wrap items-center justify-center gap-4">
-            <a href="autoshelf.html#stores" class="partner-btn-gold inline-flex items-center gap-2 rounded-xl px-8 py-4 font-bold">
+            <a href="autoshelf.html#stores" class="partner-btn-gold inline-flex items-center gap-2 rounded-xl px-8 py-4 font-bold shadow-md hover:scale-[1.02] transition">
               Register Your Store
-              <span aria-hidden="true">-></span>
+              <span aria-hidden="true">&rarr;</span>
             </a>
-            <a href="products.html" class="partner-btn-outline inline-flex items-center gap-2 rounded-xl px-8 py-4 font-semibold">
+            <a href="products.html" class="partner-btn-outline inline-flex items-center gap-2 rounded-xl px-8 py-4 font-semibold hover:bg-slate-800 transition">
               Browse Products
             </a>
           </div>
         </div>
       </section>
-    </main>
 
-    <footer class="bg-slate-900 text-white py-10 border-t border-slate-800">
-      <div class="container mx-auto px-4">
+      <!-- Bottom Footer Navigation & Brand Info -->
+      <div class="container mx-auto px-4 py-10">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 class="font-display text-lg font-bold text-white">MallMaze</h3>
-            <p class="text-sm text-slate-400 mt-1">Local store shopping: delivery + Scan&Go.</p>
+            <p class="text-sm text-slate-400 mt-1">Local store shopping: delivery + Scan&amp;Go.</p>
           </div>
-          <div class="flex flex-wrap gap-3 text-sm">
-            <!-- Malls link parked until mall onboarding begins. -->
-            <a href="products.html" class="text-slate-300 hover:text-white">Products</a>
-            <a href="deals.html" class="text-slate-300 hover:text-white">Deals</a>
-            <a href="scan.html" class="text-slate-300 hover:text-white">Scan&Go</a>
-            <a href="orders.html" class="text-slate-300 hover:text-white">Orders</a>
+          <div class="flex flex-wrap gap-4 text-sm">
+            <a href="products.html" class="text-slate-300 hover:text-white transition">Products</a>
+            <a href="deals.html" class="text-slate-300 hover:text-white transition">Deals</a>
+            <a href="scan.html" class="text-slate-300 hover:text-white transition">Scan&amp;Go</a>
+            <a href="orders.html" class="text-slate-300 hover:text-white transition">Orders</a>
           </div>
         </div>
-        <div class="border-t border-slate-800 pt-6 mt-6"><p class="text-sm text-slate-500">© 2026 MallMaze. All rights reserved.</p></div>
+        <div class="border-t border-slate-800/80 pt-6 mt-6">
+          <p class="text-sm text-slate-500">&copy; 2026 MallMaze. All rights reserved.</p>
+        </div>
       </div>
     </footer>
 

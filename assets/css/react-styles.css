@@ -1031,7 +1031,7 @@ nav.sm-header .sm-right .sm-icon-btn{white-space:nowrap;font-size:.9rem}
 
 /* Why malls choose SmartMall (React partner CTA) */
 .partner-cta-section {
-  background: linear-gradient(135deg, hsl(220 60% 20%), hsl(220 70% 12%));
+  background: #0f172a;
 }
 
 .partner-pill {
