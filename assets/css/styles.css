@@ -1511,3 +1511,27 @@ article {
 .partner-cta-section {
   background-color: #0f172a !important;
 }
+
+
+/* Utility to hide horizontal scrollbar on mobile filter rails */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+
+/* Products toolbar filter selects */
+.products-toolbar select {
+  width: auto !important;
+  min-width: 95px;
+  padding: 6px 24px 6px 12px !important;
+  border-radius: 9999px !important;
+  color: #0f172a !important;
+  background-color: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+.products-toolbar select:hover {
+  background-color: #ffffff !important;
+  border-color: #94a3b8 !important;
+}
