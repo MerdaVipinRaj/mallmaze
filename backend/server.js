@@ -1139,6 +1139,7 @@ function readRawBody(req) {
 
 const routes = {
   "GET /api/health": async (_req, res) => send(res, 200, { ok: true, service: "mallmaze-api", time: new Date().toISOString() }),
+  "GET /api/version": async (_req, res) => send(res, 200, { ok: true, service: "mallmaze-api", version: "2.1.0", branch: "master", time: new Date().toISOString() }),
   "GET /api/catalog": async (_req, res, parsed) => {
     send(res, 200, await catalogResponse({
       city: parsed.searchParams.get("city") || "",

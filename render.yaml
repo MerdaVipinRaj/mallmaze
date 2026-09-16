@@ -6,12 +6,16 @@ services:
     name: mallmaze-live
     runtime: node
     plan: free
+    branch: master
+    autoDeploy: true
     buildCommand: npm install --omit=dev
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: "22.14.0"
       - key: JWT_SECRET
         generateValue: true
       - key: OTP_DEV_MODE
