@@ -589,15 +589,7 @@ function renderNavbar() {
         </div>
       </div>
 
-      <!-- ROW 2: Prominent Search Bar -->
-      <div class="sm-search-row">
-        <form id="sm-nav-search-form" class="w-full" onsubmit="event.preventDefault();">
-          <div class="sm-search-bar-wrap">
-            ${icon('search')}
-            <input type="search" id="sm-nav-search-input" placeholder="Search products, brands, stores..." autocomplete="off" />
-          </div>
-        </form>
-      </div>
+
 
       <!-- ROW 3: Secondary Desktop Navigation Strip -->
       <div class="sm-subnav-desktop">
