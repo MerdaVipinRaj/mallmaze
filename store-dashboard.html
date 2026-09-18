@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MallMaze - Store Dashboard</title>
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,7 +50,6 @@
     }
 
     .app-container {
-      min-width: 1200px !important;
       display: flex;
       width: 100%;
       max-width: 1480px;
@@ -785,42 +784,223 @@
       opacity: 1;
     }
 
-    @media (max-width: 0px) /* disabled mobile collapse */ {
+    /* Mobile Bottom Navigation Bar */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 62px;
+      background: #121620;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 6px;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .mob-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .mob-nav-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+    .mob-nav-btn.active { color: #facc15; }
+    .mob-nav-btn.active svg { stroke: #facc15; }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 0;
+        background: var(--bg-main);
+        align-items: stretch;
+        justify-content: stretch;
+        min-height: 100dvh;
+      }
+
+      .app-container {
+        width: 100%;
+        max-width: none;
+        height: 100dvh;
+        min-height: 100dvh;
+        border-radius: 0;
+        flex-direction: column;
+        box-shadow: none;
+        padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+        overflow: hidden;
+      }
+
+      .sidebar { display: none; }
+
+      .main-wrapper {
+        flex: 1;
+        border-radius: 0;
+        padding: 16px 14px 12px;
+        flex-direction: column;
+        overflow: hidden;
+        gap: 0;
+        min-height: 0;
+      }
+
+      .orders-section {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .top-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .page-title { font-size: 1.45rem; line-height: 1.2; }
+
+      .top-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 8px;
+      }
+
+      .btn-header-home,
+      .btn-offline-bill,
+      .btn-primary,
+      button.btn-offline-bill {
+        width: 100%;
+        justify-content: center;
+        min-height: 46px;
+        font-size: 0.9rem;
+        padding: 12px 14px;
+        border-radius: 14px;
+      }
+
+      .filters-bar {
+        margin-bottom: 14px;
+        gap: 8px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .dropdown-pill {
+        font-size: 0.85rem;
+        padding: 10px 14px;
+        min-height: 40px;
+      }
+
+      .table-container {
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .orders-table {
+        min-width: 0 !important;
+        width: 100%;
+        border-spacing: 0;
+      }
+
+      .orders-table thead { display: none; }
+
+      .orders-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .order-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "customer action"
+          "status amount"
+          "date date";
+        gap: 8px 10px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: var(--shadow-sm);
+        width: 100%;
+      }
+
+      .order-row td {
+        display: block;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        font-size: 0.95rem;
+      }
+
+      .order-row td:nth-child(1) { display: none; }
+      .order-row td:nth-child(2) { grid-area: customer; }
+      .order-row td:nth-child(3) { grid-area: status; }
+      .order-row td:nth-child(4) {
+        grid-area: amount;
+        text-align: right;
+        align-self: center;
+      }
+      .order-row td:nth-child(5) { grid-area: date; }
+      .order-row td:nth-child(6) {
+        grid-area: action;
+        text-align: right;
+        align-self: start;
+      }
+
+      .customer-name { font-size: 1rem; font-weight: 700; }
+      .customer-thumb { width: 40px; height: 40px; }
+      .status-badge { font-size: 0.8rem; padding: 6px 10px; }
+      .order-total { font-size: 1.05rem; }
+      .order-date { font-size: 0.9rem; }
+      .row-menu-btn {
+        font-size: 1.25rem;
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border-radius: 12px;
+      }
+
       .detail-panel {
         display: none;
       }
-      .detail-panel.open-mobile {
+      .detail-panel.open-mobile,
+      .detail-panel.mobile-open {
         display: flex;
         position: fixed;
-        right: 16px;
-        top: 16px;
-        bottom: 16px;
-        z-index: 100;
-        width: 340px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: auto;
+        width: 100%;
+        min-width: 0;
+        max-height: min(88dvh, 720px);
+        border-radius: 24px 24px 0 0;
+        z-index: 5000;
+        padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
       }
-    }
 
-    @media (max-width: 0px) /* disabled mobile collapse */ {
-      .sidebar {
-        width: 64px;
-        min-width: 64px;
-        padding: 16px 8px;
+      .mobile-bottom-nav {
+        display: flex;
+        height: calc(68px + env(safe-area-inset-bottom, 0px));
+        padding: 6px 8px env(safe-area-inset-bottom, 0px);
       }
-      .brand span, .nav-item span, .user-info {
-        display: none;
+
+      .mob-nav-btn {
+        font-size: 0.7rem;
+        padding: 8px 6px;
+        min-width: 56px;
       }
-      .nav-item {
-        justify-content: center;
-        padding: 10px;
-      }
-      .app-container {
-        height: 100vh;
-        border-radius: 0;
-      }
-      .main-wrapper {
-        border-radius: 0;
-        padding: 14px;
-      }
+      .mob-nav-btn svg { width: 22px; height: 22px; }
     }
   </style>
 
@@ -833,6 +1013,30 @@
 <body>
 
   <div class="app-container">
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav">
+      <a href="dashboard.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+      </a>
+      <a href="orders.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Orders</span>
+      </a>
+      <a href="inventory.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        <span>Stock</span>
+      </a>
+      <a href="payments.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+        <span>Payments</span>
+      </a>
+      <a href="index.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+        <span>Store</span>
+      </a>
+    </div>
+
     <aside class="sidebar">
       <a href="dashboard.html" class="brand">
         <div class="brand-icon">
@@ -847,6 +1051,15 @@
         <a class="nav-item" href="dashboard.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           <span>Dashboard</span>
+        </a>
+                <a class="nav-item" href="#store-qr" id="nav-store-qr" onclick="showStoreQrSection(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Store QR Code</span>
         </a>
         <a class="nav-item" href="orders.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
@@ -898,7 +1111,83 @@
     </aside>
 
     <main class="main-wrapper">
-      <section class="orders-section">
+      
+      <!-- STORE QR CODE MANAGEMENT SECTION -->
+      <section id="store-qr-section" class="orders-section" style="display: none;">
+        <div class="top-header" style="margin-bottom: 24px;">
+          <div>
+            <h1 class="page-title" style="font-size: 24px; font-weight: 800; color: #131722;">Store QR Code</h1>
+            <p style="font-size: 13px; color: #8c93a3; margin-top: 4px;">Customers can scan this official QR code to open your MallMaze storefront and start fast shopping.</p>
+          </div>
+          <button class="dropdown-pill" onclick="showOrdersSection()" style="font-size: 13px; font-weight: 700;">
+            ← Back to Orders
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; background: #ffffff; border: 1px solid #eae7dc; border-radius: 20px; padding: 28px; box-shadow: var(--shadow-sm);">
+          <!-- QR Card Container -->
+          <div style="background: #ffffff; border: 2px solid #0f172a; border-radius: 18px; padding: 20px; text-align: center;">
+            <div style="display: inline-block; background: #fef08a; color: #854d0e; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 20px; margin-bottom: 12px;">
+              Official MallMaze QR
+            </div>
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 14px; display: flex; justify-content: center;">
+              <canvas id="dashboard-qr-canvas" width="200" height="200" style="display: block; max-width: 100%;"></canvas>
+            </div>
+            <h3 id="d-qr-store-name" style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">TechZone Electronics</h3>
+            <p style="font-size: 11px; color: #64748b;">Scan to shop this store on MallMaze</p>
+          </div>
+
+          <!-- QR Info & Actions -->
+          <div style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                <span style="display: inline-flex; align-items: center; gap: 4px; background: #dcfce7; color: #15803d; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px;">
+                  ● QR Code Active
+                </span>
+                <span id="d-qr-version-badge" style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 8px;">
+                  Version 1
+                </span>
+                <span style="background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 8px;">
+                  Verified Store
+                </span>
+              </div>
+
+              <h2 style="font-size: 18px; font-weight: 700; color: #131722; margin-bottom: 8px;">In-Store Fast Shopping Bridge</h2>
+              <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 16px;">
+                Display this QR code at your checkout counter, product display stands, entrance banners, or print it on customer bills. When scanned with any smartphone camera, it opens your verified digital catalog.
+              </p>
+
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;">
+                <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Public Storefront Link</p>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                  <span id="d-qr-url-text" style="font-size: 12px; font-family: monospace; color: #0f172a; word-break: break-all;">https://mallmaze-live.onrender.com/store.html?id=s1</span>
+                  <button onclick="copyStorefrontLink()" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; color: #334155;">Copy</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons Grid -->
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+              <button onclick="downloadStoreQrPng()" style="background: #0f172a; color: #ffffff; border: none; border-radius: 12px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download PNG
+              </button>
+
+              <button onclick="printStoreQrPoster()" style="background: #e2e8f0; color: #0f172a; border: none; border-radius: 12px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Print A4 Sign
+              </button>
+
+              <button onclick="regenerateStoreQrCode()" style="background: #fff; color: #dc2626; border: 1px solid #fca5a5; border-radius: 12px; padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-left: auto;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+                Regenerate QR
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <section class="orders-section" id="orders-main-section">
         <div class="top-header">
           <h1 class="page-title">Store POS Manager</h1>
           <div class="top-actions">
@@ -1358,6 +1647,128 @@
         toast.classList.remove("show");
       }, 2500);
     }
+
+    
+    let currentStoreData = {
+      id: 's1',
+      name: 'TechZone Electronics',
+      category: 'Electronics & Gadgets',
+      city: 'Bangalore',
+      qr_version: 1,
+      qr_public_token: 'tz-qr-prod-token'
+    };
+
+    function renderDashboardQr() {
+      const canvas = document.getElementById("dashboard-qr-canvas");
+      if (!canvas) return;
+
+      const origin = window.location.origin || "https://mallmaze-live.onrender.com";
+      const qrUrl = `${origin}/store.html?id=${encodeURIComponent(currentStoreData.id)}`;
+
+      const urlEl = document.getElementById("d-qr-url-text");
+      if (urlEl) urlEl.textContent = qrUrl;
+
+      const nameEl = document.getElementById("d-qr-store-name");
+      if (nameEl) nameEl.textContent = currentStoreData.name || "Store";
+
+      const vEl = document.getElementById("d-qr-version-badge");
+      if (vEl) vEl.textContent = "Version " + (currentStoreData.qr_version || 1);
+
+      if (window.MM_QR?.draw) {
+        window.MM_QR.draw(canvas, qrUrl, 200);
+      }
+    }
+
+    function showStoreQrSection(navEl) {
+      document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+      if (navEl) navEl.classList.add("active");
+
+      const ordersSec = document.getElementById("orders-main-section");
+      const detailSec = document.querySelector(".detail-panel");
+      const qrSec = document.getElementById("store-qr-section");
+
+      if (ordersSec) ordersSec.style.display = "none";
+      if (detailSec) detailSec.style.display = "none";
+      if (qrSec) qrSec.style.display = "flex";
+
+      renderDashboardQr();
+    }
+
+    function showOrdersSection() {
+      document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+      const firstNav = document.querySelector(".nav-item");
+      if (firstNav) firstNav.classList.add("active");
+
+      const ordersSec = document.getElementById("orders-main-section");
+      const detailSec = document.querySelector(".detail-panel");
+      const qrSec = document.getElementById("store-qr-section");
+
+      if (ordersSec) ordersSec.style.display = "flex";
+      if (detailSec) detailSec.style.display = "flex";
+      if (qrSec) qrSec.style.display = "none";
+    }
+
+    function downloadStoreQrPng() {
+      const canvas = document.getElementById("dashboard-qr-canvas");
+      if (!canvas) return;
+      if (window.MM_QR?.downloadPng) {
+        window.MM_QR.downloadPng(canvas, `${currentStoreData.name.toLowerCase().replace(/\s+/g, '-')}-qr`, currentStoreData.name);
+        showToast("QR Code PNG downloaded!");
+      } else {
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = "store-qr.png";
+        a.click();
+      }
+    }
+
+    function printStoreQrPoster() {
+      if (window.MM_QR?.printQr) {
+        const origin = window.location.origin || "https://mallmaze-live.onrender.com";
+        window.MM_QR.printQr({
+          id: currentStoreData.id,
+          name: currentStoreData.name,
+          category: currentStoreData.category,
+          city: currentStoreData.city,
+          url: `${origin}/store.html?id=${encodeURIComponent(currentStoreData.id)}`
+        });
+      }
+    }
+
+    function copyStorefrontLink() {
+      const origin = window.location.origin || "https://mallmaze-live.onrender.com";
+      const qrUrl = `${origin}/store.html?id=${encodeURIComponent(currentStoreData.id)}`;
+      navigator.clipboard.writeText(qrUrl).then(() => {
+        showToast("Storefront link copied to clipboard!");
+      }).catch(() => {
+        showToast(qrUrl);
+      });
+    }
+
+    async function regenerateStoreQrCode() {
+      const proceed = confirm(
+        "Are you sure you want to regenerate your Store QR code?\n\nOld printed QR signs will stop working and point to this new secure token."
+      );
+      if (!proceed) return;
+
+      showToast("Regenerating store QR token...");
+      try {
+        if (window.MM_API?.hasApi?.()) {
+          const res = await window.MM_API.regenerateStoreQr(currentStoreData.id);
+          if (res?.qr_public_token) {
+            currentStoreData.qr_public_token = res.qr_public_token;
+            currentStoreData.qr_version = res.qr_version || (currentStoreData.qr_version + 1);
+          }
+        } else {
+          currentStoreData.qr_version = (currentStoreData.qr_version || 1) + 1;
+        }
+        renderDashboardQr();
+        showToast("Store QR regenerated! New version active.");
+      } catch (err) {
+        showToast(err.message || "Failed to regenerate QR code.");
+      }
+    }
+  
 
     window.addEventListener("DOMContentLoaded", () => {
       renderTable();

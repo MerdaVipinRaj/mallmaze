@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MallMaze - Mobile Merchant POS & Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,7 +48,6 @@
     }
 
     .app-container {
-      min-width: 1200px !important;
       display: flex;
       width: 100%;
       max-width: 1540px;
@@ -497,47 +496,282 @@
     }
     .toast.show { transform: translateY(0); opacity: 1; }
 
+    /* Mobile Bottom Navigation Bar */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 62px;
+      background: #121620;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 6px;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .mob-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .mob-nav-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+    .mob-nav-btn.active { color: #facc15; }
+    .mob-nav-btn.active svg { stroke: #facc15; }
+
     /* ==========================================================
        MOBILE OPTIMIZATIONS (Smartphones <= 860px)
+       Full-bleed layout — no zoom-out, readable tap targets
        ========================================================== */
-    @media (max-width: 0px) /* disabled mobile collapse */ {
-      body { padding: 0; background: #121620; }
-      .app-container {
-        height: 100vh; min-height: 100vh; border-radius: 0; flex-direction: column; box-shadow: none; padding-bottom: 62px;
+    @media (max-width: 860px) {
+      body {
+        padding: 0;
+        background: var(--bg-main);
+        align-items: stretch;
+        justify-content: stretch;
+        min-height: 100dvh;
       }
 
-      /* Hide Desktop Sidebar on Mobile */
+      .app-container {
+        width: 100%;
+        max-width: none;
+        height: 100dvh;
+        min-height: 100dvh;
+        border-radius: 0;
+        flex-direction: column;
+        box-shadow: none;
+        padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+        overflow: hidden;
+      }
+
       .sidebar { display: none; }
 
-      /* Full Width Main Canvas */
       .main-wrapper {
-        border-radius: 0; padding: 14px 12px 18px 12px; flex-direction: column; overflow-y: auto; gap: 12px;
+        flex: 1;
+        border-radius: 0;
+        padding: 16px 14px 12px;
+        flex-direction: column;
+        overflow: hidden;
+        gap: 0;
+        min-height: 0;
       }
 
-      .top-header { flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
-      .page-title { font-size: 20px; }
-      .top-actions { width: 100%; justify-content: space-between; }
-      .btn-offline-bill { flex: 1; justify-content: center; font-size: 12px; padding: 9px 10px; }
-      .btn-header-home { padding: 9px 10px; font-size: 11.5px; }
+      .orders-section {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
 
-      /* Right Detail Drawer becomes Mobile Bottom Sheet */
+      .top-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .page-title {
+        font-size: 1.45rem;
+        line-height: 1.2;
+      }
+
+      .top-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 8px;
+      }
+
+      .btn-header-home,
+      .btn-offline-bill {
+        width: 100%;
+        justify-content: center;
+        min-height: 46px;
+        font-size: 0.9rem;
+        padding: 12px 14px;
+        border-radius: 14px;
+      }
+
+      .user-profile { display: none; }
+
+      .filters-bar {
+        margin-bottom: 14px;
+        gap: 8px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .dropdown-pill {
+        font-size: 0.85rem;
+        padding: 10px 14px;
+        border-radius: 999px;
+        min-height: 40px;
+      }
+
+      .table-container {
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-right: 0;
+        padding-bottom: 8px;
+      }
+
+      /* Turn wide table into full-width order cards */
+      .orders-table {
+        min-width: 0;
+        width: 100%;
+        border-spacing: 0;
+      }
+
+      .orders-table thead { display: none; }
+
+      .orders-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .order-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "customer action"
+          "status amount"
+          "date date";
+        gap: 8px 10px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: var(--shadow-sm);
+        width: 100%;
+      }
+
+      .order-row td {
+        display: block;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        font-size: 0.95rem;
+        width: auto;
+      }
+
+      .order-row td:nth-child(1) { display: none; } /* checkbox */
+      .order-row td:nth-child(2) { grid-area: customer; }
+      .order-row td:nth-child(3) { grid-area: status; }
+      .order-row td:nth-child(4) {
+        grid-area: amount;
+        text-align: right;
+        align-self: center;
+      }
+      .order-row td:nth-child(5) { grid-area: date; }
+      .order-row td:nth-child(6) {
+        grid-area: action;
+        text-align: right;
+        align-self: start;
+      }
+
+      .order-row:hover,
+      .order-row.selected {
+        background: #ffffff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        outline: 2px solid #121620;
+      }
+
+      .customer-cell { gap: 10px; }
+      .customer-thumb { width: 40px; height: 40px; }
+      .customer-name { font-size: 1rem; font-weight: 700; }
+      .order-id { font-size: 0.8rem; margin-top: 2px; }
+      .status-badge {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        border-radius: 999px;
+      }
+      .order-total { font-size: 1.05rem; }
+      .order-date { font-size: 0.9rem; color: #64748b; }
+      .row-menu-btn {
+        font-size: 1.25rem;
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border-radius: 12px;
+      }
+
+      /* Detail drawer as full-width bottom sheet */
       .detail-panel {
         display: none;
         position: fixed;
-        inset: 0;
-        top: 15%;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: auto;
         width: 100%;
-        min-width: 100%;
+        min-width: 0;
+        max-height: min(88dvh, 720px);
         border-radius: 24px 24px 0 0;
         z-index: 5000;
-        box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
         animation: slideUp 0.25s ease;
       }
       .detail-panel.mobile-open { display: flex; }
       @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-      /* Show Mobile Bottom Navigation Dock */
-      .mobile-bottom-nav { display: flex; }
+      .detail-title { font-size: 1.15rem; }
+      .customer-hero-name { font-size: 1rem; }
+      .btn-track,
+      .btn-refund,
+      .btn-assign-rider,
+      .modal-btn-submit {
+        min-height: 48px;
+        font-size: 0.95rem;
+        border-radius: 12px;
+      }
+
+      .modal-backdrop { padding: 0; align-items: flex-end; }
+      .modal-box {
+        max-width: none;
+        max-height: 92dvh;
+        border-radius: 24px 24px 0 0;
+        padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+      }
+      .form-input,
+      .form-select {
+        font-size: 1rem;
+        min-height: 46px;
+        padding: 12px 14px;
+      }
+
+      .mobile-bottom-nav {
+        display: flex;
+        height: calc(68px + env(safe-area-inset-bottom, 0px));
+        padding: 6px 8px env(safe-area-inset-bottom, 0px);
+      }
+
+      .mob-nav-btn {
+        font-size: 0.7rem;
+        padding: 8px 6px;
+        gap: 4px;
+        min-width: 56px;
+      }
+      .mob-nav-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .toast {
+        bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+        font-size: 0.9rem;
+      }
     }
   </style>
 
