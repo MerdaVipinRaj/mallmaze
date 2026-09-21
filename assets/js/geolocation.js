@@ -14,7 +14,8 @@
 
   const STORAGE_KEY = 'mm_user_location';
 
-  // Major Indian retail cities and shopping districts with realistic physical coordinates
+  // Major Indian retail cities and shopping districts with realistic physical coordinates.
+  // Extra locality names keep manual search useful even before exact area coordinates are added.
   const CITIES_DATA = {
     'Hyderabad': {
       lat: 17.3850,
@@ -28,7 +29,19 @@
         { name: 'Jubilee Hills', lat: 17.4319, lng: 78.4073 },
         { name: 'Kukatpally', lat: 17.4938, lng: 78.3995 },
         { name: 'Secunderabad', lat: 17.4399, lng: 78.4983 },
-        { name: 'Begumpet', lat: 17.4447, lng: 78.4664 }
+        { name: 'Begumpet', lat: 17.4447, lng: 78.4664 },
+        'Kondapur',
+        'Miyapur',
+        'Ameerpet',
+        'Somajiguda',
+        'Abids',
+        'Koti',
+        'Mehdipatnam',
+        'Tolichowki',
+        'Manikonda',
+        'Nallagandla',
+        'Uppal',
+        'LB Nagar'
       ]
     },
     'Bangalore': {
@@ -42,7 +55,20 @@
         { name: 'HSR Layout', lat: 12.9121, lng: 77.6446 },
         { name: 'Jayanagar', lat: 12.9308, lng: 77.5838 },
         { name: 'MG Road', lat: 12.9756, lng: 77.6066 },
-        { name: 'Electronic City', lat: 12.8452, lng: 77.6602 }
+        { name: 'Electronic City', lat: 12.8452, lng: 77.6602 },
+        'Marathahalli',
+        'Bellandur',
+        'JP Nagar',
+        'Malleshwaram',
+        'Rajajinagar',
+        'Hebbal',
+        'Yelahanka',
+        'Banashankari',
+        'Basavanagudi',
+        'Sarjapur Road',
+        'BTM Layout',
+        'Kalyan Nagar',
+        'Brigade Road'
       ]
     },
     'Mumbai': {
@@ -56,10 +82,23 @@
         { name: 'Juhu', lat: 19.1075, lng: 72.8263 },
         { name: 'Powai', lat: 19.1176, lng: 72.9060 },
         { name: 'Colaba', lat: 18.9067, lng: 72.8147 },
-        { name: 'Borivali', lat: 19.2307, lng: 72.8567 }
+        { name: 'Borivali', lat: 19.2307, lng: 72.8567 },
+        'Andheri East',
+        'Goregaon',
+        'Malad',
+        'Kandivali',
+        'Chembur',
+        'Dadar',
+        'Worli',
+        'Kurla',
+        'Ghatkopar',
+        'Vile Parle',
+        'Santacruz',
+        'Thane',
+        'Navi Mumbai'
       ]
     },
-    'Delhi': {
+    'New Delhi': {
       lat: 28.6139,
       lng: 77.2090,
       state: 'Delhi',
@@ -69,7 +108,21 @@
         { name: 'Vasant Kunj', lat: 28.5298, lng: 77.1537 },
         { name: 'Nehru Place', lat: 28.5494, lng: 77.2528 },
         { name: 'South Extension', lat: 28.5729, lng: 77.2215 },
-        { name: 'Dwarka', lat: 28.5921, lng: 77.0460 }
+        { name: 'Dwarka', lat: 28.5921, lng: 77.0460 },
+        'Karol Bagh',
+        'Lajpat Nagar',
+        'Hauz Khas',
+        'Greater Kailash',
+        'Rajouri Garden',
+        'Rohini',
+        'Janakpuri',
+        'Chandni Chowk',
+        'Pitampura',
+        'Green Park',
+        'Defence Colony',
+        'Mayur Vihar',
+        'Laxmi Nagar',
+        'Noida Sector 18'
       ]
     },
     'Chennai': {
@@ -81,10 +134,118 @@
         { name: 'T. Nagar', lat: 13.0418, lng: 80.2341 },
         { name: 'Adyar', lat: 13.0012, lng: 80.2565 },
         { name: 'Velachery', lat: 12.9815, lng: 80.2180 },
-        { name: 'Nungambakkam', lat: 13.0569, lng: 80.2425 }
+        { name: 'Nungambakkam', lat: 13.0569, lng: 80.2425 },
+        'Tambaram',
+        'Porur',
+        'Guindy',
+        'Mylapore',
+        'OMR',
+        'Sholinganallur',
+        'Pallavaram',
+        'Chromepet',
+        'Besant Nagar',
+        'Kilpauk',
+        'Egmore',
+        'Ashok Nagar',
+        'Perungudi',
+        'Kodambakkam',
+        'Vadapalani'
+      ]
+    },
+    'Pune': {
+      lat: 18.5204,
+      lng: 73.8567,
+      state: 'Maharashtra',
+      areas: [
+        'Koregaon Park',
+        'Viman Nagar',
+        'Baner',
+        'Wakad',
+        'Hinjewadi',
+        'Kothrud',
+        'Hadapsar',
+        'Aundh',
+        'Shivaji Nagar',
+        'Camp',
+        'Magarpatta',
+        'Kharadi',
+        'Deccan',
+        'Pimple Saudagar',
+        'Bavdhan',
+        'Yerawada'
+      ]
+    },
+    'Kolkata': {
+      lat: 22.5726,
+      lng: 88.3639,
+      state: 'West Bengal',
+      areas: [
+        'Park Street',
+        'Salt Lake',
+        'New Town',
+        'Ballygunge',
+        'Gariahat',
+        'Esplanade',
+        'Alipore',
+        'Behala',
+        'Dum Dum',
+        'Howrah',
+        'Jadavpur',
+        'Tollygunge',
+        'Rajarhat',
+        'Lake Town',
+        'Camac Street',
+        'Bhowanipore'
       ]
     }
   };
+
+  const CITY_ALIASES = {
+    Delhi: 'New Delhi',
+    'New Delhi': 'New Delhi',
+    Bengaluru: 'Bangalore'
+  };
+
+  function areaNameOf(area) {
+    return typeof area === 'string' ? area : area?.name || '';
+  }
+
+  function cleanAreaName(areaName) {
+    return String(areaName || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  }
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function normalizeCityName(city) {
+    const raw = String(city || '').trim();
+    if (!raw) return 'Hyderabad';
+    if (CITY_ALIASES[raw]) return CITY_ALIASES[raw];
+    const exact = Object.keys(CITIES_DATA).find((name) => name.toLowerCase() === raw.toLowerCase());
+    return exact || 'Hyderabad';
+  }
+
+  function getStoredAppCity() {
+    try {
+      const raw = localStorage.getItem('mm_location');
+      const parsed = raw ? JSON.parse(raw) : '';
+      return typeof parsed === 'string' ? parsed : '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function persistAppCity(city) {
+    try {
+      localStorage.setItem('mm_location', JSON.stringify(normalizeCityName(city)));
+    } catch (e) {}
+  }
 
   /**
    * Calculate distance between two coordinates using the Haversine formula (km)
@@ -160,6 +321,7 @@
         const payload = JSON.stringify(locData);
         sessionStorage.setItem(STORAGE_KEY, payload);
         localStorage.setItem(STORAGE_KEY, payload);
+        if (locData?.city) persistAppCity(locData.city);
         window.dispatchEvent(new CustomEvent('mm:location-changed', { detail: locData }));
       } catch (e) {}
     },
@@ -171,6 +333,7 @@
       try {
         sessionStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('mm_location');
         window.dispatchEvent(new CustomEvent('mm:location-changed', { detail: null }));
       } catch (e) {}
     },
@@ -229,26 +392,32 @@
      * Set location manually (City + Area)
      */
     setManualLocation: function (city, areaName) {
-      const cityData = CITIES_DATA[city] || CITIES_DATA['Hyderabad'];
+      const normalizedCity = normalizeCityName(city);
+      const cityData = CITIES_DATA[normalizedCity] || CITIES_DATA['Hyderabad'];
+      const requestedArea = cleanAreaName(areaName);
       let lat = cityData.lat;
       let lng = cityData.lng;
+      let selectedArea = requestedArea;
 
-      if (areaName && Array.isArray(cityData.areas)) {
-        const hit = cityData.areas.find((a) => (typeof a === 'string' ? a : a.name) === areaName);
+      if (requestedArea && Array.isArray(cityData.areas)) {
+        const hit = cityData.areas.find((a) => areaNameOf(a).toLowerCase() === requestedArea.toLowerCase());
         if (hit && typeof hit === 'object' && hit.lat != null) {
+          selectedArea = hit.name;
           lat = hit.lat;
           lng = hit.lng;
+        } else if (hit) {
+          selectedArea = areaNameOf(hit);
         }
       }
 
       const locData = {
         type: 'manual',
-        city: city,
-        area: areaName || '',
+        city: normalizedCity,
+        area: selectedArea || '',
         state: cityData.state || 'Telangana',
         latitude: lat,
         longitude: lng,
-        label: areaName ? (areaName + ', ' + city) : city,
+        label: selectedArea ? (selectedArea + ', ' + normalizedCity) : normalizedCity,
         updatedAt: new Date().toISOString()
       };
       MM_GEO.saveLocation(locData);
@@ -305,8 +474,20 @@
       }
 
       const activeLoc = this.getSavedLocation();
-      const currentCity = activeLoc?.city || 'Hyderabad';
+      const currentCity = normalizeCityName(activeLoc?.city || getStoredAppCity() || 'Hyderabad');
       const cityData = CITIES_DATA[currentCity] || CITIES_DATA['Hyderabad'];
+      const selectedArea = cleanAreaName(activeLoc?.area || '');
+      const renderAreaButton = (area, isSelected) => {
+        const aName = areaNameOf(area);
+        return `<button type="button" class="mm-loc-area-chip rounded-lg px-2.5 py-1 text-xs font-semibold border ${isSelected ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}" data-area="${escapeHtml(aName)}">${escapeHtml(aName)}</button>`;
+      };
+      const cityOptionsMarkup = Object.keys(CITIES_DATA)
+        .map((c) => `<option value="${escapeHtml(c)}" ${c === currentCity ? 'selected' : ''}>${escapeHtml(c)}</option>`)
+        .join('');
+      const areaButtonsMarkup = (cityData.areas || [])
+        .slice(0, 24)
+        .map((a) => renderAreaButton(a, selectedArea && selectedArea.toLowerCase() === areaNameOf(a).toLowerCase()))
+        .join('');
 
       modal.innerHTML = `
         <div class="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl border border-border">
@@ -328,7 +509,7 @@
             <div class="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-200">
               <div>
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Current Selected Location</p>
-                <p class="text-sm font-bold text-slate-900">${activeLoc ? activeLoc.label : 'No location selected (Showing all stores)'}</p>
+                <p class="text-sm font-bold text-slate-900">${activeLoc ? escapeHtml(activeLoc.label) : 'No location selected (Showing all stores)'}</p>
               </div>
               ${activeLoc ? `<button id="mm-loc-clear-btn" class="text-xs font-bold text-rose-600 hover:underline">Clear</button>` : ''}
             </div>
@@ -349,19 +530,20 @@
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1" for="mm-loc-city-select">Select City</label>
               <select id="mm-loc-city-select" class="w-full rounded-xl border border-slate-300 p-2.5 text-sm font-medium focus:border-amber-500 focus:outline-none">
-                ${Object.keys(CITIES_DATA).map(c => `<option value="${c}" ${c === currentCity ? 'selected' : ''}>${c}</option>`).join('')}
+                ${cityOptionsMarkup}
               </select>
             </div>
 
-            <!-- Area Chips -->
+            <!-- Area Search -->
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1.5">Select Retail Area / Locality</label>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="mm-loc-area-search">Search Retail Area / Locality</label>
+              <div class="flex gap-2">
+                <input id="mm-loc-area-search" type="search" value="${escapeHtml(selectedArea)}" placeholder="Search or type any area in ${escapeHtml(currentCity)}" class="min-w-0 flex-1 rounded-xl border border-slate-300 p-2.5 text-sm font-medium focus:border-amber-500 focus:outline-none" autocomplete="off" />
+                <button id="mm-loc-area-use-btn" type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800">Use</button>
+              </div>
+              <p id="mm-loc-area-help" class="mt-1 text-[11px] font-medium text-slate-500">Pick a suggestion or type any locality in this city.</p>
               <div id="mm-loc-areas-container" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
-                ${(cityData.areas || []).map(a => {
-                  const aName = typeof a === 'string' ? a : a.name;
-                  const isSel = activeLoc && activeLoc.area === aName;
-                  return `<button class="mm-loc-area-chip rounded-lg px-2.5 py-1 text-xs font-semibold border ${isSel ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}" data-area="${aName}">${aName}</button>`;
-                }).join('')}
+                ${areaButtonsMarkup}
               </div>
             </div>
           </div>
@@ -376,15 +558,19 @@
 
       // Wire events
       const close = () => { modal.classList.add('hidden'); };
+      const reloadAfterSave = () => {
+        window.setTimeout(() => window.location.reload(), 350);
+      };
       modal.querySelector('#mm-loc-close-btn')?.addEventListener('click', close);
       modal.querySelector('#mm-loc-cancel-btn')?.addEventListener('click', close);
-      modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+      modal.onclick = (e) => { if (e.target === modal) close(); };
 
       const clearBtn = modal.querySelector('#mm-loc-clear-btn');
       if (clearBtn) {
         clearBtn.addEventListener('click', () => {
           MM_GEO.clearLocation();
           close();
+          reloadAfterSave();
         });
       }
 
@@ -404,7 +590,10 @@
               statusMsg.textContent = 'Location detected: ' + loc.label;
               statusMsg.className = 'text-center text-xs text-emerald-600 font-bold';
             }
-            setTimeout(close, 600);
+            setTimeout(() => {
+              close();
+              window.location.reload();
+            }, 600);
           } catch (err) {
             if (statusMsg) {
               statusMsg.textContent = err.message;
@@ -419,24 +608,77 @@
 
       const citySelect = modal.querySelector('#mm-loc-city-select');
       const areasContainer = modal.querySelector('#mm-loc-areas-container');
-      if (citySelect && areasContainer) {
+      const areaSearch = modal.querySelector('#mm-loc-area-search');
+      const useAreaBtn = modal.querySelector('#mm-loc-area-use-btn');
+      const areaHelp = modal.querySelector('#mm-loc-area-help');
+      if (citySelect && areasContainer && areaSearch) {
+        const saveManualSelection = (areaName) => {
+          const city = normalizeCityName(citySelect.value);
+          const cleanedArea = cleanAreaName(areaName);
+          const loc = MM_GEO.setManualLocation(city, cleanedArea);
+          if (statusMsg) {
+            statusMsg.textContent = 'Location set: ' + loc.label;
+            statusMsg.className = 'text-center text-xs text-emerald-600 font-bold';
+          }
+          close();
+          reloadAfterSave();
+        };
+
+        const renderAreaChoices = () => {
+          const city = normalizeCityName(citySelect.value);
+          const cData = CITIES_DATA[city] || CITIES_DATA['Hyderabad'];
+          const query = cleanAreaName(areaSearch.value);
+          const q = query.toLowerCase();
+          const allAreas = cData.areas || [];
+          const matches = q
+            ? allAreas.filter((a) => areaNameOf(a).toLowerCase().includes(q))
+            : allAreas.slice(0, 24);
+          const exactMatch = q && allAreas.some((a) => areaNameOf(a).toLowerCase() === q);
+          const buttons = matches.slice(0, 30).map((a) => {
+            const isSel = selectedArea && selectedArea.toLowerCase() === areaNameOf(a).toLowerCase();
+            return renderAreaButton(a, isSel);
+          });
+
+          if (query && !exactMatch) {
+            buttons.unshift(renderAreaButton(query, false));
+          }
+
+          areasContainer.innerHTML = buttons.length
+            ? buttons.join('')
+            : '<p class="text-xs font-medium text-slate-500">Type your locality and press Use.</p>';
+          areaSearch.placeholder = 'Search or type any area in ' + city;
+          if (areaHelp) {
+            areaHelp.textContent = query
+              ? 'Showing matches. Press Use to save typed text as your locality.'
+              : 'Pick a suggestion or type any locality in this city.';
+          }
+        };
+
         citySelect.addEventListener('change', () => {
-          const c = citySelect.value;
-          const cData = CITIES_DATA[c] || CITIES_DATA['Hyderabad'];
-          areasContainer.innerHTML = (cData.areas || []).map(a => {
-            const aName = typeof a === 'string' ? a : a.name;
-            return `<button class="mm-loc-area-chip rounded-lg px-2.5 py-1 text-xs font-semibold border bg-white text-slate-700 border-slate-300 hover:bg-slate-100" data-area="${aName}">${aName}</button>`;
-          }).join('');
+          areaSearch.value = '';
+          renderAreaChoices();
+        });
+
+        areaSearch.addEventListener('input', renderAreaChoices);
+        areaSearch.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            saveManualSelection(areaSearch.value);
+          }
+        });
+
+        useAreaBtn?.addEventListener('click', () => {
+          saveManualSelection(areaSearch.value);
         });
 
         areasContainer.addEventListener('click', (e) => {
           const chip = e.target.closest('.mm-loc-area-chip');
           if (!chip) return;
           const area = chip.getAttribute('data-area');
-          const city = citySelect.value;
-          MM_GEO.setManualLocation(city, area);
-          close();
+          saveManualSelection(area);
         });
+
+        renderAreaChoices();
       }
     }
   };

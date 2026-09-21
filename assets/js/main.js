@@ -514,6 +514,13 @@ function renderNavbar() {
   const nav = document.querySelector('nav');
   if (!nav) return;
   const file = location.pathname.split('/').pop() || 'index.html';
+  const normalizeNavCity = (value) => {
+    const city = String(value || '').trim();
+    if (!city) return 'Hyderabad';
+    if (city.toLowerCase() === 'delhi') return 'New Delhi';
+    if (city.toLowerCase() === 'bengaluru') return 'Bangalore';
+    return city;
+  };
   const CITIES = [
     { city: 'Hyderabad', state: 'Telangana' },
     { city: 'New Delhi', state: 'Delhi' },
@@ -523,11 +530,13 @@ function renderNavbar() {
     { city: 'Pune', state: 'Maharashtra' },
     { city: 'Kolkata', state: 'West Bengal' }
   ];
-  const locationValue = state.location || 'Hyderabad';
+  const savedGeoLocation = window.MM_GEO?.getSavedLocation?.() || null;
+  const activeCity = normalizeNavCity(savedGeoLocation?.city || state.location || 'Hyderabad');
+  const locationValue = savedGeoLocation?.area ? `${savedGeoLocation.area}, ${activeCity}` : activeCity;
   const navItem = (href, label, active) =>
     `<a href="${href}" class="sm-subnav-link ${active ? 'active' : ''}">${label}</a>`;
   const citiesMarkup = CITIES.map((c) => {
-    const active = c.city === locationValue;
+    const active = c.city === activeCity;
     return `
       <button type="button" class="sm-city-item ${active ? 'active' : ''}" data-city="${c.city}">
         <span class="sm-city-left">${icon('pin')}<span class="sm-city-name">${c.city}</span></span>
@@ -553,7 +562,7 @@ function renderNavbar() {
           <div class="sm-location-wrap relative">
             <button type="button" id="sm-location-btn" class="sm-location-btn-v2" aria-haspopup="true" aria-expanded="false" title="Select City">
               ${icon('pin')}
-              <span class="sm-loc-text" id="sm-selected-city">${locationValue}</span>
+              <span class="sm-loc-text" id="sm-selected-city">${escapeHtml(locationValue)}</span>
               ${icon('chevronDown')}
             </button>
             <div id="sm-location-panel" class="sm-location-panel" role="menu" aria-hidden="true">
@@ -620,6 +629,18 @@ function renderNavbar() {
     locPanel?.setAttribute('aria-hidden', 'false');
   };
 
+  const syncLocationState = (loc) => {
+    if (!loc?.city) return;
+    const nextCity = normalizeNavCity(loc.city);
+    state.location = nextCity;
+    if (cityLabel) cityLabel.textContent = loc.area ? `${loc.area}, ${nextCity}` : nextCity;
+    persist();
+  };
+
+  if (window.__smGeoLocationChanged) window.removeEventListener('mm:location-changed', window.__smGeoLocationChanged);
+  window.__smGeoLocationChanged = (e) => syncLocationState(e.detail);
+  window.addEventListener('mm:location-changed', window.__smGeoLocationChanged);
+
 
   // Injected Mobile Bottom Navigation Bar
   let bottomNav = document.getElementById('mm-mobile-bottom-nav');
@@ -666,8 +687,9 @@ function renderNavbar() {
   nav.querySelectorAll('.sm-city-item').forEach((btn) => {
     btn.addEventListener('click', () => {
       const nextCity = btn.getAttribute('data-city') || 'Hyderabad';
-      state.location = nextCity;
-      if (cityLabel) cityLabel.textContent = nextCity;
+      const loc = window.MM_GEO?.setManualLocation ? window.MM_GEO.setManualLocation(nextCity, '') : null;
+      state.location = loc?.city || nextCity;
+      if (cityLabel) cityLabel.textContent = state.location;
       persist();
       closePanel();
       window.location.reload();
@@ -698,8 +720,8 @@ function renderNavbar() {
          try {
            toast('Detecting device location...', { type: 'ok', title: 'Location', ms: 1200 });
            const loc = await window.MM_GEO.getCurrentPosition();
-           state.location = loc.city || loc.label;
-           if (cityLabel) cityLabel.textContent = loc.city;
+           state.location = normalizeNavCity(loc.city || loc.label);
+           if (cityLabel) cityLabel.textContent = loc.label || state.location;
            persist();
            closePanel();
            toast(`Location set: ${loc.label}`, { type: 'ok', title: 'Location', ms: 2000 });
@@ -720,7 +742,7 @@ function renderNavbar() {
         const result = window.MM_API?.detectLocation
           ? await window.MM_API.detectLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
           : { city: 'Hyderabad' };
-        state.location = result.city || 'Hyderabad';
+        state.location = normalizeNavCity(result.city || 'Hyderabad');
         if (cityLabel) cityLabel.textContent = state.location;
         persist();
         closePanel();
