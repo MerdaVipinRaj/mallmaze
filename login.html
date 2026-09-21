@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Sign in or register for MallMaze to discover products from verified local stores, reserve items, and track orders." />
-    <title>MallMaze - Sign In / Register</title>
+    <meta name="description" content="Sign in to MallMaze with a 6-digit OTP sent to your phone or email." />
+    <title>MallMaze - OTP Sign In</title>
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <link rel="stylesheet" href="assets/css/react-styles.css">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
-    <meta property="og:title" content="MallMaze - Sign In / Register" />
-    <meta property="og:description" content="Sign in to your MallMaze account with Supabase Auth." />
+    <meta property="og:title" content="MallMaze - OTP Sign In" />
+    <meta property="og:description" content="Sign in to your MallMaze account with a phone or email OTP." />
     <meta property="og:type" content="website" />
     <style>
       .auth-card {
@@ -173,7 +173,9 @@
     <nav></nav>
 
     <main class="container mx-auto px-4 py-8 sm:py-12 flex-1 flex items-center justify-center">
-      <div class="auth-card">
+      <div id="login-container" class="w-full"></div>
+
+      <div class="hidden auth-card" aria-hidden="true">
         <!-- Toast / Notification Banner -->
         <div id="auth-alert" class="hidden auth-alert"></div>
 

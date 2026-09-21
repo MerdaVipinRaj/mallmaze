@@ -1473,20 +1473,12 @@ function renderRecentlyViewedRail(allProducts) {
   const products = Array.isArray(allProducts) ? allProducts : [];
   const items = ids.map((x) => products.find((p) => String(p.id) === String(x.id))).filter(Boolean).slice(0, 12);
   if (!items.length) {
+    rail.className = 'block';
     rail.innerHTML = `<div class="mm-card mm-card-pad w-full"><p class="font-extrabold">No history yet</p><p class="mm-page-sub">Open a product and it will appear here.</p></div>`;
     return;
   }
-  rail.innerHTML = items.map((p) => `
-    <a href="product.html?id=${encodeURIComponent(String(p.id))}" class="shrink-0 w-[220px] group overflow-hidden rounded-2xl border border-border bg-card shadow-card hover:shadow-card-hover">
-      <div class="aspect-square overflow-hidden bg-muted">
-        <img src="${p.image}" alt="${escapeHtml(p.name)}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
-      </div>
-      <div class="p-3">
-        <p class="font-extrabold line-clamp-2">${escapeHtml(p.name)}</p>
-        <p class="text-sm text-primary font-semibold mt-1">${money(p.price)}</p>
-      </div>
-    </a>
-  `).join('');
+  rail.className = 'product-grid';
+  rail.innerHTML = items.map(productCard).join('');
 }
 
 function removeFromCart(index) {
