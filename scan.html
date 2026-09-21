@@ -103,6 +103,8 @@
           <div class="flex items-center justify-between gap-3 mb-3">
             <div class="text-sm font-semibold">Camera Scanner</div>
             <button id="scan-start" class="mm-action mm-action-primary mm-action-sm">Start scanner</button>
+     <button id="scan-stop" class="mm-action mm-action-outline mm-action-sm hidden">Stop scanner</button>
+     <button id="scan-switch" class="mm-action mm-action-ghost mm-action-sm hidden">Switch camera</button>
           </div>
           <video id="scan-video" class="scan-video" autoplay playsinline muted></video>
           <p id="scan-status" class="text-xs text-muted-foreground mt-3">Allow camera permission to scan.</p>
@@ -142,6 +144,57 @@
           <div id="scan-receipt" class="mt-4"></div>
         </section>
       </div>
+    
+    <!-- Store Found Confirmation Modal -->
+    <div id="store-found-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm hidden">
+      <div class="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl border border-border">
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="flex h-3 w-3 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </span>
+              <h3 class="text-lg font-bold">Store QR Detected</h3>
+            </div>
+            <button id="store-found-close" class="rounded-lg p-1 text-slate-400 hover:bg-slate-700 hover:text-white" aria-label="Close">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+            </button>
+          </div>
+          <p class="mt-1 text-xs text-slate-300">Verified official MallMaze storefront code.</p>
+        </div>
+
+        <div class="p-5 text-center">
+          <div id="sf-image-wrap" class="mx-auto mb-3 h-16 w-16 overflow-hidden rounded-2xl border-2 border-amber-400 bg-slate-100 flex items-center justify-center">
+            <img id="sf-logo" src="assets/media/hero-mall.jpg" alt="Store Logo" class="h-full w-full object-cover" />
+          </div>
+          <h4 id="sf-name" class="text-xl font-extrabold text-slate-900">Store Name</h4>
+          <div class="mt-1 flex items-center justify-center gap-2">
+            <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800">
+              <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>
+              Verified Store
+            </span>
+            <span id="sf-cat" class="text-xs text-slate-500">Retail</span>
+          </div>
+          <p id="sf-loc" class="mt-2 text-xs text-slate-600 font-medium">Location Details</p>
+          <p id="sf-dist" class="mt-0.5 text-xs font-bold text-amber-600">Approx. distance</p>
+
+          <div class="mt-6 flex flex-col gap-2.5">
+            <button id="sf-start-fast" class="w-full rounded-xl bg-amber-400 hover:bg-amber-500 py-3 text-sm font-extrabold text-slate-950 transition shadow-sm flex items-center justify-center gap-2">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              Start Fast Shopping
+            </button>
+            <a id="sf-view-store" href="#" class="w-full rounded-xl border border-slate-300 py-2.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition">
+              View Storefront
+            </a>
+            <a id="sf-directions" href="#" target="_blank" rel="noopener" class="w-full rounded-xl border border-transparent py-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
+              Get Directions on Map ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  
     </main>
 
     <footer class="bg-slate-900 text-white py-10 border-t border-slate-800 mt-14">
@@ -164,6 +217,9 @@
     <script src="assets/js/config.js" defer></script>
     <script src="assets/js/api-client.js" defer></script>
     <script src="assets/js/runtime-guard.js" defer></script>
+    <script src="assets/js/jsqr.js" defer></script>
+    <script src="assets/js/geolocation.js" defer></script>
+    <script src="assets/js/fast-shopping.js" defer></script>
     <script src="assets/js/main.js?v=20260505-2" defer></script>
     <script>
       // Scan&Go: local-first cart with backend receipt persistence.
@@ -385,46 +441,207 @@
           }
         });
 
-        $('scan-add-manual')?.addEventListener('click', () => { addCode($('scan-manual')?.value); if ($('scan-manual')) $('scan-manual').value = ''; });
+        $('scan-add-manual')?.addEventListener('click', () => {
+     const v = $('scan-manual')?.value;
+     if (v) handleScannedValue(v);
+     if ($('scan-manual')) $('scan-manual').value = '';
+   });
         $('scan-manual')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('scan-add-manual')?.click(); } });
         $('scan-add-picked')?.addEventListener('click', addPicked);
         $('scan-pick')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addPicked(); } });
 
-        $('scan-start')?.addEventListener('click', async () => {
+        let facingMode = 'environment';
+        let isScanning = false;
+        let scanCanvas = document.createElement('canvas');
+        let scanCtx = scanCanvas.getContext('2d');
+        let allStoresList = [];
+
+        // Preload stores for quick offline & online Store QR matching
+        const fetchAllStores = async () => {
+          try {
+            if (window.MM_API?.hasApi?.()) {
+              const res = await window.MM_API.autoshelfStores();
+              if (Array.isArray(res?.stores)) allStoresList = res.stores;
+            }
+            if (!allStoresList.length) {
+              const r = await fetch('data/mock-data.json');
+              const j = await r.json();
+              if (Array.isArray(j?.stores)) allStoresList = j.stores;
+            }
+          } catch (e) {}
+        };
+        fetchAllStores();
+
+        const stopCamera = () => {
+          isScanning = false;
+          if (stream) {
+            stream.getTracks().forEach((t) => { t.stop(); });
+            stream = null;
+          }
+          const vid = $('scan-video');
+          if (vid) vid.srcObject = null;
+          $('scan-start')?.classList.remove('hidden');
+          $('scan-stop')?.classList.add('hidden');
+          $('scan-switch')?.classList.add('hidden');
+          status('Scanner stopped.');
+        };
+
+        const showStoreModal = (store) => {
+          if (!store) return;
+          const modal = $('store-found-modal');
+          if (!modal) return;
+
+          $('sf-name').textContent = store.name || 'Store';
+          $('sf-cat').textContent = store.category || 'Retail Store';
+          $('sf-loc').textContent = (store.address || '') + (store.city ? ' · ' + store.city : '');
+          if ($('sf-logo') && (store.image || store.banner_url)) {
+            $('sf-logo').src = store.image || store.banner_url || 'assets/media/hero-mall.jpg';
+          }
+
+          const distLabel = window.MM_GEO ? window.MM_GEO.getStoreDistanceLabel(store) : 'Distance unavailable';
+          $('sf-dist').textContent = distLabel;
+
+          $('sf-view-store').href = `store.html?id=${encodeURIComponent(store.id)}`;
+          if ($('sf-directions')) {
+            $('sf-directions').href = window.MM_GEO ? window.MM_GEO.getDirectionsUrl(store) : '#';
+          }
+
+          $('sf-start-fast').onclick = () => {
+            if (window.MM_FAST_SHOPPING) {
+              window.MM_FAST_SHOPPING.startSession(store);
+            }
+            modal.classList.add('hidden');
+            window.location.href = `store.html?id=${encodeURIComponent(store.id)}&mode=fast`;
+          };
+
+          modal.classList.remove('hidden');
+        };
+
+        $('store-found-close')?.addEventListener('click', () => {
+          $('store-found-modal')?.classList.add('hidden');
+        });
+
+        // Resolve scanned raw code to either Store QR or Product
+        const handleScannedValue = async (rawCode) => {
+          const val = String(rawCode || '').trim();
+          if (!val) return;
+
+          // 1. Check if it is a Store URL or token
+          let matchedStore = null;
+
+          // Check if URL matches store.html?id=... or token
+          if (val.includes('store.html') || val.includes('/store/') || val.includes('/scan/store/')) {
+            try {
+              const parsedUrl = new URL(val, window.location.origin);
+              const idParam = parsedUrl.searchParams.get('id');
+              const tokenParam = parsedUrl.searchParams.get('token');
+              const pathParts = parsedUrl.pathname.split('/');
+              const slugOrId = idParam || tokenParam || pathParts[pathParts.length - 1];
+
+              matchedStore = allStoresList.find(s => 
+                String(s.id) === String(slugOrId) ||
+                String(s.slug || '') === String(slugOrId) ||
+                String(s.qr_public_token || '') === String(slugOrId)
+              );
+
+              if (!matchedStore && window.MM_API?.hasApi?.()) {
+                const res = await window.MM_API.resolveStoreQr(slugOrId);
+                if (res?.store) matchedStore = res.store;
+              }
+            } catch (e) {}
+          } else {
+            // Check direct token or store ID
+            matchedStore = allStoresList.find(s => 
+              String(s.id) === val ||
+              String(s.slug || '') === val ||
+              String(s.qr_public_token || '') === val
+            );
+
+            if (!matchedStore && window.MM_API?.hasApi?.() && (val.startsWith('store-') || val.length >= 16)) {
+              try {
+                const res = await window.MM_API.resolveStoreQr(val);
+                if (res?.store) matchedStore = res.store;
+              } catch (e) {}
+            }
+          }
+
+          if (matchedStore) {
+            status(`Store detected: ${matchedStore.name}`);
+            showStoreModal(matchedStore);
+            return;
+          }
+
+          // 2. Otherwise treat as Product Barcode / SKU
+          addCode(val);
+          status(`Added product: ${val}`);
+        };
+
+        const scanLoop = () => {
+          if (!isScanning || !stream) return;
+          const vid = $('scan-video');
+          if (vid && vid.readyState === vid.HAVE_ENOUGH_DATA) {
+            scanCanvas.width = vid.videoWidth;
+            scanCanvas.height = vid.videoHeight;
+            scanCtx.drawImage(vid, 0, 0, scanCanvas.width, scanCanvas.height);
+
+            // Use jsQR for robust client-side QR decoding
+            if (window.jsQR) {
+              const imgData = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
+              const qr = window.jsQR(imgData.data, imgData.width, imgData.height, {
+                inversionAttempts: "dontInvert"
+              });
+              if (qr && qr.data) {
+                handleScannedValue(qr.data);
+                setTimeout(() => { if (isScanning) requestAnimationFrame(scanLoop); }, 1500);
+                return;
+              }
+            }
+          }
+          requestAnimationFrame(scanLoop);
+        };
+
+        const startCamera = async () => {
           if (!navigator.mediaDevices?.getUserMedia) {
-            status('Camera not supported in this browser. Use manual entry.');
+            status('Camera not supported in this browser. Please use manual entry.');
             return;
           }
           try {
-            if (stream) stream.getTracks().forEach((t) => t.stop());
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+            stopCamera();
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: facingMode },
+              audio: false
+            });
             const vid = $('scan-video');
-            if (vid) vid.srcObject = stream;
-            status('Camera started. Scanning support will be enabled next (BarcodeDetector).');
-
-            if ('BarcodeDetector' in window) {
-              const detector = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_39', 'codabar', 'itf'] });
-              const loop = async () => {
-                if (!stream) return;
-                try {
-                  const barcodes = await detector.detect(vid);
-                  if (barcodes && barcodes.length) {
-                    addCode(barcodes[0].rawValue || barcodes[0].value || '');
-                    status(`Added: ${barcodes[0].rawValue || ''}`);
-                    await new Promise((r) => setTimeout(r, 1200));
-                  }
-                } catch {}
-                requestAnimationFrame(loop);
-              };
-              requestAnimationFrame(loop);
-              status('Scanning enabled. Point the camera at a barcode/QR.');
-            } else {
-              status('BarcodeDetector not available. Use manual entry for now.');
+            if (vid) {
+              vid.srcObject = stream;
+              vid.setAttribute('playsinline', 'true');
+              await vid.play();
             }
+            isScanning = true;
+            $('scan-start')?.classList.add('hidden');
+            $('scan-stop')?.classList.remove('hidden');
+            $('scan-switch')?.classList.remove('hidden');
+            status('Camera active. Point your camera at a Store QR or product barcode.');
+            requestAnimationFrame(scanLoop);
           } catch (err) {
-            status('Could not start camera. Check permissions and try again.');
+            let msg = 'Could not start camera. Check permissions and try again.';
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+              msg = 'Camera permission was denied. You can enter the store or product link manually.';
+            } else if (err.name === 'NotFoundError') {
+              msg = 'No camera found on this device.';
+            }
+            status(msg);
           }
+        };
+
+        $('scan-start')?.addEventListener('click', startCamera);
+        $('scan-stop')?.addEventListener('click', stopCamera);
+        $('scan-switch')?.addEventListener('click', () => {
+          facingMode = facingMode === 'environment' ? 'user' : 'environment';
+          startCamera();
         });
+
+        window.addEventListener('beforeunload', stopCamera);
 
         $('scan-pay')?.addEventListener('click', async () => {
           const items = read();

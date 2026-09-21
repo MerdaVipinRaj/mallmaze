@@ -28,9 +28,24 @@ create table if not exists stores (
   id text primary key,
   owner_user_id text references users(id),
   name text not null,
+  slug text unique,
+  description text,
   category text,
   address text,
+  address_line text,
+  area text,
+  city text default 'Hyderabad',
+  state text default 'Telangana',
+  country text default 'India',
+  postal_code text,
+  latitude numeric,
+  longitude numeric,
   phone text,
+  email text,
+  hours text default '10:00 AM - 9:00 PM',
+  opening_time text default '10:00 AM',
+  closing_time text default '10:00 PM',
+  status text not null default 'active',
   verification_status text not null default 'pending',
   payout_account_ref text,
   payout_status text not null default 'pending',
@@ -38,8 +53,32 @@ create table if not exists stores (
   bank_account_masked text,
   bank_ifsc text,
   bank_account_type text,
-  created_at timestamptz not null default now()
+  qr_public_token text unique,
+  qr_version integer not null default 1,
+  qr_enabled boolean not null default true,
+  qr_created_at timestamptz default now(),
+  qr_updated_at timestamptz default now(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
+
+create table if not exists store_shopping_sessions (
+  id text primary key,
+  user_id text references users(id),
+  store_id text not null references stores(id),
+  session_token text unique,
+  status text not null default 'active',
+  started_at timestamptz not null default now(),
+  last_activity_at timestamptz not null default now(),
+  ended_at timestamptz
+);
+
+-- Location and store discovery indexes
+create index if not exists idx_stores_status_verify on stores(status, verification_status);
+create index if not exists idx_stores_city_area on stores(city, area);
+create index if not exists idx_stores_coords on stores(latitude, longitude);
+create index if not exists idx_stores_qr_token on stores(qr_public_token);
+create index if not exists idx_sessions_store_user on store_shopping_sessions(store_id, user_id, status);
 
 create table if not exists products (
   id text primary key,
@@ -303,3 +342,43 @@ create index if not exists idx_mm_orders_customer_id on mm_orders(customer_id);
 create index if not exists idx_mm_scan_receipts_token on mm_scan_receipts(token);
 create index if not exists idx_mm_support_tickets_user_id on mm_support_tickets(user_id);
 create index if not exists idx_mm_feedback_topic on mm_feedback(topic);
+
+
+-- ============================================================
+-- MALLMAZE — Migration 003: Product Media Studio Table
+-- ============================================================
+
+-- Add images column to products table if missing
+do $$
+begin
+  if not exists (select 1 from information_schema.columns where table_name='products' and column_name='images') then
+    alter table products add column images jsonb default '[]'::jsonb;
+  end if;
+end $$;
+
+-- Create dedicated product_images table
+create table if not exists product_images (
+  id text primary key,
+  product_id text references products(id) on delete cascade,
+  store_id text references stores(id),
+  storage_path text not null,
+  original_storage_path text,
+  processed_storage_path text,
+  thumbnail_storage_path text,
+  mime_type text,
+  width integer,
+  height integer,
+  file_size bigint,
+  sort_order integer default 0,
+  is_primary boolean default false,
+  processing_status text default 'ready',
+  processing_provider text,
+  processing_version text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- Optimize indexing for lightning-fast product queries
+create index if not exists idx_product_images_product_id on product_images(product_id);
+create index if not exists idx_product_images_store_id on product_images(store_id);
+create index if not exists idx_product_images_sort_order on product_images(product_id, sort_order);

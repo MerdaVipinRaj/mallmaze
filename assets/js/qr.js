@@ -256,6 +256,179 @@
     }
   }
 
-  window.MM_QR = { draw };
+  
+  function downloadPng(canvas, filename, storeName) {
+    if (!canvas) return;
+    try {
+      // Create a higher-res offscreen canvas with branded card for download
+      const exportCanvas = document.createElement("canvas");
+      const pad = 40;
+      const qrSize = canvas.width;
+      exportCanvas.width = qrSize + (pad * 2);
+      exportCanvas.height = qrSize + (pad * 2) + 70;
+      const ctx = exportCanvas.getContext("2d");
+
+      // White background
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+      // Border outline
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(10, 10, exportCanvas.width - 20, exportCanvas.height - 20);
+
+      // Draw QR Code
+      ctx.drawImage(canvas, pad, pad, qrSize, qrSize);
+
+      // Brand text
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 16px 'Plus Jakarta Sans', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(storeName || "MallMaze Store", exportCanvas.width / 2, exportCanvas.height - 55);
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "500 12px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillText("Scan to shop on MallMaze", exportCanvas.width / 2, exportCanvas.height - 32);
+
+      const dataUrl = exportCanvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = (filename || "store-qr") + ".png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) {
+      console.error("Error downloading QR:", e);
+    }
+  }
+
+  function printQr(store) {
+    if (!store) return;
+    const printWin = window.open("", "_blank");
+    if (!printWin) {
+      alert("Please allow popups to print your Store QR code.");
+      return;
+    }
+
+    const qrUrl = store.url || `https://mallmaze-live.onrender.com/store.html?id=${encodeURIComponent(store.id || '')}`;
+
+    printWin.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>MallMaze - Store QR: ${store.name || 'Store'}</title>
+  <style>
+    @page { size: A4; margin: 20mm; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #0f172a;
+      text-align: center;
+      padding: 40px 20px;
+      margin: 0;
+      background: #ffffff;
+    }
+    .print-card {
+      max-width: 440px;
+      margin: 0 auto;
+      border: 3px solid #0f172a;
+      border-radius: 28px;
+      padding: 36px 24px;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .badge {
+      display: inline-block;
+      background: #fef08a;
+      color: #854d0e;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .store-name {
+      font-size: 26px;
+      font-weight: 800;
+      margin: 0 0 6px 0;
+    }
+    .store-sub {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0 0 24px 0;
+    }
+    .qr-container {
+      background: #ffffff;
+      padding: 16px;
+      display: inline-block;
+      border: 2px solid #e2e8f0;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    canvas {
+      display: block;
+    }
+    .callout {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 6px 0;
+    }
+    .instructions {
+      font-size: 12px;
+      color: #64748b;
+      max-width: 320px;
+      margin: 0 auto 16px auto;
+      line-height: 1.5;
+    }
+    .url-text {
+      font-size: 11px;
+      color: #94a3b8;
+      word-break: break-all;
+    }
+    @media print {
+      body { padding: 0; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-card">
+    <div class="logo">MallMaze</div>
+    <div class="badge">Official Storefront QR</div>
+    <h1 class="store-name">${store.name || 'Store'}</h1>
+    <p class="store-sub">${store.category || 'Local Retail'} · ${store.city || 'Verified Store'}</p>
+
+    <div class="qr-container">
+      <canvas id="p-qr" width="220" height="220"></canvas>
+    </div>
+
+    <p class="callout">Scan to Shop In-Store</p>
+    <p class="instructions">Open your phone camera to browse this store's catalog, check prices & start Fast Shopping on MallMaze.</p>
+    <p class="url-text">${qrUrl}</p>
+  </div>
+  <div class="no-print" style="margin-top: 30px;">
+    <button onclick="window.print()" style="padding: 10px 24px; font-weight: bold; background: #0f172a; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-size: 14px;">Print Now</button>
+  </div>
+</body>
+</html>`);
+
+    printWin.document.close();
+
+    // Render the QR code on the print window canvas using MM_QR
+    setTimeout(() => {
+      const pCanvas = printWin.document.getElementById("p-qr");
+      if (pCanvas) {
+        draw(pCanvas, qrUrl, 220);
+      }
+    }, 150);
+  }
+
+  window.MM_QR = { draw, downloadPng, printQr };
 })();
 

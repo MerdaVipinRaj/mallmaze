@@ -17,7 +17,8 @@ const {
   createRazorpayOrderWithTransfers,
   applyTransferWebhook
 } = require("./razorpay-route");
-const { saveUpload, uploadStaticTarget } = require("./uploads");
+const { saveUpload, uploadStaticTarget, parseDataUrl } = require("./uploads");
+const { defaultImageService } = require("./image-service");
 
 const PORT = Number(process.env.PORT || 4000);
 const ROOT = path.resolve(__dirname, "..");
@@ -530,6 +531,8 @@ function staticTarget(urlPath) {
     return null;
   }
   if (clean === "/") clean = "/index.html";
+  if (clean === "/fast-shopping" || clean.startsWith("/store/")) clean = "/store.html";
+  if (clean.startsWith("/scan/store/")) clean = "/scan.html";
   const relative = clean.replace(/^\/+/, "");
   const first = relative.split(/[\\/]/)[0];
   const allowedRootFiles = new Set([
@@ -929,6 +932,11 @@ function storeOwnedBy(db, storeId, userId) {
   return String(store.owner_user_id || "") === String(userId);
 }
 
+function slugifyName(name, id) {
+  const base = String(name || 'store').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return base ? `${base}-${id}` : id;
+}
+
 function normalizeStorePayload(input) {
   const now = new Date().toISOString();
   const id = String(input.id || `store-${Date.now()}`);
@@ -937,6 +945,21 @@ function normalizeStorePayload(input) {
     || input.account_number || input.ifsc_code || input.beneficiary_name;
   return {
     id,
+    slug: String(input.slug || slugifyName(input.name, id)).trim(),
+    description: String(input.description || "").trim(),
+    address_line: String(input.address_line || input.address || "").trim(),
+    area: String(input.area || "").trim(),
+    country: String(input.country || "India").trim(),
+    postal_code: String(input.postal_code || "").trim(),
+    latitude: input.latitude != null && !isNaN(Number(input.latitude)) ? Number(input.latitude) : null,
+    longitude: input.longitude != null && !isNaN(Number(input.longitude)) ? Number(input.longitude) : null,
+    opening_time: String(input.opening_time || "10:00 AM").trim(),
+    closing_time: String(input.closing_time || "10:00 PM").trim(),
+    qr_public_token: String(input.qr_public_token || crypto.randomBytes(16).toString("hex")).trim(),
+    qr_version: Number(input.qr_version || 1),
+    qr_enabled: input.qr_enabled !== false,
+    qr_created_at: input.qr_created_at || now,
+    qr_updated_at: input.qr_updated_at || now,
     name: String(input.name || "Local Store").trim(),
     category: String(input.category || "Local Store").trim(),
     owner_name: String(input.owner_name || input.owner || "").trim(),
@@ -1137,7 +1160,270 @@ function readRawBody(req) {
   });
 }
 
+
+function calcHaversineDistance(lat1, lon1, lat2, lon2) {
+  if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
+  const nLat1 = Number(lat1), nLon1 = Number(lon1), nLat2 = Number(lat2), nLon2 = Number(lon2);
+  if (isNaN(nLat1) || isNaN(nLon1) || isNaN(nLat2) || isNaN(nLon2)) return null;
+  const R = 6371; // km
+  const dLat = (nLat2 - nLat1) * (Math.PI / 180);
+  const dLon = (nLon2 - nLon1) * (Math.PI / 180);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(nLat1 * (Math.PI / 180)) * Math.cos(nLat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function formatDistLabel(distKm) {
+  if (distKm == null || isNaN(distKm)) return "Distance unavailable";
+  if (distKm < 0.1) return "Within 100m";
+  if (distKm < 1) return `${Math.round(distKm * 1000)}m away`;
+  if (distKm <= 10) return `${distKm.toFixed(1)} km away`;
+  return `${Math.round(distKm)} km away`;
+}
+
 const routes = {
+  "GET /api/stores/nearby": async (_req, res, parsed) => {
+    const db = await readDb();
+    const q = parsed.searchParams;
+    const lat = q.get("lat") ? Number(q.get("lat")) : null;
+    const lng = q.get("lng") ? Number(q.get("lng")) : null;
+    const radiusKm = Number(q.get("radius_km") || 35);
+    const cityFilter = (q.get("city") || "").trim().toLowerCase();
+    const areaFilter = (q.get("area") || "").trim().toLowerCase();
+    const categoryFilter = (q.get("category") || "").trim().toLowerCase();
+    const openNow = q.get("open_now") === "true";
+
+    // Only active and verified stores appear in public discovery
+    let list = (db.stores || []).filter((s) => {
+      const isVerified = (s.verification_status || "").toLowerCase() === "verified";
+      const isActive = (s.status || "active").toLowerCase() === "active";
+      return isVerified && isActive;
+    });
+
+    if (cityFilter) {
+      list = list.filter((s) => (s.city || "").toLowerCase().includes(cityFilter));
+    }
+    if (areaFilter) {
+      list = list.filter((s) => (s.area || "").toLowerCase().includes(areaFilter));
+    }
+    if (categoryFilter) {
+      list = list.filter((s) => (s.category || "").toLowerCase().includes(categoryFilter));
+    }
+
+    const storesWithDist = list.map((st) => {
+      let distKm = null;
+      if (lat != null && lng != null && st.latitude != null && st.longitude != null) {
+        distKm = calcHaversineDistance(lat, lng, st.latitude, st.longitude);
+      }
+      return {
+        ...publicStore(st),
+        distance_km: distKm != null ? Number(distKm.toFixed(2)) : null,
+        distance_label: formatDistLabel(distKm),
+        is_open: true // Can be checked against store hours
+      };
+    });
+
+    let filtered = storesWithDist;
+    if (lat != null && lng != null && radiusKm > 0) {
+      // Filter within radius if distance is available, or include nearby city matches
+      filtered = storesWithDist.filter((s) => s.distance_km == null || s.distance_km <= radiusKm);
+      filtered.sort((a, b) => {
+        if (a.distance_km == null && b.distance_km == null) return 0;
+        if (a.distance_km == null) return 1;
+        if (b.distance_km == null) return -1;
+        return a.distance_km - b.distance_km;
+      });
+    }
+
+    send(res, 200, {
+      ok: true,
+      count: filtered.length,
+      user_location: lat != null && lng != null ? { lat, lng } : null,
+      stores: filtered
+    });
+  },
+
+  "GET /api/stores/qr": async (_req, res, parsed) => {
+    const db = await readDb();
+    const token = (parsed.searchParams.get("token") || "").trim();
+    const storeId = (parsed.searchParams.get("id") || "").trim();
+    const slug = (parsed.searchParams.get("slug") || "").trim();
+
+    if (!token && !storeId && !slug) {
+      return send(res, 400, { error: "Store QR token, id, or slug is required" });
+    }
+
+    const store = (db.stores || []).find((s) => {
+      if (token && String(s.qr_public_token || "") === token) return true;
+      if (storeId && String(s.id) === storeId) return true;
+      if (slug && String(s.slug || "") === slug) return true;
+      return false;
+    });
+
+    if (!store) {
+      return send(res, 404, { error: "Store not found" });
+    }
+
+    if ((store.status || "active").toLowerCase() !== "active") {
+      return send(res, 400, { error: "This store is currently unavailable on MallMaze." });
+    }
+
+    if (store.qr_enabled === false) {
+      return send(res, 400, { error: "This store QR code is no longer active or has been revoked." });
+    }
+
+    const products = (db.products || []).filter((p) => String(p.store_id || p.storeId) === String(store.id));
+    send(res, 200, {
+      ok: true,
+      store: {
+        ...publicStore(store),
+        products_count: products.length
+      }
+    });
+  },
+
+  "POST /api/stores/qr/regenerate": async (req, res) => {
+    const db = await readDb();
+    const gate = requireAuth(req, db);
+    if (gate.error) return send(res, gate.status, { error: gate.error });
+
+    const body = await readBody(req);
+    const storeId = String(body.store_id || body.id || "").trim();
+    if (!storeId) return send(res, 400, { error: "store_id is required" });
+
+    const store = (db.stores || []).find((s) => String(s.id) === storeId);
+    if (!store) return send(res, 404, { error: "Store not found" });
+
+    const uid = gate.user.sub || gate.user.id;
+    const isOwner = String(store.owner_user_id || "") === String(uid);
+    const isAdmin = gate.user.role === "admin";
+    if (!isOwner && !isAdmin) {
+      return send(res, 403, { error: "Unauthorized. Only the store owner or admin can regenerate this QR code." });
+    }
+
+    const newToken = crypto.randomBytes(16).toString("hex");
+    store.qr_public_token = newToken;
+    store.qr_version = (Number(store.qr_version) || 1) + 1;
+    store.qr_enabled = true;
+    store.qr_updated_at = new Date().toISOString();
+    store.updated_at = new Date().toISOString();
+
+    db.stores = upsertById(db.stores, store);
+    await writeDb(db);
+
+    send(res, 200, {
+      ok: true,
+      message: "Store QR code rotated and regenerated successfully.",
+      store_id: store.id,
+      qr_public_token: newToken,
+      qr_version: store.qr_version,
+      qr_updated_at: store.qr_updated_at
+    });
+  },
+
+  "POST /api/shopping-sessions": async (req, res) => {
+    const db = await readDb();
+    const auth = verifyToken(req.headers.authorization);
+    const body = await readBody(req);
+    const storeId = String(body.store_id || "").trim();
+    if (!storeId) return send(res, 400, { error: "store_id is required" });
+
+    const store = (db.stores || []).find((s) => String(s.id) === storeId);
+    if (!store) return send(res, 404, { error: "Store not found" });
+    if ((store.status || "active").toLowerCase() !== "active") {
+      return send(res, 400, { error: "Cannot start a session for an inactive store." });
+    }
+
+    if (!db.store_shopping_sessions) db.store_shopping_sessions = [];
+
+    const now = new Date().toISOString();
+    const userId = auth?.sub || auth?.id || null;
+    const sessionToken = String(body.session_token || crypto.randomBytes(16).toString("hex"));
+
+    // End any prior active session for this user
+    if (userId) {
+      db.store_shopping_sessions.forEach((sess) => {
+        if (sess.user_id === userId && sess.status === "active") {
+          sess.status = "ended";
+          sess.ended_at = now;
+        }
+      });
+    }
+
+    const newSession = {
+      id: `sess-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`,
+      user_id: userId,
+      store_id: storeId,
+      store_name: store.name,
+      session_token: sessionToken,
+      status: "active",
+      started_at: now,
+      last_activity_at: now,
+      ended_at: null
+    };
+
+    db.store_shopping_sessions.push(newSession);
+    await writeDb(db);
+
+    send(res, 200, {
+      ok: true,
+      session: newSession,
+      store: publicStore(store)
+    });
+  },
+
+  "POST /api/shopping-sessions/end": async (req, res) => {
+    const db = await readDb();
+    const body = await readBody(req);
+    const sessionId = String(body.session_id || "").trim();
+    const sessionToken = String(body.session_token || "").trim();
+
+    if (!db.store_shopping_sessions) db.store_shopping_sessions = [];
+
+    const session = db.store_shopping_sessions.find((s) =>
+      (sessionId && s.id === sessionId) || (sessionToken && s.session_token === sessionToken)
+    );
+
+    if (session) {
+      session.status = "ended";
+      session.ended_at = new Date().toISOString();
+      await writeDb(db);
+    }
+
+    send(res, 200, { ok: true, message: "Shopping session ended successfully." });
+  },
+
+  "GET /api/shopping-sessions/active": async (req, res, parsed) => {
+    const db = await readDb();
+    const auth = verifyToken(req.headers.authorization);
+    const token = (parsed.searchParams.get("token") || "").trim();
+
+    if (!db.store_shopping_sessions) db.store_shopping_sessions = [];
+
+    const userId = auth?.sub || auth?.id;
+    let active = null;
+    if (userId) {
+      active = db.store_shopping_sessions.find((s) => s.user_id === userId && s.status === "active");
+    }
+    if (!active && token) {
+      active = db.store_shopping_sessions.find((s) => s.session_token === token && s.status === "active");
+    }
+
+    if (!active) {
+      return send(res, 200, { ok: true, active: false, session: null });
+    }
+
+    const store = (db.stores || []).find((s) => String(s.id) === String(active.store_id));
+    send(res, 200, {
+      ok: true,
+      active: true,
+      session: active,
+      store: store ? publicStore(store) : null
+    });
+  },
+
   "GET /api/health": async (_req, res) => send(res, 200, { ok: true, service: "mallmaze-api", time: new Date().toISOString() }),
   "GET /api/version": async (_req, res) => send(res, 200, { ok: true, service: "mallmaze-api", version: "2.1.0", branch: "master", time: new Date().toISOString() }),
   "GET /api/catalog": async (_req, res, parsed) => {
@@ -1799,7 +2085,8 @@ const routes = {
       mall_name: String(body.mall_name || "Local Mall"),
       city: String(body.city || "Bangalore"),
       trust_tier: String(body.trust_tier || "rapid"),
-      image_url: String(body.image_url || "assets/media/hero-mall.jpg"),
+      image_url: String((Array.isArray(body.images) && body.images[0]) || body.image_url || "assets/media/hero-mall.jpg"),
+      images: Array.isArray(body.images) ? body.images : (body.image_url ? [body.image_url] : []),
       description: String(body.description || ""),
       rating: Number(body.rating || 4.8),
       is_active: body.is_active !== false,
@@ -2461,6 +2748,30 @@ const routes = {
     });
     return;
   },
+  "POST /api/images/process": async (req, res) => {
+    const body = await readBody(req);
+    const dataUrl = body.data_url || body.dataUrl;
+    if (!dataUrl) return send(res, 400, { error: "data_url is required" });
+    try {
+      const parsed = parseDataUrl(dataUrl);
+      if (!parsed) return send(res, 400, { error: "Invalid image data" });
+      const processed = await defaultImageService.processProductImage(parsed.buffer, {
+        removeBg: Boolean(body.remove_bg || body.removeBg),
+        enhance: Boolean(body.enhance),
+        backdrop: body.backdrop || "white"
+      });
+      const processedDataUrl = `data:${processed.mime};base64,${processed.buffer.toString("base64")}`;
+      send(res, 200, {
+        ok: true,
+        data_url: processedDataUrl,
+        mime: processed.mime,
+        provider: processed.provider,
+        status: processed.status
+      });
+    } catch (error) {
+      send(res, 400, { error: error.message || "Processing failed" });
+    }
+  },
   "POST /api/uploads": async (req, res) => {
     const db = await readDb();
     const gate = requireAuth(req, db);
@@ -2474,7 +2785,9 @@ const routes = {
     try {
       const saved = saveUpload(ROOT, {
         dataUrl: body.data_url || body.dataUrl,
+        originalDataUrl: body.original_data_url || body.originalDataUrl || null,
         storeId,
+        productId: body.product_id || body.productId || "",
         kind: body.kind || "products",
         filename: body.filename || ""
       });

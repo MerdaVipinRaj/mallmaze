@@ -125,6 +125,37 @@
     rejectStore: (payload) => request("/admin/stores/reject", { method: "POST", body: payload }),
     createPosSale: (payload) => request("/pos/sale", { method: "POST", body: payload }),
     createPosPurchase: (payload) => request("/pos/purchase", { method: "POST", body: payload }),
+    
+    nearbyStores: (params) => {
+      const q = new URLSearchParams();
+      if (params?.lat != null) q.set("lat", params.lat);
+      if (params?.lng != null) q.set("lng", params.lng);
+      if (params?.radius_km != null) q.set("radius_km", params.radius_km);
+      if (params?.city) q.set("city", params.city);
+      if (params?.area) q.set("area", params.area);
+      if (params?.category) q.set("category", params.category);
+      if (params?.open_now) q.set("open_now", "true");
+      return request(`/stores/nearby?${q.toString()}`);
+    },
+    resolveStoreQr: (tokenOrId) => {
+      const q = new URLSearchParams();
+      if (tokenOrId) q.set("token", tokenOrId);
+      return request(`/stores/qr?${q.toString()}`);
+    },
+    regenerateStoreQr: (storeId) => {
+      return request("/stores/qr/regenerate", { method: "POST", body: { store_id: storeId } });
+    },
+    startShoppingSession: (payload) => {
+      return request("/shopping-sessions", { method: "POST", body: payload });
+    },
+    endShoppingSession: (payload) => {
+      return request("/shopping-sessions/end", { method: "POST", body: payload });
+    },
+    activeShoppingSession: (token) => {
+      const q = new URLSearchParams();
+      if (token) q.set("token", token);
+      return request(`/shopping-sessions/active?${q.toString()}`);
+    },
     moneyPaiseToRupees
   };
 })();

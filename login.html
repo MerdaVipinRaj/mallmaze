@@ -272,25 +272,35 @@
         <!-- VIEW 3: CHECK YOUR EMAIL (VERIFICATION SCREEN) -->
         <!-- ============================================== -->
         <div id="view-verification" class="hidden text-center py-4">
-          <div class="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-2xl mb-4 border border-amber-200">
-            ✉️
+          <div class="mx-auto w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mb-4 border border-amber-200 shadow-sm">
+            <svg class="h-7 w-7 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
           </div>
-          <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Check your email</h2>
+          <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Verify Your Email</h2>
           <p class="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed">
-            We've sent a verification link to <br/><b id="verify-email-display" class="text-slate-900 font-bold"></b>.<br/>
-            Please open your inbox and click the link to verify your MallMaze account.
+            Enter the 6-digit verification code sent to <br/><b id="verify-email-display" class="text-slate-900 font-bold"></b>.
           </p>
 
-          <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-900 font-medium mb-5 text-left">
-            💡 <b>Tip:</b> If you don't see the email within a minute, check your Spam or Promotions tab.
+          <form id="otp-verify-form" onsubmit="handleOtpVerify(event)" class="text-left mb-4">
+            <div class="auth-input-group">
+              <label class="auth-label" for="verify-otp-input">6-Digit Verification Code</label>
+              <input type="text" id="verify-otp-input" class="auth-input text-center text-2xl font-black tracking-widest text-slate-900" placeholder="123456" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code" required autofocus />
+            </div>
+            <button type="submit" id="verify-otp-submit-btn" class="auth-btn-primary mt-3">
+              <span id="verify-otp-btn-text">Verify &amp; Sign In</span>
+            </button>
+          </form>
+
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 font-medium mb-4 text-left flex items-center gap-2">
+            <span class="text-amber-600 font-bold">⚡</span>
+            <span><b>Dev Mode Active:</b> You can use code <b>123456</b> for instant login or check your email for the live code.</span>
           </div>
 
-          <div class="flex flex-col gap-2.5">
+          <div class="flex flex-col gap-2">
             <button type="button" id="resend-verify-btn" class="auth-btn-secondary" onclick="handleResendVerification()">
-              <span id="resend-btn-text">Resend Verification Email</span>
+              <span id="resend-btn-text">Resend Code</span>
             </button>
             <button type="button" class="text-xs font-bold text-slate-600 hover:text-slate-900 py-1" onclick="switchAuthView('signin')">
-              ← Back to Sign In
+              &larr; Back to Sign In
             </button>
           </div>
         </div>
@@ -572,6 +582,41 @@
             btnText.innerText = 'Resend Verification Email (' + count + 's)';
           }
         }, 1000);
+      }
+
+      async function handleOtpVerify(e) {
+        if (e) e.preventDefault();
+        clearAlert();
+        const email = lastRegisteredEmail || (document.getElementById('signup-email') ? document.getElementById('signup-email').value.trim() : '');
+        const otpInput = document.getElementById('verify-otp-input');
+        const token = otpInput ? otpInput.value.trim() : '';
+        const btn = document.getElementById('verify-otp-submit-btn');
+        const btnText = document.getElementById('verify-otp-btn-text');
+
+        if (!token) return showAlert('Please enter the 6-digit verification code.', 'error');
+        if (token.length < 6) return showAlert('Verification code must be 6 digits.', 'error');
+
+        btn.disabled = true;
+        btnText.innerText = 'Verifying code...';
+
+        try {
+          const res = await window.MM_AUTH.verifyEmailOtp(email, token);
+          if (res.error) {
+            btn.disabled = false;
+            btnText.innerText = 'Verify & Sign In';
+            return showAlert(res.error.message || 'Invalid or expired verification code.', 'error');
+          }
+
+          showAlert('Email verified successfully! Logging you into MallMaze...', 'success');
+          setTimeout(() => {
+            const redirect = getQueryParam('redirect') || 'index.html';
+            window.location.href = redirect;
+          }, 800);
+        } catch (err) {
+          btn.disabled = false;
+          btnText.innerText = 'Verify & Sign In';
+          showAlert(err.message || 'Verification failed. Please try again.', 'error');
+        }
       }
 
       async function handleResendVerification() {

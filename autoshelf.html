@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <link rel="stylesheet" href="assets/css/react-styles.css">
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/product-camera-studio.css">
 
     <!--
       Old Connect OS kept for later use. These are intentionally commented out.
@@ -15,11 +16,14 @@
         <main class="connect-os-page">
           <div id="autoshelf-root"></div>
         </main>
-      </body>
+        <script src="assets/js/product-camera-studio.js"></script>
+</body>
       <script src="assets/js/config.js" defer></script>
       <script src="assets/js/api-client.js" defer></script>
       <script src="assets/js/runtime-guard.js" defer></script>
-      <script src="assets/js/qr.js" defer></script>
+      <script src="assets/js/geolocation.js" defer></script>
+    <script src="assets/js/fast-shopping.js" defer></script>
+    <script src="assets/js/qr.js" defer></script>
       <script src="assets/js/main.js?v=connect-os-20260519-2" defer></script>
     -->
     <style>
@@ -1730,6 +1734,32 @@
         const input = document.getElementById(inputId);
         const preview = document.getElementById(previewId);
         if (!input) return;
+
+        // Upgrade camera buttons to Pro Camera Studio
+        if (inputId.includes("camera")) {
+          const parentLabel = input.closest("label");
+          if (parentLabel) {
+            parentLabel.addEventListener("click", (e) => {
+              if (window.ProductCameraStudio && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                e.preventDefault();
+                const studio = new window.ProductCameraStudio({
+                  onImagesChange: (imgs) => {
+                    if (imgs && imgs[0]) {
+                      const url = imgs[0].url;
+                      onReady(url);
+                      if (preview) {
+                        preview.src = url;
+                        preview.classList.add("show");
+                      }
+                    }
+                  }
+                });
+                studio.openCamera();
+              }
+            });
+          }
+        }
+
         input.addEventListener("change", async () => {
           const file = input.files?.[0];
           if (!file) return;
@@ -2051,6 +2081,28 @@
                   </div>
                   <span class="vs-count-pill">${pendingStores} pending</span>
                 </div>
+                
+                <!-- Location Discovery Header for Local Stores -->
+                <div id="autoshelf-loc-banner" class="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div class="flex items-center gap-2.5">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    </span>
+                    <div>
+                      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Nearby Stores Around</p>
+                      <p id="autoshelf-loc-text" class="text-sm font-extrabold text-slate-900">Hyderabad (Detected)</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button type="button" id="autoshelf-use-loc-btn" class="rounded-xl bg-amber-400 hover:bg-amber-500 px-3 py-1.5 text-xs font-bold text-slate-950 transition">
+                      Use GPS
+                    </button>
+                    <button type="button" id="autoshelf-change-loc-btn" class="rounded-xl border border-slate-300 hover:bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition">
+                      Change Location
+                    </button>
+                  </div>
+                </div>
+  
                 <div class="vs-filter-bar" role="search" aria-label="Filter created stores">
                   <label class="vs-label" for="store-search">Store search
                     <input id="store-search" class="vs-input" type="search" placeholder="Filter by name, category, owner, phone, address..." autocomplete="off" />
@@ -2089,7 +2141,9 @@
                             <button type="button" data-verify-store="${escapeHtml(store.id)}" class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">Verify</button>
                             <button type="button" data-reject-store="${escapeHtml(store.id)}" class="rounded-full bg-rose-50 px-3 py-1 text-xs font-extrabold text-rose-700">Reject</button>
                             <button type="button" data-delete-store="${escapeHtml(store.id)}" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">Delete</button>
-                            <a href="${appUrlForStore(store.id)}" class="rounded-full bg-amber-50 px-3 py-1 text-xs font-extrabold text-amber-700">Open</a>
+                            <a href="${window.MM_GEO ? window.MM_GEO.getDirectionsUrl(store) : '#'}" target="_blank" rel="noopener" class="rounded-full border border-slate-300 px-3 py-1 text-xs font-extrabold text-slate-700 hover:bg-slate-100">Directions ↗</a>
+     <a href="store.html?id=${encodeURIComponent(store.id)}&mode=fast" onclick="if(window.MM_FAST_SHOPPING) MM_FAST_SHOPPING.startSession({id: '${store.id}', name: '${escapeHtml(store.name)}', category: '${escapeHtml(store.category)}', city: '${escapeHtml(store.city || '')}'});" class="rounded-full bg-amber-400 hover:bg-amber-500 px-3.5 py-1 text-xs font-extrabold text-slate-950 shadow-sm">Fast Shopping</a>
+     <a href="${appUrlForStore(store.id)}" class="rounded-full bg-slate-100 hover:bg-slate-200 px-3 py-1 text-xs font-extrabold text-slate-700">Open</a>
                           </div>
                         </div>
                       </div>
@@ -2569,6 +2623,41 @@
       }
 
       initAutoshelf();
+    
+      function initAutoshelfLocationBanner() {
+        const text = document.getElementById("autoshelf-loc-text");
+        const useBtn = document.getElementById("autoshelf-use-loc-btn");
+        const changeBtn = document.getElementById("autoshelf-change-loc-btn");
+
+        const updateLocText = () => {
+          const loc = window.MM_GEO ? window.MM_GEO.getSavedLocation() : null;
+          if (text) text.textContent = loc ? loc.label : "Hyderabad (Default)";
+        };
+        updateLocText();
+
+        window.addEventListener("mm:location-changed", updateLocText);
+
+        useBtn?.addEventListener("click", async () => {
+          if (!window.MM_GEO?.getCurrentPosition) return;
+          try {
+            useBtn.disabled = true;
+            const loc = await window.MM_GEO.getCurrentPosition();
+            updateLocText();
+          } catch (e) {
+            alert(e.message || "Location permission denied.");
+          } finally {
+            useBtn.disabled = false;
+          }
+        });
+
+        changeBtn?.addEventListener("click", () => {
+          if (window.MM_GEO?.openLocationModal) {
+            window.MM_GEO.openLocationModal();
+          }
+        });
+      }
+      setTimeout(initAutoshelfLocationBanner, 200);
+  
     </script>
   </body>
 </html>

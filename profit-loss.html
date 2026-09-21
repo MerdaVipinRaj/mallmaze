@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>MallMaze - Profit & Loss Architecture</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +49,7 @@
     }
 
     .app-container {
-      min-width: 1200px !important;
+      min-width: 0;
       display: flex;
       width: 100%;
       max-width: 1480px;
@@ -512,47 +512,17 @@
     }
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    @media (max-width: 0px) /* disabled mobile collapse */ { .detail-panel { display: none; } }
-    /* Mobile Bottom Navigation Dock */
-    .mobile-bottom-nav {
-      display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 62px; background: #121620;
-      border-top: 1px solid rgba(255, 255, 255, 0.08); z-index: 1000; justify-content: space-around; align-items: center;
-      padding: 0 6px; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
-    }
-    .mob-nav-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 3px; color: #94a3b8; text-decoration: none;
-      font-size: 10px; font-weight: 700; padding: 6px 10px; border-radius: 8px;
-    }
-    .mob-nav-btn svg { width: 18px; height: 18px; stroke: currentColor; }
-    .mob-nav-btn.active { color: #facc15; }
-    .mob-nav-btn.active svg { stroke: #facc15; }
-
-    @media (max-width: 0px) /* disabled mobile collapse */ {
-      body { padding: 0; background: #121620; }
-      .app-container { height: 100vh; min-height: 100vh; border-radius: 0; flex-direction: column; box-shadow: none; padding-bottom: 62px; }
-      .sidebar { display: none; }
-      .main-wrapper { border-radius: 0; padding: 14px 12px 18px 12px; flex-direction: column; overflow-y: auto; gap: 12px; }
-      .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .kpi-card { padding: 10px 12px; }
-      .kpi-val { font-size: 16px; }
-      .top-header { flex-wrap: wrap; gap: 10px; }
-      .header-actions { width: 100%; justify-content: space-between; }
-      .btn-record-sale { flex: 1; justify-content: center; font-size: 12px; }
-      .detail-panel {
-        display: none; position: fixed; inset: 0; top: 15%; width: 100%; min-width: 100%;
-        border-radius: 24px 24px 0 0; z-index: 5000; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); animation: slideUp 0.25s ease;
-      }
-      .detail-panel.mobile-open { display: flex; }
-      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-      .mobile-bottom-nav { display: flex; }
+    /* Mobile overrides handled dynamically by assets/css/pos-mobile.css */
     }
   </style>
+  <link rel="stylesheet" href="assets/css/pos-mobile.css">
 
   <meta name="description" content="MallMaze - Profit & Loss Architecture - MallMaze unified local commerce." />
 
   <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
 
   <script src="assets/js/api-client.js" defer></script>
+  <script src="assets/js/pos-mobile.js"></script>
 </head>
 <body>
 
@@ -688,6 +658,13 @@
         </div>
 
         <!-- Filter Pills Bar -->
+        <!-- Real-time Mobile & Desktop Ledger Search Bar -->
+        <div class="mobile-search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="pnlSearchInput" class="mobile-search-input" placeholder="Search ledger by transaction, vendor, category..." oninput="handlePnlSearch(this.value)" />
+          <button id="pnlSearchClear" class="mobile-search-clear" onclick="clearPnlSearch()">✕</button>
+        </div>
+
         <div class="filters-bar">
           <div class="filter-group">
             <button class="dropdown-pill active-pill" id="filterAllBtn" onclick="filterLedger('ALL', this)">All Financial Heads</button>
@@ -735,12 +712,7 @@
       <aside class="detail-panel" id="detailPanel">
         <div class="detail-header">
           <h2 class="detail-title" id="panelOrderId">Offline Counter Sales</h2>
-          <button class="close-btn" onclick="showToast('Panel refreshed')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close details">✕</button>
         </div>
 
         <div class="detail-sub-meta">
@@ -1012,14 +984,53 @@
       document.getElementById("dispNet").innerText = `₹${net.toLocaleString('en-IN')} (${margin}%)`;
     }
 
+    let pnlSearchTerm = "";
+
+    function handlePnlSearch(val) {
+      pnlSearchTerm = (val || "").trim().toLowerCase();
+      const clearBtn = document.getElementById("pnlSearchClear");
+      if (clearBtn) clearBtn.style.display = pnlSearchTerm ? "flex" : "none";
+      renderTable();
+    }
+
+    function clearPnlSearch() {
+      const input = document.getElementById("pnlSearchInput");
+      if (input) input.value = "";
+      handlePnlSearch("");
+    }
+
     function renderTable() {
       const tbody = document.getElementById("pnlTableBody");
+      if (!tbody) return;
       tbody.innerHTML = "";
       
+      const isMobile = window.innerWidth <= 900;
+
       let filtered = pnlHeads.filter(item => {
+        if (pnlSearchTerm) {
+          const matchName = (item.name || "").toLowerCase().includes(pnlSearchTerm);
+          const matchCat = (item.category || "").toLowerCase().includes(pnlSearchTerm);
+          const matchBadge = (item.badge || "").toLowerCase().includes(pnlSearchTerm);
+          if (!matchName && !matchCat && !matchBadge) return false;
+        }
+
         if (activeFilter === "ALL") return true;
         return item.type === activeFilter;
       });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; padding:30px 16px; color:#64748b; background:#ffffff; border-radius:16px;">
+              <div style="font-size:24px; margin-bottom:6px;">📊</div>
+              <strong style="display:block; font-size:14px; color:#0f172a;">No ledger entries found</strong>
+              <span style="font-size:12px;">Try adjusting your search or active filter</span>
+            </td>
+          </tr>
+        `;
+        updateSelectAllState();
+        return;
+      }
 
       filtered.forEach(item => {
         const tr = document.createElement("tr");
@@ -1029,37 +1040,88 @@
           selectItem(item.id);
         };
         const badgeClass = `badge-${item.badgeType}`;
-        const totalClass = item.numericTotal < 0 ? 'negative' : 'positive';
+        const isNegative = item.numericTotal < 0;
+        const totalClass = isNegative ? 'negative' : 'positive';
+        const amountColor = isNegative ? '#dc2626' : '#15803d';
 
-        tr.innerHTML = `
-          <td>
-            <div class="custom-checkbox ${item.checked ? 'checked' : ''}" onclick="toggleRowCheck(event, '${item.id}')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-          </td>
-          <td><span class="order-id">${item.name}</span></td>
-          <td>
-            <div class="customer-cell">
-              <img src="${item.avatar}" alt="${item.name}" class="customer-thumb" />
-              <span class="customer-name">${item.category}</span>
-            </div>
-          </td>
-          <td><span class="status-badge ${badgeClass}">${item.badge}</span></td>
-          <td><span class="order-total ${totalClass}">${item.total}</span></td>
-          <td><span class="order-date">${item.period}</span></td>
-          <td>
-            <button class="row-menu-btn" title="More options" onclick="event.stopPropagation(); showToast('Tally Voucher for ${item.name}')">···</button>
-          </td>
-        `;
+        if (isMobile) {
+          // Ultra-optimized Mobile Transaction Card
+          tr.innerHTML = `
+            <td>
+              <div class="mob-card-header">
+                <span style="font-size:11px; font-weight:700; color:#64748b; background:#f8fafc; padding:2px 8px; border-radius:6px;">${item.period}</span>
+                <span class="status-badge ${badgeClass}">${item.badge}</span>
+              </div>
+              <div class="mob-card-body" style="margin: 8px 0 6px;">
+                <img src="${item.avatar}" alt="${item.name}" class="customer-thumb" style="width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0;" />
+                <div style="flex:1; min-width:0;">
+                  <strong style="font-size:13.5px; color:#0f172a; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</strong>
+                  <div style="font-size:11px; color:#64748b; margin-top:2px;">${item.category}</div>
+                </div>
+                <div style="text-align:right; flex-shrink:0;">
+                  <strong style="font-size:15px; font-weight:800; color:${amountColor}; display:block;">${item.total}</strong>
+                  <span style="font-size:10.5px; font-weight:700; color:${amountColor};">${isNegative ? '● Outflow' : '● Inflow'}</span>
+                </div>
+              </div>
+              <div class="mob-card-footer">
+                <span style="font-size:11px; color:#64748b;">${item.items ? item.items.length + ' itemized lines' : 'Ledger line'}</span>
+                <div style="display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; color:#121620;">
+                  <span>Inspect Audit</span>
+                  <span style="color:#94a3b8;">❯</span>
+                </div>
+              </div>
+            </td>
+          `;
+        } else {
+          // Standard Desktop Table Layout
+          tr.innerHTML = `
+            <td>
+              <div class="custom-checkbox ${item.checked ? 'checked' : ''}" onclick="toggleRowCheck(event, '${item.id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+            </td>
+            <td><span class="order-id">${item.name}</span></td>
+            <td>
+              <div class="customer-cell">
+                <img src="${item.avatar}" alt="${item.name}" class="customer-thumb" />
+                <span class="customer-name">${item.category}</span>
+              </div>
+            </td>
+            <td><span class="status-badge ${badgeClass}">${item.badge}</span></td>
+            <td><span class="order-total ${totalClass}">${item.total}</span></td>
+            <td><span class="order-date">${item.period}</span></td>
+            <td>
+              <button class="row-menu-btn" title="More options" onclick="event.stopPropagation(); showToast('Tally Voucher for ${item.name}')">···</button>
+            </td>
+          `;
+        }
         tbody.appendChild(tr);
       });
       updateSelectAllState();
     }
 
+    // Auto re-render on resize to flip between mobile cards and table smoothly
+    let pnlResizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(pnlResizeTimer);
+      pnlResizeTimer = setTimeout(() => {
+        renderTable();
+      }, 150);
+    });
+
     function selectItem(id) {
       selectedId = id;
       renderTable();
       renderDetailPanel();
+      if (window.innerWidth <= 900) {
+        if (typeof window.openMobileDetailPanel === 'function') {
+          window.openMobileDetailPanel();
+        } else {
+          document.querySelector(".detail-panel").classList.add("mobile-open");
+          const b = document.getElementById("detailBackdrop");
+          if (b) b.classList.add("show");
+        }
+      }
     }
 
     function renderDetailPanel() {

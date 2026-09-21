@@ -68,7 +68,7 @@ function publicBankDetails(store) {
 
 function publicStore(store) {
   if (!store) return store;
-  const { bank, ...rest } = store;
+  const { bank, owner_email, owner_phone, owner_user_id, verification_doc, payout_account_ref, ...rest } = store;
   return {
     ...rest,
     bank: publicBankDetails(store),

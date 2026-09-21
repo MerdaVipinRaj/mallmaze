@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MallMaze live PostgreSQL data viewer and database management dashboard.">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>MallMaze - PostgreSQL Data Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+    body { background: #0f172a; color: #e2e8f0; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { color: #facc15; margin-bottom: 20px; }
+    .api-status { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+    .status-online { background: #22c55e; }
+    .status-offline { background: #ef4444; }
+    .data-section { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    .data-section h2 { color: #facc15; margin-bottom: 15px; font-size: 18px; }
+    .btn-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+    .btn { 
+      background: #3b82f6; color: white; border: none; padding: 10px 20px; 
+      border-radius: 6px; cursor: pointer; font-weight: 600; 
+    }
+    .btn:hover { background: #2563eb; }
+    .btn:disabled { background: #64748b; cursor: not-allowed; }
+    .data-display { 
+      background: #0f172a; padding: 15px; border-radius: 6px; 
+      font-family: 'Courier New', monospace; font-size: 12px; 
+      max-height: 400px; overflow-y: auto; white-space: pre-wrap;
+    }
+    .loading { color: #facc15; font-style: italic; }
+    .error { color: #ef4444; }
+    .success { color: #22c55e; }
+    .table-info { color: #94a3b8; font-size: 14px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗄️ MallMaze PostgreSQL Data Viewer</h1>
+    
+    <div class="api-status">
+      <span class="status-indicator status-offline" id="statusIndicator"></span>
+      <span id="statusText">Checking API status...</span>
+    </div>
+
+    <div class="data-section">
+      <h2>📊 Quick Data Access</h2>
+      <div class="table-info">Click buttons to fetch data from your PostgreSQL database via API</div>
+      <div class="btn-group">
+        <button class="btn" onclick="fetchData('stores')">🏪 Stores</button>
+        <button class="btn" onclick="fetchData('products')">📦 Products</button>
+        <button class="btn" onclick="fetchData('users')">👥 Users</button>
+        <button class="btn" onclick="fetchData('orders')">🛒 Orders</button>
+        <button class="btn" onclick="fetchData('catalog')">🌐 Full Catalog</button>
+        <button class="btn" onclick="fetchData('autoshelf')">🔧 AutoShelf Data</button>
+      </div>
+      <div class="data-display" id="dataDisplay">Click a button above to view data...</div>
+    </div>
+
+    <div class="data-section">
+      <h2>🔗 Direct API Endpoints</h2>
+      <div class="table-info">Access these endpoints directly via browser or API client:</div>
+      <div class="data-display">
+/api/autoshelf/stores    - All stores with products
+/api/catalog/all         - All products and stores  
+/api/stores/all          - Store listings only
+/api/db/export           - Complete database export (requires auth)
+/api/admin/users         - All users (requires admin auth)
+/api/admin/orders        - All orders (requires admin auth)
+/api/admin/products      - All products (requires admin auth)
+      </div>
+    </div>
+
+    <div class="data-section">
+      <h2>💾 PostgreSQL Tables</h2>
+      <div class="table-info">Your PostgreSQL database contains these projection tables:</div>
+      <div class="data-display">
+mm_users          - User accounts and profiles
+mm_stores         - Store information and verification status
+mm_products       - Product inventory and pricing
+mm_orders         - Order details and payment status
+mm_scan_receipts  - Scan & Go receipt records
+mm_stock_events   - Stock change history
+mm_delivery_jobs  - Delivery tracking information
+mm_support_tickets- Customer support requests
+mm_feedback       - User feedback submissions
+mm_otp_challenges - OTP verification records
+mm_reservations   - Product reservations
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin + '/api';
+    
+    // Check API status on load
+    async function checkApiStatus() {
+      try {
+        const response = await fetch(`${API_BASE}/health`);
+        if (response.ok) {
+          document.getElementById('statusIndicator').className = 'status-indicator status-online';
+          document.getElementById('statusText').textContent = 'API Online - PostgreSQL Connected';
+        } else {
+          throw new Error('API not responding');
+        }
+      } catch (error) {
+        document.getElementById('statusIndicator').className = 'status-indicator status-offline';
+        document.getElementById('statusText').textContent = 'API Offline - Start the backend server';
+      }
+    }
+    
+    async function fetchData(type) {
+      const display = document.getElementById('dataDisplay');
+      display.innerHTML = '<div class="loading">Loading data...</div>';
+      
+      try {
+        let endpoint;
+        switch(type) {
+          case 'stores':
+            endpoint = '/autoshelf/stores';
+            break;
+          case 'products':
+            endpoint = '/catalog/all';
+            break;
+          case 'users':
+            endpoint = '/admin/users';
+            break;
+          case 'orders':
+            endpoint = '/admin/orders';
+            break;
+          case 'catalog':
+            endpoint = '/catalog';
+            break;
+          case 'autoshelf':
+            endpoint = '/autoshelf/stores';
+            break;
+          default:
+            endpoint = '/catalog';
+        }
+        
+        const response = await fetch(`${API_BASE}${endpoint}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          display.innerHTML = `<div class="success">✅ Data loaded successfully!</div>\n\n${JSON.stringify(data, null, 2)}`;
+        } else {
+          display.innerHTML = `<div class="error">❌ Error: ${data.error || 'Failed to fetch data'}</div>\n\n${JSON.stringify(data, null, 2)}`;
+        }
+      } catch (error) {
+        display.innerHTML = `<div class="error">❌ Connection Error: ${error.message}</div>\n\nMake sure the backend server is running on port 4000`;
+      }
+    }
+    
+    // Initialize
+    checkApiStatus();
+  </script>
+  <script src="assets/js/api-client.js"></script>
+</body>
+</html>

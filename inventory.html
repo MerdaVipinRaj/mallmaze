@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>MallMaze - Stock Studio & AI Image Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +41,7 @@
     }
 
     .app-container {
-      min-width: 1200px !important;
+      min-width: 0;
       display: flex;
       width: 100%;
       max-width: 1540px;
@@ -551,32 +551,18 @@
     .mob-nav-btn.active { color: #facc15; }
     .mob-nav-btn.active svg { stroke: #facc15; }
 
-    @media (max-width: 0px) /* disabled mobile collapse */ {
-      body { padding: 0; background: #121620; }
-      .app-container { height: 100vh; min-height: 100vh; border-radius: 0; flex-direction: column; box-shadow: none; padding-bottom: 62px; }
-      .sidebar { display: none; }
-      .main-wrapper { border-radius: 0; padding: 14px 12px 18px 12px; flex-direction: column; overflow-y: auto; gap: 12px; }
-      .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .kpi-box { padding: 10px 12px; }
-      .kpi-value { font-size: 16px; }
-      .top-header { flex-wrap: wrap; gap: 10px; }
-      .top-actions { width: 100%; justify-content: space-between; }
-      .btn-action-primary { flex: 1; justify-content: center; font-size: 12px; }
-      .detail-panel {
-        display: none; position: fixed; inset: 0; top: 15%; width: 100%; min-width: 100%;
-        border-radius: 24px 24px 0 0; z-index: 5000; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); animation: slideUp 0.25s ease;
-      }
-      .detail-panel.mobile-open { display: flex; }
-      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-      .mobile-bottom-nav { display: flex; }
+    /* Mobile overrides handled dynamically by assets/css/pos-mobile.css */
     }
   </style>
+  <link rel="stylesheet" href="assets/css/pos-mobile.css">
 
   <meta name="description" content="MallMaze - Stock Studio & AI Image Studio - MallMaze unified local commerce." />
 
   <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
 
   <script src="assets/js/api-client.js" defer></script>
+  <script src="assets/js/pos-mobile.js"></script>
+  <link rel="stylesheet" href="assets/css/product-camera-studio.css" />
 </head>
 <body>
 
@@ -688,6 +674,13 @@
         </div>
 
         <!-- Filter Bar -->
+        <!-- Real-time Mobile & Desktop Search Bar -->
+        <div class="mobile-search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="inventorySearchInput" class="mobile-search-input" placeholder="Search stock by product name, SKU, or category..." oninput="handleInventorySearch(this.value)" />
+          <button id="inventorySearchClear" class="mobile-search-clear" onclick="clearInventorySearch()">✕</button>
+        </div>
+
         <div class="filters-bar">
           <div class="filter-group">
             <button class="dropdown-pill active-pill" onclick="filterCatalog('ALL', this)">All Products</button>
@@ -722,7 +715,7 @@
       <aside class="detail-panel">
         <div class="detail-header">
           <h2 class="detail-title" id="pDetailName">TIG-200 Inverter Welder</h2>
-          <button class="stepper-btn" onclick="showToast('Refreshed')">✕</button>
+          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close details">✕</button>
         </div>
 
         <!-- Studio Preview Box -->
@@ -816,67 +809,8 @@
 
       <form onsubmit="handleSaveNewProduct(event)">
         
-        <!-- Live Camera Snap vs Device File Upload Selector -->
-        <div class="capture-switch-bar">
-          <button type="button" class="btn-capture-mode active" id="btnUploadTab" onclick="switchCaptureMode('upload')">
-            📁 Upload from Device / Gallery
-          </button>
-          <button type="button" class="btn-capture-mode" id="btnCameraTab" onclick="switchCaptureMode('camera')">
-            📷 Take Live Camera Photo
-          </button>
-        </div>
-
-        <!-- Hidden File Input for Device Upload -->
-        <input type="file" id="deviceFileInput" accept="image/*" style="display:none;" onchange="handleFileSelected(event)" />
-
-        <!-- Camera Live Capture Box -->
-        <div class="camera-live-box" id="cameraBox">
-          <video id="liveVideo" class="video-preview" autoplay playsinline></video>
-          <div style="margin-top:10px; display:flex; justify-content:center; gap:10px;">
-            <button type="button" class="btn-action-primary" style="background:#15803d; font-size:12.5px; padding:8px 16px;" onclick="snapCameraPhoto()">
-              📸 Click Photo & Auto-Enhance
-            </button>
-            <button type="button" class="btn-action-primary" style="background:#dc2626; font-size:12.5px; padding:8px 14px;" onclick="stopCamera()">
-              Stop Camera
-            </button>
-          </div>
-        </div>
-
-        <!-- AI Photo Enhancement Studio Box with Dynamic Color Combinations -->
-        <div class="ai-upload-studio">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:12.5px; font-weight:800; color:#0f172a;">✨ Live AI Studio Output (Amazon / Flipkart Quality)</span>
-            <button type="button" style="border:none; background:#e0e7ff; color:#4338ca; font-size:11px; font-weight:700; padding:4px 10px; border-radius:8px; cursor:pointer;" onclick="document.getElementById('deviceFileInput').click()">
-              Choose Photo File ⬆
-            </button>
-          </div>
-
-          <!-- Split Comparison (Before vs After) -->
-          <div class="studio-comparison-grid">
-            <div class="compare-card">
-              <span class="compare-tag tag-raw">1. Raw Camera Snap (Phone)</span>
-              <div class="compare-img-box" style="background:#475569;">
-                <img id="rawPreviewImg" src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&auto=format&fit=crop&q=80" alt="Raw Photo" style="filter: brightness(0.85) contrast(0.9);" />
-              </div>
-              <span style="font-size:10.5px; color:#64748b;">Messy background & shop glare</span>
-            </div>
-
-            <div class="compare-card" style="border:1.5px solid #86efac; background:#f0fdf4;">
-              <span class="compare-tag tag-enhanced">2. MallMaze AI Enhanced</span>
-              <div class="compare-img-box" id="modalEnhancedBox" style="background:#ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                <img id="enhancedPreviewImg" src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&auto=format&fit=crop&q=80" alt="Enhanced Photo" style="filter: contrast(1.15) saturate(1.1); transform:scale(1.02);" />
-              </div>
-              
-              <!-- Color Combination Studio Controls -->
-              <div style="display:flex; gap:4px; justify-content:center; margin-top:4px;">
-                <button type="button" class="palette-btn active" onclick="setModalBgTheme('white', this)">White</button>
-                <button type="button" class="palette-btn" onclick="setModalBgTheme('dark', this)">Dark Onyx</button>
-                <button type="button" class="palette-btn" onclick="setModalBgTheme('sand', this)">Sand</button>
-                <button type="button" class="palette-btn" onclick="setModalBgTheme('blue', this)">Glacier</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- MallMaze Pro AI Product Camera + Media Upload Studio -->
+        <div id="productMediaStudioContainer" style="margin-bottom:16px;"></div>
 
         <!-- Custom Product Fields -->
         <div class="form-grid-2">
@@ -991,11 +925,47 @@
     let activeFilter = "ALL";
     let cameraStream = null;
 
+    let inventorySearchTerm = "";
+
+    function handleInventorySearch(val) {
+      inventorySearchTerm = (val || "").trim().toLowerCase();
+      const clearBtn = document.getElementById("inventorySearchClear");
+      if (clearBtn) clearBtn.style.display = inventorySearchTerm ? "flex" : "none";
+      renderTable();
+    }
+
+    function clearInventorySearch() {
+      const input = document.getElementById("inventorySearchInput");
+      if (input) input.value = "";
+      handleInventorySearch("");
+    }
+
+    function quickAdjustStock(id, delta, event) {
+      if (event) event.stopPropagation();
+      const p = inventoryData.find(x => x.id === id);
+      if (p) {
+        p.stock = Math.max(0, p.stock + delta);
+        renderTable();
+        renderDetailPanel();
+        showToast(`Stock updated for ${p.name.split(' ')[0]}: ${p.stock} units`);
+      }
+    }
+
     function renderTable() {
       const tbody = document.getElementById("inventoryTableBody");
+      if (!tbody) return;
       tbody.innerHTML = "";
 
+      const isMobile = window.innerWidth <= 900;
+
       let filtered = inventoryData.filter(p => {
+        if (inventorySearchTerm) {
+          const matchName = (p.name || "").toLowerCase().includes(inventorySearchTerm);
+          const matchSku = (p.id || "").toLowerCase().includes(inventorySearchTerm);
+          const matchCat = (p.category || "").toLowerCase().includes(inventorySearchTerm);
+          if (!matchName && !matchSku && !matchCat) return false;
+        }
+
         if (activeFilter === "ALL") return true;
         if (activeFilter === "LOW") return p.stock <= p.lowThreshold;
         if (activeFilter === "HIGH_MARGIN") {
@@ -1004,6 +974,20 @@
         }
         return true;
       });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; padding:30px 16px; color:#64748b; background:#ffffff; border-radius:16px;">
+              <div style="font-size:24px; margin-bottom:6px;">📦</div>
+              <strong style="display:block; font-size:14px; color:#0f172a;">No stock items match your search</strong>
+              <span style="font-size:12px;">Try a different keyword or reset filters</span>
+            </td>
+          </tr>
+        `;
+        updateKpis();
+        return;
+      }
 
       filtered.forEach(p => {
         const marginAmt = p.price - p.cost;
@@ -1014,41 +998,99 @@
         tr.className = `data-row ${p.id === selectedProductId ? "selected" : ""}`;
         tr.onclick = () => selectProduct(p.id);
 
-        tr.innerHTML = `
-          <td>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <div class="product-thumb-box">
-                <img src="${p.img}" alt="${p.name}" />
+        if (isMobile) {
+          // Ultra-optimized Mobile Card Layout
+          tr.innerHTML = `
+            <td>
+              <div class="mob-card-header">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="font-size:10.5px; font-weight:800; color:#475569; background:#f1f5f9; padding:2px 8px; border-radius:6px; letter-spacing:0.3px;">${p.id}</span>
+                  <span style="font-size:11px; font-weight:700; color:#64748b;">${p.category}</span>
+                </div>
+                <span class="status-badge ${isLow ? 'badge-low' : 'badge-live'}">
+                  ${isLow ? '⚠️ Low (' + p.stock + ')' : '● ' + p.stock + ' in stock'}
+                </span>
               </div>
-              <div>
-                <strong style="font-size:12.5px; color:#0f172a;">${p.name}</strong>
-                <div style="font-size:10.5px; color:#64748b;">SKU: ${p.id}</div>
+              <div class="mob-card-body" style="margin: 8px 0 6px;">
+                <div class="product-thumb-box" style="width:52px; height:52px; flex-shrink:0;">
+                  <img src="${p.img}" alt="${p.name}" />
+                </div>
+                <div style="flex:1; min-width:0;">
+                  <strong style="font-size:13.5px; color:#0f172a; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</strong>
+                  <div style="display:flex; align-items:baseline; gap:8px; margin-top:3px; flex-wrap:wrap;">
+                    <strong style="font-size:14.5px; color:#0f172a;">₹${p.price.toLocaleString('en-IN')}</strong>
+                    <span style="font-size:11.5px; color:#64748b;">Cost: ₹${p.cost.toLocaleString('en-IN')}</span>
+                    <span style="font-size:11px; color:#15803d; font-weight:700; background:#dcfce7; padding:1px 6px; border-radius:4px;">+${marginPct}%</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </td>
-          <td>${p.category}</td>
-          <td>₹${p.cost.toLocaleString('en-IN')}</td>
-          <td><strong>₹${p.price.toLocaleString('en-IN')}</strong></td>
-          <td><span style="color:#15803d; font-weight:700;">+₹${marginAmt.toLocaleString('en-IN')} (${marginPct}%)</span></td>
-          <td>
-            <span class="status-badge ${isLow ? 'badge-low' : 'badge-live'}">
-              ${p.stock} units ${isLow ? '(Low)' : ''}
-            </span>
-          </td>
-          <td><span class="status-badge badge-ai">✨ Studio Clean</span></td>
-        `;
+              <div class="mob-card-footer">
+                <div class="mob-stock-stepper" onclick="event.stopPropagation();">
+                  <button class="mob-step-btn" onclick="quickAdjustStock('${p.id}', -1, event)" title="Decrease Stock">−</button>
+                  <span class="mob-step-val">${p.stock}</span>
+                  <button class="mob-step-btn" onclick="quickAdjustStock('${p.id}', 1, event)" title="Increase Stock">+</button>
+                  <span style="font-size:10.5px; color:#64748b; font-weight:600; margin-left:4px;">units</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="status-badge badge-ai" style="font-size:10.5px; padding:4px 8px;">✨ AI Studio</span>
+                  <span style="font-size:12px; color:#94a3b8; font-weight:700;">❯</span>
+                </div>
+              </div>
+            </td>
+          `;
+        } else {
+          // Standard Desktop Table Layout
+          tr.innerHTML = `
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="product-thumb-box">
+                  <img src="${p.img}" alt="${p.name}" />
+                </div>
+                <div>
+                  <strong style="font-size:12.5px; color:#0f172a;">${p.name}</strong>
+                  <div style="font-size:10.5px; color:#64748b;">SKU: ${p.id}</div>
+                </div>
+              </div>
+            </td>
+            <td>${p.category}</td>
+            <td>₹${p.cost.toLocaleString('en-IN')}</td>
+            <td><strong>₹${p.price.toLocaleString('en-IN')}</strong></td>
+            <td><span style="color:#15803d; font-weight:700;">+₹${marginAmt.toLocaleString('en-IN')} (${marginPct}%)</span></td>
+            <td>
+              <span class="status-badge ${isLow ? 'badge-low' : 'badge-live'}">
+                ${p.stock} units ${isLow ? '(Low)' : ''}
+              </span>
+            </td>
+            <td><span class="status-badge badge-ai">✨ Studio Clean</span></td>
+          `;
+        }
         tbody.appendChild(tr);
       });
 
       updateKpis();
     }
 
+    // Auto re-render on resize to switch between cards and table seamlessly
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        renderTable();
+      }, 150);
+    });
+
     function selectProduct(id) {
       selectedProductId = id;
       renderTable();
       renderDetailPanel();
-      if (window.innerWidth <= 860) {
-        document.querySelector(".detail-panel").classList.add("mobile-open");
+      if (window.innerWidth <= 900) {
+        if (typeof window.openMobileDetailPanel === 'function') {
+          window.openMobileDetailPanel();
+        } else {
+          document.querySelector(".detail-panel").classList.add("mobile-open");
+          const b = document.getElementById("detailBackdrop");
+          if (b) b.classList.add("show");
+        }
       }
     }
 
@@ -1131,14 +1173,42 @@
       renderTable();
     }
 
+    let productStudio = null;
+
+    function initProductStudio() {
+      if (window.ProductCameraStudio && !productStudio) {
+        productStudio = new ProductCameraStudio({
+          containerId: "productMediaStudioContainer",
+          maxImages: 9,
+          storeId: "store-01",
+          onImagesChange: (imgs) => {
+            // Live update callback
+          },
+          onToast: (msg) => showToast(msg)
+        });
+      }
+    }
+
     function openAddProductModal() {
       calculateMarginPreview();
+      initProductStudio();
+      if (productStudio) {
+        productStudio.setImages([
+          {
+            id: "default-drill",
+            url: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500&auto=format&fit=crop&q=80",
+            isPrimary: true,
+            status: "ready"
+          }
+        ]);
+      }
       document.getElementById("addProductModal").classList.add("open");
     }
 
     function closeModal(id) {
-      stopCamera();
-      document.getElementById(id).classList.remove("open");
+      if (productStudio) productStudio.closeCamera();
+      const el = document.getElementById(id);
+      if (el) el.classList.remove("open");
     }
 
     function calculateMarginPreview() {
@@ -1146,61 +1216,8 @@
       const price = parseFloat(document.getElementById("npPrice").value) || 0;
       const diff = price - cost;
       const pct = price > 0 ? ((diff / price) * 100).toFixed(1) : 0;
-      document.getElementById("npMarginPreview").innerText = `+ ₹${diff.toLocaleString('en-IN')} (${pct}%)`;
-    }
-
-    /* Camera vs File Upload Switching */
-    function switchCaptureMode(mode) {
-      document.getElementById("btnUploadTab").classList.toggle("active", mode === 'upload');
-      document.getElementById("btnCameraTab").classList.toggle("active", mode === 'camera');
-      const camBox = document.getElementById("cameraBox");
-
-      if (mode === 'camera') {
-        camBox.style.display = "block";
-        startCamera();
-      } else {
-        camBox.style.display = "none";
-        stopCamera();
-        document.getElementById("deviceFileInput").click();
-      }
-    }
-
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        cameraStream = stream;
-        document.getElementById("liveVideo").srcObject = stream;
-      } catch (err) {
-        showToast("Camera access simulated (or permission denied).");
-      }
-    }
-
-    function stopCamera() {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-        cameraStream = null;
-      }
-    }
-
-    function snapCameraPhoto() {
-      showToast("📸 Live camera snap captured! Auto AI Background Isolation applied.");
-      document.getElementById("rawPreviewImg").src = "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&auto=format&fit=crop&q=80";
-      document.getElementById("enhancedPreviewImg").src = "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&auto=format&fit=crop&q=80";
-      document.getElementById("cameraBox").style.display = "none";
-      stopCamera();
-    }
-
-    function handleFileSelected(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          document.getElementById("rawPreviewImg").src = event.target.result;
-          document.getElementById("enhancedPreviewImg").src = event.target.result;
-          showToast(`✨ File "${file.name}" loaded & enhanced with AI Studio background!`);
-        };
-        reader.readAsDataURL(file);
-      }
+      const disp = document.getElementById("npMarginPreview");
+      if (disp) disp.innerText = `+ ₹${diff.toLocaleString('en-IN')} (${pct}%)`;
     }
 
     function handleSaveNewProduct(e) {
@@ -1211,7 +1228,9 @@
       const price = parseFloat(document.getElementById("npPrice").value) || 0;
       const qty = parseInt(document.getElementById("npQty").value, 10) || 1;
       const low = parseInt(document.getElementById("npLowAlert").value, 10) || 3;
-      const imgSrc = document.getElementById("enhancedPreviewImg").src;
+
+      const primaryImg = (productStudio && productStudio.getPrimaryImage()) || "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500&auto=format&fit=crop&q=80";
+      const allImgs = (productStudio && productStudio.getImages().map(i => i.url)) || [primaryImg];
 
       const newId = "PRD-0" + (inventoryData.length + 1);
       const newProduct = {
@@ -1222,13 +1241,14 @@
         price: price,
         stock: qty,
         lowThreshold: low,
-        img: imgSrc
+        img: primaryImg,
+        images: allImgs
       };
 
       inventoryData.unshift(newProduct);
       closeModal("addProductModal");
       selectProduct(newId);
-      showToast(`✨ Custom Product "${title}" published with AI Studio Background!`);
+      showToast(`✨ Product "${title}" published with ${allImgs.length} media photos!`);
     }
 
     function showToast(msg) {
@@ -1241,7 +1261,9 @@
     window.addEventListener("DOMContentLoaded", () => {
       renderTable();
       renderDetailPanel();
+      initProductStudio();
     });
   </script>
+  <script src="assets/js/product-camera-studio.js"></script>
 </body>
 </html>

@@ -216,6 +216,67 @@
     /**
      * Resend Email Verification Link
      */
+    /**
+     * Verify Email with 6-Digit OTP Token (In-Page Verification)
+     * Directly confirms user account in Supabase without redirecting to external or old URLs.
+     */
+    verifyEmailOtp: async function (email, token) {
+      const client = getClient();
+      if (!client) throw new Error('Supabase client is not available.');
+
+      const cleanEmail = String(email || '').trim().toLowerCase();
+      const cleanToken = String(token || '').trim();
+      if (!cleanEmail) return { error: { message: 'Email address is required.' } };
+      if (!cleanToken) return { error: { message: 'Please enter the 6-digit verification code.' } };
+
+      // Dev Mode Instant Bypass for local testing
+      const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || (window.MM_CONFIG && window.MM_CONFIG.ENABLE_LOCAL_FALLBACKS);
+      if (isDev && (cleanToken === '123456' || cleanToken === '000000')) {
+        console.log('[MM_AUTH] Dev OTP code accepted for', cleanEmail);
+        const namePart = cleanEmail.split('@')[0];
+        const devUser = {
+          id: 'usr_' + Math.random().toString(36).slice(2, 10),
+          email: cleanEmail,
+          user_metadata: { full_name: namePart, username: namePart }
+        };
+        const devSession = { user: devUser, access_token: 'mock_token_' + Date.now() };
+        localStorage.setItem('mm_sb_session', JSON.stringify(devSession));
+        localStorage.setItem('mallmaze_user', JSON.stringify({ email: cleanEmail, name: namePart }));
+        window.dispatchEvent(new CustomEvent('mm:auth-changed', { detail: { user: devUser } }));
+        if (typeof window.renderNavbar === 'function') window.renderNavbar();
+        return { data: { session: devSession, user: devUser }, error: null };
+      }
+
+      // 1. Try verifyOtp with type 'signup' (new user email confirmation)
+      let res = await client.auth.verifyOtp({
+        email: cleanEmail,
+        token: cleanToken,
+        type: 'signup'
+      });
+
+      // 2. Fallback to type 'email' if signup verification fails
+      if (res.error) {
+        const altRes = await client.auth.verifyOtp({
+          email: cleanEmail,
+          token: cleanToken,
+          type: 'email'
+        });
+        if (!altRes.error) {
+          res = altRes;
+        }
+      }
+
+      if (res.error) {
+        return { error: res.error };
+      }
+
+      if (res.data && res.data.session) {
+        await this.syncSessionUser(res.data.session.user);
+      }
+
+      return res;
+    },
+
     resendVerification: async function (email) {
       const client = getClient();
       if (!client) throw new Error('Supabase client is not available.');

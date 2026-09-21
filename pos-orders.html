@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>MallMaze - Orders POS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,7 +51,6 @@
     }
 
     .app-container {
-      min-width: 1200px !important;
       display: flex;
       width: 100%;
       max-width: 1480px;
@@ -751,27 +750,77 @@
       opacity: 1;
     }
 
-    @media (max-width: 0px) /* disabled mobile collapse */ {
-      .detail-panel { display: none; }
+    /* Mobile Bottom Navigation Bar */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 62px;
+      background: #121620;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 6px;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
     }
-    @media (max-width: 0px) /* disabled mobile collapse */ {
-      .sidebar { width: 64px; min-width: 64px; padding: 16px 8px; }
-      .brand span, .nav-item span, .user-info { display: none; }
-      .nav-item { justify-content: center; padding: 10px; }
-      .app-container { height: 100vh; border-radius: 0; }
-      .main-wrapper { border-radius: 0; padding: 14px; }
+
+    .mob-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
     }
+    .mob-nav-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+    .mob-nav-btn.active { color: #facc15; }
+    .mob-nav-btn.active svg { stroke: #facc15; }
+
+    /* Handled dynamically by assets/css/pos-mobile.css */
   </style>
+  <link rel="stylesheet" href="assets/css/pos-mobile.css">
 
   <meta name="description" content="MallMaze - Orders POS - MallMaze unified local commerce." />
 
   <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
 
   <script src="assets/js/api-client.js" defer></script>
+  <script src="assets/js/pos-mobile.js"></script>
 </head>
 <body>
 
   <div class="app-container">
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav">
+      <a href="dashboard.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+      </a>
+      <a href="orders.html" class="mob-nav-btn active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Orders</span>
+      </a>
+      <a href="inventory.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        <span>Stock</span>
+      </a>
+      <a href="payments.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+        <span>Payments</span>
+      </a>
+      <a href="index.html" class="mob-nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+        <span>Store</span>
+      </a>
+    </div>
+
     <aside class="sidebar">
       <a href="dashboard.html" class="brand">
         <div class="brand-icon">
@@ -879,6 +928,13 @@
           </div>
         </div>
 
+        <!-- Real-time Mobile & Desktop Order Search Bar -->
+        <div class="mobile-search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="orderSearchInput" class="mobile-search-input" placeholder="Search orders by ID, customer name, phone, item..." oninput="handleOrderSearch(this.value)" />
+          <button id="orderSearchClear" class="mobile-search-clear" onclick="clearOrderSearch()">✕</button>
+        </div>
+
         <div class="filters-bar">
           <div class="filter-group">
             <button class="dropdown-pill" id="statusFilterBtn" onclick="toggleStatusFilter()">
@@ -925,12 +981,7 @@
       <aside class="detail-panel" id="detailPanel">
         <div class="detail-header">
           <h2 class="detail-title" id="panelOrderId">Order #IND-390561</h2>
-          <button class="close-btn" onclick="showToast('Panel refreshed')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close order details">✕</button>
         </div>
 
         <div class="detail-sub-meta">
@@ -1131,13 +1182,53 @@
     let currentFilterStatus = "ALL";
     let sortAsc = false;
 
+    let orderSearchTerm = "";
+
+    function handleOrderSearch(val) {
+      orderSearchTerm = (val || "").trim().toLowerCase();
+      const clearBtn = document.getElementById("orderSearchClear");
+      if (clearBtn) clearBtn.style.display = orderSearchTerm ? "flex" : "none";
+      renderTable();
+    }
+
+    function clearOrderSearch() {
+      const input = document.getElementById("orderSearchInput");
+      if (input) input.value = "";
+      handleOrderSearch("");
+    }
+
     function renderTable() {
       const tbody = document.getElementById("ordersTableBody");
+      if (!tbody) return;
       tbody.innerHTML = "";
+
+      const isMobile = window.innerWidth <= 900;
+
       let filtered = ordersData.filter(o => {
+        if (orderSearchTerm) {
+          const matchId = (o.id || "").toLowerCase().includes(orderSearchTerm);
+          const matchName = (o.customer && o.customer.name ? o.customer.name : "").toLowerCase().includes(orderSearchTerm);
+          const matchItem = (o.items || []).some(it => (it.name || "").toLowerCase().includes(orderSearchTerm));
+          if (!matchId && !matchName && !matchItem) return false;
+        }
+
         if (currentFilterStatus === "ALL") return true;
         return o.status.toLowerCase() === currentFilterStatus.toLowerCase();
       });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; padding:30px 16px; color:#64748b; background:#ffffff; border-radius:16px;">
+              <div style="font-size:24px; margin-bottom:6px;">🛍️</div>
+              <strong style="display:block; font-size:14px; color:#0f172a;">No orders found</strong>
+              <span style="font-size:12px;">Try adjusting your search or status filter</span>
+            </td>
+          </tr>
+        `;
+        updateSelectAllState();
+        return;
+      }
 
       filtered.forEach((order) => {
         const tr = document.createElement("tr");
@@ -1147,36 +1238,89 @@
           selectOrder(order.id);
         };
         const badgeClass = `badge-${order.statusType}`;
+        const itemsSummary = order.items && order.items.length > 0 
+          ? `${order.items.length} items: ${order.items.map(i => i.name).join(', ')}`
+          : 'Standard store order';
 
-        tr.innerHTML = `
-          <td>
-            <div class="custom-checkbox ${order.checked ? 'checked' : ''}" onclick="toggleRowCheck(event, '${order.id}')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-          </td>
-          <td><span class="order-id">${order.id}</span></td>
-          <td>
-            <div class="customer-cell">
-              <img src="${order.customer.avatar}" alt="${order.customer.name}" class="customer-thumb" />
-              <span class="customer-name">${order.customer.name}</span>
-            </div>
-          </td>
-          <td><span class="status-badge ${badgeClass}">${order.status}</span></td>
-          <td><span class="order-total">${order.total}</span></td>
-          <td><span class="order-date">${order.date}</span></td>
-          <td>
-            <button class="row-menu-btn" title="More options" onclick="event.stopPropagation(); showToast('GST Invoice & E-Way Bill for ${order.id}')">···</button>
-          </td>
-        `;
+        if (isMobile) {
+          // Ultra-optimized Mobile Order Card
+          tr.innerHTML = `
+            <td>
+              <div class="mob-card-header">
+                <span style="font-size:11px; font-weight:800; color:#121620; background:#f1f5f9; padding:2px 8px; border-radius:6px; font-family:monospace;">${order.id}</span>
+                <span style="font-size:11px; color:#64748b;">${order.date} • ${order.timestamp}</span>
+              </div>
+              <div class="mob-card-body" style="margin: 8px 0 6px;">
+                <img src="${order.customer.avatar}" alt="${order.customer.name}" class="customer-thumb" style="width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0;" />
+                <div style="flex:1; min-width:0;">
+                  <strong style="font-size:13.5px; color:#0f172a; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${order.customer.name}</strong>
+                  <div style="font-size:11px; color:#64748b; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${itemsSummary}</div>
+                </div>
+                <div style="text-align:right; flex-shrink:0;">
+                  <strong style="font-size:15px; font-weight:800; color:#0f172a; display:block;">${order.total}</strong>
+                  <span class="status-badge ${badgeClass}" style="font-size:10px; padding:3px 8px;">${order.status}</span>
+                </div>
+              </div>
+              <div class="mob-card-footer">
+                <span style="font-size:11px; color:#15803d; font-weight:700;">● Live POS Verified</span>
+                <div style="display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; color:#121620;">
+                  <span>View Bill & Dispatch</span>
+                  <span style="color:#94a3b8;">❯</span>
+                </div>
+              </div>
+            </td>
+          `;
+        } else {
+          // Standard Desktop Table Layout
+          tr.innerHTML = `
+            <td>
+              <div class="custom-checkbox ${order.checked ? 'checked' : ''}" onclick="toggleRowCheck(event, '${order.id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+            </td>
+            <td><span class="order-id">${order.id}</span></td>
+            <td>
+              <div class="customer-cell">
+                <img src="${order.customer.avatar}" alt="${order.customer.name}" class="customer-thumb" />
+                <span class="customer-name">${order.customer.name}</span>
+              </div>
+            </td>
+            <td><span class="status-badge ${badgeClass}">${order.status}</span></td>
+            <td><span class="order-total">${order.total}</span></td>
+            <td><span class="order-date">${order.date}</span></td>
+            <td>
+              <button class="row-menu-btn" title="More options" onclick="event.stopPropagation(); showToast('GST Invoice & E-Way Bill for ${order.id}')">···</button>
+            </td>
+          `;
+        }
         tbody.appendChild(tr);
       });
       updateSelectAllState();
     }
 
+    // Auto re-render on resize to flip between mobile cards and table seamlessly
+    let orderResizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(orderResizeTimer);
+      orderResizeTimer = setTimeout(() => {
+        renderTable();
+      }, 150);
+    });
+
     function selectOrder(orderId) {
       selectedOrderId = orderId;
       renderTable();
       renderDetailPanel();
+      if (window.innerWidth <= 900) {
+        if (typeof window.openMobileDetailPanel === 'function') {
+          window.openMobileDetailPanel();
+        } else {
+          const panel = document.getElementById("detailPanel") || document.querySelector(".detail-panel");
+          if (panel) panel.classList.add("mobile-open");
+          const b = document.getElementById("detailBackdrop");
+          if (b) b.classList.add("show");
+        }
+      }
     }
 
     function renderDetailPanel() {

@@ -562,7 +562,8 @@ function renderNavbar() {
                 <p class="sm-location-sub">Browse products & stores near you</p>
               </div>
               <div class="sm-city-list">${citiesMarkup}</div>
-              <button type="button" id="sm-detect-city" class="sm-detect-city mt-2 w-full rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 transition">Use my current location</button>
+              <button type="button" id="sm-detect-city" class="sm-detect-city mt-2 w-full rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 transition">Use my device location</button>
+     <button type="button" id="sm-choose-area-btn" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition">Choose area / manual location</button>
             </div>
           </div>
         </div>
@@ -687,7 +688,28 @@ function renderNavbar() {
   document.addEventListener('click', window.__smLocOutsideClick);
   document.addEventListener('keydown', window.__smLocEscapeKey);
 
-  el('sm-detect-city')?.addEventListener('click', () => {
+  el('sm-choose-area-btn')?.addEventListener('click', () => {
+       closePanel();
+       if (window.MM_GEO?.openLocationModal) window.MM_GEO.openLocationModal();
+     });
+
+     el('sm-detect-city')?.addEventListener('click', async () => {
+       if (window.MM_GEO?.getCurrentPosition) {
+         try {
+           toast('Detecting device location...', { type: 'ok', title: 'Location', ms: 1200 });
+           const loc = await window.MM_GEO.getCurrentPosition();
+           state.location = loc.city || loc.label;
+           if (cityLabel) cityLabel.textContent = loc.city;
+           persist();
+           closePanel();
+           toast(`Location set: ${loc.label}`, { type: 'ok', title: 'Location', ms: 2000 });
+           setTimeout(() => window.location.reload(), 400);
+           return;
+         } catch (err) {
+           toast(err.message || 'Could not detect location.', { type: 'bad', title: 'Location' });
+           return;
+         }
+       }
     if (!navigator.geolocation) {
       toast('Location not supported on this device.', { type: 'bad', title: 'Location' });
       return;
@@ -2118,7 +2140,8 @@ function renderStorePage(data) {
           <div class="flex flex-wrap gap-2">
             <a href="compare.html" class="mm-action mm-action-outline mm-action-sm">Compare</a>
             <a href="support.html" class="mm-action mm-action-ghost mm-action-sm">Support</a>
-            <a href="${scanLink?.href || 'scan.html'}" class="mm-action mm-action-primary mm-action-sm">Scan&Go here</a>
+            <button type="button" id="store-start-fast-btn" class="mm-action mm-action-primary mm-action-sm font-bold bg-amber-400 text-slate-950 hover:bg-amber-500 border-none">Fast Shopping</button>
+     <a href="${scanLink?.href || 'scan.html'}" class="mm-action mm-action-outline mm-action-sm">Scan&Go here</a>
           </div>
         </div>
       `;
@@ -2156,6 +2179,18 @@ function renderStorePage(data) {
         host.insertBefore(bridge, grid);
         const qr = document.getElementById('storefront-qr');
         if (qr && window.MM_QR?.draw) window.MM_QR.draw(qr, storefrontUrl, 176);
+
+        // Wire Fast Shopping button
+        document.getElementById('store-start-fast-btn')?.addEventListener('click', () => {
+          if (window.MM_FAST_SHOPPING && store) {
+            window.MM_FAST_SHOPPING.startSession(store);
+          }
+        });
+
+        // Check if mode=fast is requested in query params
+        if (location.search.includes('mode=fast') && window.MM_FAST_SHOPPING && store) {
+          window.MM_FAST_SHOPPING.startSession(store);
+        }
       }
     }
   } catch {}
@@ -7457,3 +7492,96 @@ async function init() {
 }
 
 init();
+
+
+function initHomeLocationDiscovery() {
+  const wrap = document.getElementById('mm-home-location-discovery');
+  if (!wrap) return;
+
+  const locLabel = document.getElementById('mm-home-loc-label');
+  const useBtn = document.getElementById('mm-home-use-loc-btn');
+  const chooseBtn = document.getElementById('mm-home-choose-loc-btn');
+  const container = document.getElementById('mm-home-nearby-stores');
+
+  const updateLabel = () => {
+    const saved = window.MM_GEO ? window.MM_GEO.getSavedLocation() : null;
+    if (locLabel) {
+      locLabel.textContent = saved ? saved.label : (state.location || 'Hyderabad (Default)');
+    }
+  };
+  updateLabel();
+
+  window.addEventListener('mm:location-changed', () => {
+    updateLabel();
+    renderNearbyStores();
+  });
+
+  useBtn?.addEventListener('click', async () => {
+    if (!window.MM_GEO?.getCurrentPosition) return;
+    useBtn.disabled = true;
+    try {
+      toast('Requesting device location...', { type: 'ok', title: 'Location', ms: 1200 });
+      const loc = await window.MM_GEO.getCurrentPosition();
+      toast(`Location set: ${loc.label}`, { type: 'ok', title: 'Location', ms: 2000 });
+      updateLabel();
+      renderNearbyStores();
+    } catch (err) {
+      toast(err.message || 'Permission denied or location unavailable.', { type: 'bad', title: 'Location' });
+    } finally {
+      useBtn.disabled = false;
+    }
+  });
+
+  chooseBtn?.addEventListener('click', () => {
+    if (window.MM_GEO?.openLocationModal) {
+      window.MM_GEO.openLocationModal();
+    }
+  });
+
+  const renderNearbyStores = () => {
+    if (!container) return;
+    const allStores = window.appData?.stores || [];
+    const savedLoc = window.MM_GEO ? window.MM_GEO.getSavedLocation() : null;
+
+    // Filter verified stores and compute real Haversine distance
+    const list = allStores.map((st) => {
+      const dist = window.MM_GEO ? window.MM_GEO.calculateStoreDistance(st) : null;
+      const distLabel = window.MM_GEO ? window.MM_GEO.getStoreDistanceLabel(st) : 'Distance unavailable';
+      return { ...st, dist, distLabel };
+    });
+
+    list.sort((a, b) => {
+      if (a.dist == null && b.dist == null) return 0;
+      if (a.dist == null) return 1;
+      if (b.dist == null) return -1;
+      return a.dist - b.dist;
+    });
+
+    const top4 = list.slice(0, 4);
+    if (!top4.length) {
+      container.innerHTML = `<p class="col-span-full text-xs text-slate-500">No local stores registered in this area yet.</p>`;
+      return;
+    }
+
+    container.innerHTML = top4.map((st) => `
+      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between gap-1 mb-2">
+            <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+              Verified
+            </span>
+            <span class="text-[11px] font-bold text-amber-600">${st.distLabel}</span>
+          </div>
+          <h3 class="font-extrabold text-sm text-slate-900">${escapeHtml(st.name)}</h3>
+          <p class="text-xs text-slate-500 mt-0.5">${escapeHtml(st.category || 'Retail')} · ${escapeHtml(st.city || 'Hyderabad')}</p>
+        </div>
+        <div class="mt-4 flex items-center gap-2">
+          <a href="store.html?id=${encodeURIComponent(st.id)}" class="flex-1 text-center rounded-lg bg-slate-900 hover:bg-slate-800 py-1.5 text-xs font-bold text-white transition">View</a>
+          <button type="button" class="flex-1 rounded-lg bg-amber-400 hover:bg-amber-500 py-1.5 text-xs font-bold text-slate-950 transition" onclick="if(window.MM_FAST_SHOPPING) MM_FAST_SHOPPING.startSession(${JSON.stringify({id: st.id, name: st.name, category: st.category, city: st.city}).replace(/"/g, '&quot;')}); window.location.href='store.html?id=${encodeURIComponent(st.id)}&mode=fast';">Fast Shop</button>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  renderNearbyStores();
+}
