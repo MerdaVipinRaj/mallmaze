@@ -15,7 +15,7 @@
   }
 
   function icon(pathD) {
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + pathD + "</svg>";
+    return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + pathD + "</svg>";
   }
 
   // Ensure Backdrop and Bottom Sheet Drawer helpers
@@ -69,13 +69,19 @@
   };
 
   function ensureBottomNav() {
-    // If a mobile-bottom-nav is already present, ensure it has payments link
-    var existingNav = document.querySelector(".mobile-bottom-nav");
-    if (existingNav) {
-      existingNav.remove(); // replace with standardized responsive nav
+    // If on desktop (> 900px), remove any mobile bottom nav and do not create one
+    if (window.innerWidth > 900) {
+      var allNavs = document.querySelectorAll(".mobile-bottom-nav");
+      allNavs.forEach(function (el) { el.remove(); });
+      return;
     }
 
-    var host = document.querySelector(".app-container") || document.body;
+    // Clean up any existing mobile-bottom-nav instances
+    var existingNavs = document.querySelectorAll(".mobile-bottom-nav");
+    existingNavs.forEach(function (el) { el.remove(); });
+
+    // Always attach to document.body, NEVER inside .app-container flex layout
+    var host = document.body;
     var page = currentPage();
     var items = [
       { 
@@ -123,6 +129,14 @@
   function init() {
     setupDrawerBackdrop();
     ensureBottomNav();
+    window.addEventListener("resize", function () {
+      if (window.innerWidth > 900) {
+        var navs = document.querySelectorAll(".mobile-bottom-nav");
+        navs.forEach(function (el) { el.remove(); });
+      } else {
+        ensureBottomNav();
+      }
+    });
   }
 
   if (document.readyState === "loading") {

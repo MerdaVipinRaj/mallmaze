@@ -14,6 +14,14 @@ html {
   box-sizing: inherit;
 }
 
+/* STRICTLY hide mobile bottom dock navigation on desktop / laptop / tablet (> 900px) */
+.mobile-bottom-nav,
+nav.mobile-bottom-nav,
+div.mobile-bottom-nav {
+  display: none !important;
+  visibility: hidden !important;
+}
+
 /* --------------------------------------------------------------------------
    UNIVERSAL SEARCH BAR (Desktop, Tablet & Mobile)
    Clean, modern, crisp styling with SVG search icon and clear trigger
