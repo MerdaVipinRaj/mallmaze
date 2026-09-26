@@ -1192,7 +1192,7 @@
 
       const isMobile = window.innerWidth <= 900;
 
-      let filtered = ordersData.filter(✕=> {
+      let filtered = ordersData.filter(o => {
         if (orderSearchTerm) {
           const matchId = (o.id || "").toLowerCase().includes(orderSearchTerm);
           const matchName = (o.customer && o.customer.name ? o.customer.name : "").toLowerCase().includes(orderSearchTerm);
@@ -1312,7 +1312,7 @@
     }
 
     function renderDetailPanel() {
-      const order = ordersData.find(✕=> o.id === selectedOrderId) || ordersData[0];
+      const order = ordersData.find(o => o.id === selectedOrderId) || ordersData[0];
       window.currentOrder = order;
       document.getElementById("panelOrderId").innerText = `Order ${order.id}`;
       document.getElementById("panelBadge").innerText = order.status;
@@ -1343,7 +1343,7 @@
 
     function toggleRowCheck(event, orderId) {
       event.stopPropagation();
-      const order = ordersData.find(✕=> o.id === orderId);
+      const order = ordersData.find(o => o.id === orderId);
       if (order) {
         order.checked = !order.checked;
         renderTable();
@@ -1351,14 +1351,14 @@
     }
 
     function toggleSelectAll() {
-      const allChecked = ordersData.every(✕=> o.checked);
-      ordersData.forEach(✕=> o.checked = !allChecked);
+      const allChecked = ordersData.every(o => o.checked);
+      ordersData.forEach(o => o.checked = !allChecked);
       renderTable();
     }
 
     function updateSelectAllState() {
       const selectAll = document.getElementById("selectAllCheckbox");
-      const allChecked = ordersData.every(✕=> o.checked);
+      const allChecked = ordersData.every(o => o.checked);
       if (allChecked && ordersData.length > 0) {
         selectAll.classList.add("checked");
       } else {
@@ -1391,7 +1391,7 @@
       const input = document.getElementById("orderSearchInput");
       if (input) { input.focus(); input.select(); return; }
       if (term) {
-        const found = ordersData.find(✕=> o.id.toLowerCase().includes(term.toLowerCase()) || o.customer.name.toLowerCase().includes(term.toLowerCase()));
+        const found = ordersData.find(o => o.id.toLowerCase().includes(term.toLowerCase()) || o.customer.name.toLowerCase().includes(term.toLowerCase()));
         if (found) {
           selectOrder(found.id);
           showToast(`Found: ${found.customer.name} (${found.id})`);

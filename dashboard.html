@@ -959,16 +959,36 @@
           </div>
         </div>
 
-        <!-- Shiprocket Delivery Section -->
-        <div class="delivery-partner-box" id="shiprocketBox">
-          <div class="delivery-header">
-            <span class="delivery-title">🚚 Shiprocket Courier</span>
-            <span class="delivery-badge" id="srBadge">Hyperlocal</span>
+        <!-- Shiprocket Delivery Section (Multi-Speed: Zepto 5-min to Amazon 3-days) -->
+        <div class="delivery-partner-box" id="shiprocketBox" style="background:#131722; border:1px solid rgba(99,102,241,0.25); border-radius:12px; padding:12px;">
+          <div class="delivery-header" style="margin-bottom:8px;">
+            <span class="delivery-title" style="color:#f8fafc; font-size:12px;">🚀 Shiprocket Logistics</span>
+            <span class="delivery-badge" id="srBadge" style="background:rgba(16,185,129,0.2); color:#34d399; font-weight:800; font-size:10px;">⚡ 5-Min Zepto Mode</span>
           </div>
-          <p class="delivery-desc" id="srDesc">Direct 2-hour doorstep rider integration ready.</p>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px;">
+            <button type="button" class="dash-tier-btn active" onclick="selectDashTier('zepto_flash', this)" style="padding:6px; background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#34d399; border-radius:8px; font-size:10px; font-weight:800; text-align:left; cursor:pointer;">
+              ⚡ Zepto Flash (5m)
+            </button>
+            <button type="button" class="dash-tier-btn" onclick="selectDashTier('rapid_hyperlocal', this)" style="padding:6px; background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; border-radius:8px; font-size:10px; font-weight:700; text-align:left; cursor:pointer;">
+              🚀 Rapid (45m)
+            </button>
+            <button type="button" class="dash-tier-btn" onclick="selectDashTier('amazon_prime', this)" style="padding:6px; background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; border-radius:8px; font-size:10px; font-weight:700; text-align:left; cursor:pointer;">
+              📦 Prime Air (24h)
+            </button>
+            <button type="button" class="dash-tier-btn" onclick="selectDashTier('standard_surface', this)" style="padding:6px; background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; border-radius:8px; font-size:10px; font-weight:700; text-align:left; cursor:pointer;">
+              🚚 Amazon (2-3d)
+            </button>
+          </div>
+
+          <div id="dashCountdownBox" style="display:none; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:6px 8px; margin-bottom:8px; text-align:center;">
+            <span style="font-size:10px; color:#34d399; font-weight:700;">⚡ 5-MIN DOORSTEP COUNTDOWN: </span>
+            <span id="dashCountdownTimer" style="font-size:13px; font-family:monospace; font-weight:900; color:#fff;">04:59</span>
+          </div>
+
           <div style="display:flex; gap:8px;">
-            <button class="btn-assign-rider" id="srBtn" onclick="assignShiprocketDelivery()" style="flex:1;">
-              🚀 Assign Shiprocket Rider
+            <button class="btn-assign-rider" id="srBtn" onclick="assignShiprocketDelivery()" style="flex:1; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:800;">
+              ⚡ Dispatch Flash Rider
             </button>
             <button class="btn-assign-rider" id="srPrintBtn" onclick="printShiprocketLabel()" style="display:none; width:auto; padding:0 12px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);">
               📄 Print Label
@@ -1227,7 +1247,8 @@
           body: JSON.stringify({
             order_id: String(order.id).replace("#", ""),
             customer_name: order.customer ? order.customer.name : "Customer",
-            amount_inr: 499
+            amount_inr: 499,
+            speed_tier: currentDashTier
           })
         });
         const data = await res.json();
@@ -1242,6 +1263,11 @@
       renderDetailPanel();
       const printBtn = document.getElementById("srPrintBtn");
       if (printBtn) printBtn.style.display = "inline-flex";
+      
+      if (currentDashTier === 'zepto_flash') {
+        startDashCountdown(300);
+      }
+
       showToast(`🚚 Shiprocket Rider Assigned! Tracking: ${order.shiprocket.tracking}`);
     }
 

@@ -2475,7 +2475,9 @@ function renderCart() {
     return;
   }
   const total = state.cart.reduce((s, i) => s + i.price * (i.quantity || 1), 0);
-  const deliveryFee = total ? 49 : 0;
+  const speedKey = 'mm_delivery_speed';
+  const currentSpeed = (() => { try { return localStorage.getItem(speedKey) || 'zepto_flash'; } catch { return 'zepto_flash'; } })();
+  const deliveryFee = total ? (currentSpeed === 'zepto_flash' ? 29 : (currentSpeed === 'rapid_hyperlocal' ? 39 : (total > 499 ? 0 : 45))) : 0;
   const platformFee = total ? 29 : 0;
   const gst = Math.round((total + deliveryFee + platformFee) * 0.18);
   const grand = total + deliveryFee + platformFee + gst;
@@ -2570,6 +2572,45 @@ function renderCart() {
               <button type="button" id="addr-save-new" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">Save as new</button>
             </div>
           </form>
+          <div class="mt-4 pt-3 border-t border-border">
+            <p class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+              <span>⚡</span> Choose Delivery Speed:
+            </p>
+            <div class="grid grid-cols-1 gap-2" id="cart-speed-picker">
+              <label class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer ${currentSpeed==='zepto_flash'?'border-emerald-500 bg-emerald-50/70 shadow-sm ring-1 ring-emerald-400':'border-border bg-card hover:bg-muted/40'}">
+                <div class="flex items-center gap-2.5">
+                  <input type="radio" name="delivery_speed" value="zepto_flash" ${currentSpeed==='zepto_flash'?'checked':''} onchange="localStorage.setItem('mm_delivery_speed', 'zepto_flash'); renderCart();" class="accent-emerald-600">
+                  <div>
+                    <div class="text-xs font-bold text-slate-900 flex items-center gap-1">⚡ Zepto Flash (5–15 Mins) <span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Fastest</span></div>
+                    <div class="text-[11px] text-slate-500">Dedicated local shelf EV runner direct to doorstep</div>
+                  </div>
+                </div>
+                <div class="text-xs font-extrabold text-emerald-700">₹29</div>
+              </label>
+
+              <label class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer ${currentSpeed==='rapid_hyperlocal'?'border-sky-500 bg-sky-50/70 shadow-sm ring-1 ring-sky-400':'border-border bg-card hover:bg-muted/40'}">
+                <div class="flex items-center gap-2.5">
+                  <input type="radio" name="delivery_speed" value="rapid_hyperlocal" ${currentSpeed==='rapid_hyperlocal'?'checked':''} onchange="localStorage.setItem('mm_delivery_speed', 'rapid_hyperlocal'); renderCart();" class="accent-sky-600">
+                  <div>
+                    <div class="text-xs font-bold text-slate-900">🚀 Rapid Local (30–45 Mins)</div>
+                    <div class="text-[11px] text-slate-500">Shadowfax / Dunzo Express Local Fleet</div>
+                  </div>
+                </div>
+                <div class="text-xs font-extrabold text-sky-700">₹39</div>
+              </label>
+
+              <label class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer ${currentSpeed==='standard_surface'?'border-indigo-500 bg-indigo-50/70 shadow-sm ring-1 ring-indigo-400':'border-border bg-card hover:bg-muted/40'}">
+                <div class="flex items-center gap-2.5">
+                  <input type="radio" name="delivery_speed" value="standard_surface" ${currentSpeed==='standard_surface'?'checked':''} onchange="localStorage.setItem('mm_delivery_speed', 'standard_surface'); renderCart();" class="accent-indigo-600">
+                  <div>
+                    <div class="text-xs font-bold text-slate-900">🚚 Standard Domestic (2–3 Days)</div>
+                    <div class="text-[11px] text-slate-500">Delhivery Surface / DTDC (Amazon Speed)</div>
+                  </div>
+                </div>
+                <div class="text-xs font-extrabold text-indigo-700">${total > 499 ? '<span class="text-emerald-600">FREE</span>' : '₹45'}</div>
+              </label>
+            </div>
+          </div>
         </div>
         <div class="border rounded-lg p-4">
           <div class="flex items-center justify-between gap-3 mb-3">

@@ -3021,6 +3021,7 @@ const routes = {
       const body = await readBody(req);
       const orderId = String(body.order_id || "");
       if (!orderId) return send(res, 400, { error: "order_id is required" });
+      const speedTier = body.speed_tier || "zepto_flash";
 
       const db = await readDb();
       let order = (db.orders || []).find((o) => String(o.id) === orderId || String(o.order_id) === orderId);
@@ -3046,27 +3047,35 @@ const routes = {
         db.orders = [order, ...(db.orders || [])];
       }
 
-      // Step A: Create order in Shiprocket
-      const created = await shiprocket.createOrder(order);
+      // Step A: Create order in Shiprocket with speed tier
+      const created = await shiprocket.createOrder(order, {}, speedTier);
 
       // Step B: Assign courier & generate AWB
       const courierId = body.courier_id || (created.courier_company_id || 12);
       const awbRes = await shiprocket.assignAwb({
         shipment_id: created.shipment_id,
-        courier_id: courierId
+        courier_id: courierId,
+        speed_tier: speedTier
       });
 
-      // Update order state
+      // Update order state with Speed Tier & Live Rider info
+      const awbCode = created.awb_code || awbRes.awb_code;
+      const courierName = created.courier_name || awbRes.courier_name;
       const shiprocketData = {
         assigned: true,
         sandbox: created.sandbox,
+        speed_tier: created.speed_tier || speedTier,
+        speed_tier_name: created.speed_tier_name,
+        eta: created.speed_tier_eta,
+        eta_seconds: created.eta_seconds,
+        rider: created.rider,
         shiprocket_order_id: created.shiprocket_order_id,
         shipment_id: created.shipment_id,
-        awb_code: awbRes.awb_code,
-        courier_name: awbRes.courier_name,
+        awb_code: awbCode,
+        courier_name: courierName,
         routing_code: awbRes.routing_code,
-        status: "pickup_scheduled",
-        label_url: `/api/shiprocket/label?order_id=${encodeURIComponent(order.id)}&shipment_id=${created.shipment_id}&awb=${awbRes.awb_code}`,
+        status: created.status || "pickup_scheduled",
+        label_url: `/api/shiprocket/label?order_id=${encodeURIComponent(order.id)}&shipment_id=${created.shipment_id}&awb=${awbCode}&speed_tier=${speedTier}`,
         dispatched_at: new Date().toISOString()
       };
 
@@ -3076,7 +3085,7 @@ const routes = {
 
       send(res, 200, {
         ok: true,
-        message: "Shiprocket shipment created and courier assigned successfully!",
+        message: `Shiprocket dispatch active (${shiprocketData.speed_tier_name})`,
         order_id: order.id,
         shiprocket: shiprocketData
       });
@@ -3112,11 +3121,13 @@ const routes = {
       const courierName = order.shiprocket?.courier_name || "Delhivery Surface Express";
       const awbCode = awb || order.shiprocket?.awb_code || `SR${shipmentId || "892019401"}`;
 
+      const speedTier = parsed.searchParams.get("speed_tier") || order.shiprocket?.speed_tier || "zepto_flash";
       const html = shiprocket.generatePrintableLabelHtml({
         order,
         shipment_id: shipmentId,
         awb_code: awbCode,
-        courier_name: courierName
+        courier_name: courierName,
+        speed_tier: speedTier
       });
 
       res.writeHead(200, {
@@ -3131,7 +3142,8 @@ const routes = {
   "GET /api/shiprocket/track": async (_req, res, parsed) => {
     try {
       const awb = parsed.searchParams.get("awb") || parsed.searchParams.get("order_id") || "SR9821804291";
-      const tracking = await shiprocket.trackShipment(awb);
+      const speedTier = parsed.searchParams.get("speed_tier") || "zepto_flash";
+      const tracking = await shiprocket.trackShipment(awb, speedTier);
       send(res, 200, tracking);
     } catch (err) {
       send(res, 500, { ok: false, error: err.message });
