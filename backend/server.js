@@ -47,6 +47,16 @@ const env = {
   appOrigin: process.env.APP_ORIGIN || process.env.RENDER_EXTERNAL_URL || "http://localhost:8080",
   jwtSecret: process.env.JWT_SECRET || "dev-change-me",
   otpDevMode: String(process.env.OTP_DEV_MODE || "true").toLowerCase() !== "false",
+  otpEmailFrom: process.env.OTP_EMAIL_FROM || "MallMaze <no-reply@mallmaze.in>",
+  resendApiKey: process.env.RESEND_API_KEY || "",
+  sendgridApiKey: process.env.SENDGRID_API_KEY || "",
+  emailOtpWebhookUrl: process.env.EMAIL_OTP_WEBHOOK_URL || "",
+  emailOtpWebhookToken: process.env.EMAIL_OTP_WEBHOOK_TOKEN || "",
+  twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || "",
+  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || "",
+  twilioFromNumber: process.env.TWILIO_FROM_NUMBER || "",
+  smsOtpWebhookUrl: process.env.SMS_OTP_WEBHOOK_URL || "",
+  smsOtpWebhookToken: process.env.SMS_OTP_WEBHOOK_TOKEN || "",
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || "",
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || "",
   razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || "",
@@ -674,6 +684,121 @@ function normalizeIdentity({ email, phone }) {
   if (cleanEmail) return { channel: "email", value: cleanEmail };
   if (cleanPhone) return { channel: "phone", value: cleanPhone };
   return null;
+}
+
+function parseEmailSender(value) {
+  const rawValue = String(value || "").trim();
+  const match = rawValue.match(/^(.*?)\s*<([^>]+)>$/);
+  if (!match) return { name: "MallMaze", email: rawValue || "no-reply@mallmaze.in" };
+  return { name: match[1].trim() || "MallMaze", email: match[2].trim() };
+}
+
+function otpText(otp) {
+  return `Your MallMaze OTP is ${otp}. It expires in 5 minutes. Do not share this code.`;
+}
+
+function otpHtml(otp) {
+  return `
+    <div style="font-family:Inter,Arial,sans-serif;line-height:1.5;color:#0f172a">
+      <h2 style="margin:0 0 12px">Your MallMaze OTP</h2>
+      <p style="margin:0 0 16px">Use this 6-digit code to sign in:</p>
+      <div style="display:inline-block;font-size:28px;font-weight:800;letter-spacing:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px">${otp}</div>
+      <p style="margin:16px 0 0;color:#64748b;font-size:13px">This code expires in 5 minutes. Do not share it with anyone.</p>
+    </div>
+  `;
+}
+
+async function postJson(url, payload, headers = {}) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json", ...headers },
+    body: JSON.stringify(payload)
+  });
+  const body = await response.text().catch(() => "");
+  if (!response.ok) throw new Error(`Provider request failed (${response.status}): ${body.slice(0, 180)}`);
+  return body;
+}
+
+async function sendEmailOtp(to, otp) {
+  const payload = { channel: "email", to, otp, text: otpText(otp), subject: "Your MallMaze OTP", expires_in_seconds: 300 };
+
+  if (env.emailOtpWebhookUrl) {
+    const headers = env.emailOtpWebhookToken ? { authorization: `Bearer ${env.emailOtpWebhookToken}` } : {};
+    await postJson(env.emailOtpWebhookUrl, payload, headers);
+    return { delivered: true, provider: "email_webhook" };
+  }
+
+  if (env.resendApiKey) {
+    await postJson("https://api.resend.com/emails", {
+      from: env.otpEmailFrom,
+      to: [to],
+      subject: payload.subject,
+      text: payload.text,
+      html: otpHtml(otp)
+    }, { authorization: `Bearer ${env.resendApiKey}` });
+    return { delivered: true, provider: "resend" };
+  }
+
+  if (env.sendgridApiKey) {
+    const from = parseEmailSender(env.otpEmailFrom);
+    await postJson("https://api.sendgrid.com/v3/mail/send", {
+      personalizations: [{ to: [{ email: to }] }],
+      from,
+      subject: payload.subject,
+      content: [
+        { type: "text/plain", value: payload.text },
+        { type: "text/html", value: otpHtml(otp) }
+      ]
+    }, { authorization: `Bearer ${env.sendgridApiKey}` });
+    return { delivered: true, provider: "sendgrid" };
+  }
+
+  return { delivered: false, provider: "not_configured" };
+}
+
+async function sendSmsOtp(to, otp) {
+  const payload = { channel: "phone", to, otp, text: otpText(otp), expires_in_seconds: 300 };
+
+  if (env.smsOtpWebhookUrl) {
+    const headers = env.smsOtpWebhookToken ? { authorization: `Bearer ${env.smsOtpWebhookToken}` } : {};
+    await postJson(env.smsOtpWebhookUrl, payload, headers);
+    return { delivered: true, provider: "sms_webhook" };
+  }
+
+  if (env.twilioAccountSid && env.twilioAuthToken && env.twilioFromNumber) {
+    const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(env.twilioAccountSid)}/Messages.json`, {
+      method: "POST",
+      headers: {
+        authorization: `Basic ${Buffer.from(`${env.twilioAccountSid}:${env.twilioAuthToken}`).toString("base64")}`,
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({ To: to, From: env.twilioFromNumber, Body: payload.text })
+    });
+    const body = await response.text().catch(() => "");
+    if (!response.ok) throw new Error(`Twilio request failed (${response.status}): ${body.slice(0, 180)}`);
+    return { delivered: true, provider: "twilio" };
+  }
+
+  return { delivered: false, provider: "not_configured" };
+}
+
+async function dispatchOtp(identity, otp) {
+  let delivery;
+  try {
+    delivery = identity.channel === "email"
+      ? await sendEmailOtp(identity.value, otp)
+      : await sendSmsOtp(identity.value, otp);
+  } catch (error) {
+    if (!env.otpDevMode) throw error;
+    delivery = { delivered: false, provider: "dev_fallback", error: error.message };
+  }
+
+  if (!delivery.delivered && !env.otpDevMode) {
+    throw new Error(`${identity.channel === "email" ? "Email" : "SMS"} OTP delivery is not configured.`);
+  }
+
+  console.log(`[OTP ${delivery.delivered ? "SENT" : "DEV"}] Channel: ${identity.channel.toUpperCase()} | Recipient: ${identity.value} | Provider: ${delivery.provider}${env.otpDevMode ? ` | Code: ${otp}` : ""}`);
+  return delivery;
 }
 
 function computeTotals(items, options = {}) {
@@ -1753,22 +1878,51 @@ const routes = {
     const identity = normalizeIdentity(body);
     if (!identity) return send(res, 400, { error: "Valid email or mobile phone (+91) is required" });
     const db = await readDb();
+    const now = Date.now();
+    const liveChallenges = (db.otp_challenges || []).filter((x) => now < Number(x.expires_at || 0));
+    const recent = liveChallenges.find((x) =>
+      !x.consumed &&
+      x.channel === identity.channel &&
+      x.value === identity.value &&
+      now - new Date(x.created_at || 0).getTime() < 30 * 1000
+    );
+    if (recent) {
+      return send(res, 200, {
+        ok: true,
+        challenge_id: recent.id,
+        channel: identity.channel,
+        value: identity.value,
+        expires_in_seconds: Math.max(1, Math.round((Number(recent.expires_at || now) - now) / 1000)),
+        dev_otp: env.otpDevMode ? recent.raw_otp_dev : undefined,
+        delivery: { reused: true, provider: "recent_request" },
+        message: `OTP already sent to ${identity.value}. Please wait before requesting another code.`
+      });
+    }
+
     const otp = String(crypto.randomInt(100000, 999999));
+    let delivery;
+    try {
+      delivery = await dispatchOtp(identity, otp);
+    } catch (error) {
+      return send(res, 503, { error: error.message || "Could not send OTP. Please try again." });
+    }
+
     const challenge = {
       id: `otp-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`,
       channel: identity.channel,
       value: identity.value,
       otp_hash: crypto.createHash("sha256").update(otp).digest("hex"),
-      raw_otp_dev: otp, // Saved on server for verification logging
+      raw_otp_dev: env.otpDevMode ? otp : undefined,
       expires_at: Date.now() + 5 * 60 * 1000,
       attempts: 0,
       consumed: false,
       created_at: new Date().toISOString()
     };
-    db.otp_challenges = [...(db.otp_challenges || []).filter((x) => Date.now() < Number(x.expires_at || 0)), challenge];
+    db.otp_challenges = [
+      ...liveChallenges.filter((x) => x.channel !== identity.channel || x.value !== identity.value || x.consumed),
+      challenge
+    ];
     await writeDb(db);
-
-    console.log(`[REAL OTP DISPATCH] Channel: ${identity.channel.toUpperCase()} | Recipient: ${identity.value} | 6-Digit Code: ${otp}`);
 
     send(res, 200, {
       ok: true,
@@ -1777,6 +1931,7 @@ const routes = {
       value: identity.value,
       expires_in_seconds: 300,
       dev_otp: env.otpDevMode ? otp : undefined,
+      delivery,
       message: `Verification OTP dispatched to ${identity.value}`
     });
   },

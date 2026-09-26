@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>MallMaze - Payments & Settlements (Razorpay Route)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -742,12 +742,14 @@
       transform: translateY(0);
     }
   </style>
+  <link rel="stylesheet" href="assets/css/pos-mobile.css">
 
   <meta name="description" content="MallMaze - Payments & Settlements (Razorpay Route) - MallMaze unified local commerce." />
 
   <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
 
   <script src="assets/js/api-client.js" defer></script>
+  <script src="assets/js/pos-mobile.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -873,6 +875,16 @@
           </div>
         </div>
 
+                <!-- Real-time Payments & Route Settlement Search Bar -->
+        <div class="mobile-search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="paymentsSearchInput" class="mobile-search-input" placeholder="Search settlements by Txn ID, Order ID, Store, Customer, or Payment Mode..." oninput="handlePaymentsSearch(this.value)" autocomplete="off" />
+          <button id="paymentsSearchClear" class="mobile-search-clear" onclick="clearPaymentsSearch()" title="Clear search">✕</button>
+        </div>
+
         <!-- FILTERS -->
         <div class="filters-bar">
           <div class="filter-group">
@@ -912,8 +924,11 @@
       <!-- DETAIL PANEL -->
       <aside class="detail-panel" id="paymentDetailPanel">
         <div class="detail-header">
-          <h2 class="detail-title" id="pTxnId">payout-101-s1</h2>
-          <span class="status-badge badge-success" id="pStatusBadge">Settled (&lt; 1s)</span>
+          <div>
+            <h2 class="detail-title" id="pTxnId">payout-101-s1</h2>
+            <span class="status-badge badge-success" id="pStatusBadge" style="margin-top:4px; display:inline-block;">⚡ Settled (&lt; 1s)</span>
+          </div>
+          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close details">✕</button>
         </div>
         <p style="font-size: 11.5px; color: #94a3b8; margin-bottom: 12px;" id="pTimestamp">Just now</p>
 
@@ -1191,10 +1206,38 @@
       document.getElementById("kpiStorePayouts").innerText = "₹" + net.toLocaleString('en-IN');
     }
 
+    let paymentsSearchTerm = "";
+
+    function handlePaymentsSearch(val) {
+      paymentsSearchTerm = (val || "").trim().toLowerCase();
+      const clearBtn = document.getElementById("paymentsSearchClear");
+      if (clearBtn) clearBtn.style.display = paymentsSearchTerm ? "flex" : "none";
+      renderTable();
+    }
+
+    function clearPaymentsSearch() {
+      const input = document.getElementById("paymentsSearchInput");
+      if (input) input.value = "";
+      handlePaymentsSearch("");
+    }
+
     function getFilteredData() {
       let list = [...rawPayoutsData];
       if (currentStoreFilter !== 'ALL') {
         list = list.filter(p => String(p.store_id) === currentStoreFilter);
+      }
+      if (paymentsSearchTerm) {
+        list = list.filter(p => {
+          const id = (p.id || "").toLowerCase();
+          const ord = (p.order_id || "").toLowerCase();
+          const store = (p.store_name || "").toLowerCase();
+          const cust = (p.customer_name || "").toLowerCase();
+          const mode = (p.payment_mode || "").toLowerCase();
+          const rzp = (p.razorpay_transfer_id || "").toLowerCase();
+          return id.includes(paymentsSearchTerm) || ord.includes(paymentsSearchTerm) ||
+                 store.includes(paymentsSearchTerm) || cust.includes(paymentsSearchTerm) ||
+                 mode.includes(paymentsSearchTerm) || rzp.includes(paymentsSearchTerm);
+        });
       }
       list.sort((a, b) => {
         const amtA = Number(a.gross_inr || 0);
@@ -1206,11 +1249,21 @@
 
     function renderTable() {
       const tbody = document.getElementById("paymentsTableBody");
+      if (!tbody) return;
       tbody.innerHTML = "";
       const list = getFilteredData();
+      const isMobile = window.innerWidth <= 900;
 
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">No settlement records found for this filter.</td></tr>';
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align:center; padding:32px 16px; color:#64748b; background:#ffffff; border-radius:16px;">
+              <div style="font-size:24px; margin-bottom:6px;">💳</div>
+              <strong style="display:block; font-size:14px; color:#0f172a;">No settlement records found</strong>
+              <span style="font-size:12px;">Try adjusting your search keywords or store filter</span>
+            </td>
+          </tr>
+        `;
         return;
       }
 
@@ -1221,31 +1274,90 @@
 
         const d = p.created_at ? new Date(p.created_at) : new Date();
         const dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        const gross = Number(p.gross_inr || 0);
+        const fee = Number(p.commission_inr || Math.round(gross * 0.1));
+        const net = Number(p.net_inr || (gross - fee));
 
-        tr.innerHTML = `
-          <td>
-            <strong style="color:#0f172a; font-size:12px;">${p.id}</strong>
-            <div style="font-size:10.5px; color:#94a3b8; font-family:monospace;">${p.razorpay_transfer_id || 'Auto-Route'}</div>
-          </td>
-          <td>
-            <div style="font-weight:700; color:#1e293b;">${p.store_name || p.store_id}</div>
-            <div style="font-size:10.5px; color:#64748b;">${p.bank_name || 'Bank'} (${p.account_number_masked || '****'})</div>
-          </td>
-          <td>
-            <div style="font-weight:600; color:#334155;">${p.customer_name || 'Customer'}</div>
-            <span class="mode-tag">${p.payment_mode || 'Razorpay UPI'}</span>
-          </td>
-          <td>
-            <span class="status-badge badge-success">⚡ Settled (&lt; 1s)</span>
-          </td>
-          <td><strong style="color:#0f172a;">₹${Number(p.gross_inr || 0).toLocaleString('en-IN')}</strong></td>
-          <td style="color:#2563eb; font-weight:700;">₹${Number(p.commission_inr || 0).toLocaleString('en-IN')}</td>
-          <td style="color:#059669; font-weight:800;">₹${Number(p.net_inr || 0).toLocaleString('en-IN')}</td>
-          <td style="color:#64748b; font-size:11.5px;">${dateStr}</td>
-        `;
+        if (isMobile) {
+          // Ultra-optimized Mobile Payment Card
+          tr.innerHTML = `
+            <td>
+              <div class="mob-card-header">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="font-size:10.5px; font-weight:800; color:#121620; background:#f1f5f9; padding:2px 8px; border-radius:6px; font-family:monospace;">${p.id}</span>
+                  <span style="font-size:11px; color:#64748b;">${dateStr}</span>
+                </div>
+                <span class="status-badge badge-success" style="font-size:10px; padding:3px 8px;">⚡ Settled (&lt; 1s)</span>
+              </div>
+              <div class="mob-card-body" style="margin: 8px 0 6px;">
+                <div style="flex:1; min-width:0;">
+                  <strong style="font-size:13.5px; color:#0f172a; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    ${p.store_name || p.store_id}
+                  </strong>
+                  <div style="font-size:11.5px; color:#64748b; margin-top:2px;">
+                    ${p.customer_name || 'Customer'} • <span class="mode-tag" style="font-size:10px; padding:1px 6px;">${p.payment_mode || 'Razorpay UPI'}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mob-pay-breakdown">
+                <div>
+                  <span class="val-label">Gross Paid</span>
+                  <span class="val-amount" style="color:#0f172a;">₹${gross.toLocaleString('en-IN')}</span>
+                </div>
+                <div>
+                  <span class="val-label">MallMaze (10%)</span>
+                  <span class="val-amount" style="color:#2563eb;">₹${fee.toLocaleString('en-IN')}</span>
+                </div>
+                <div>
+                  <span class="val-label">Store Net (90%)</span>
+                  <span class="val-amount" style="color:#059669;">₹${net.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+              <div class="mob-card-footer" style="margin-top:6px;">
+                <span style="font-size:11px; color:#64748b; font-family:monospace;">${p.razorpay_transfer_id || 'Auto-Route'}</span>
+                <div style="display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; color:#121620;">
+                  <span>Receipt & Payout</span>
+                  <span style="color:#94a3b8;">❯</span>
+                </div>
+              </div>
+            </td>
+          `;
+        } else {
+          // Standard Desktop Table Layout
+          tr.innerHTML = `
+            <td>
+              <strong style="color:#0f172a; font-size:12px;">${p.id}</strong>
+              <div style="font-size:10.5px; color:#94a3b8; font-family:monospace;">${p.razorpay_transfer_id || 'Auto-Route'}</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e293b;">${p.store_name || p.store_id}</div>
+              <div style="font-size:10.5px; color:#64748b;">${p.bank_name || 'Bank'} (${p.account_number_masked || '****'})</div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:#334155;">${p.customer_name || 'Customer'}</div>
+              <span class="mode-tag">${p.payment_mode || 'Razorpay UPI'}</span>
+            </td>
+            <td>
+              <span class="status-badge badge-success">⚡ Settled (&lt; 1s)</span>
+            </td>
+            <td><strong style="color:#0f172a;">₹${gross.toLocaleString('en-IN')}</strong></td>
+            <td style="color:#2563eb; font-weight:700;">₹${fee.toLocaleString('en-IN')}</td>
+            <td style="color:#059669; font-weight:800;">₹${net.toLocaleString('en-IN')}</td>
+            <td style="color:#64748b; font-size:11.5px;">${dateStr}</td>
+          `;
+        }
         tbody.appendChild(tr);
       });
     }
+
+    // Auto re-render on resize to flip between mobile cards and table
+    let paymentsResizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(paymentsResizeTimer);
+      paymentsResizeTimer = setTimeout(() => {
+        renderTable();
+      }, 150);
+    });
 
     function selectPayout(id) {
       selectedPayoutId = id;
@@ -1254,6 +1366,17 @@
 
       document.querySelectorAll(".payment-row").forEach(r => r.classList.remove("selected"));
       renderTable();
+
+      if (window.innerWidth <= 900) {
+        if (typeof window.openMobileDetailPanel === 'function') {
+          window.openMobileDetailPanel('paymentDetailPanel');
+        } else {
+          const panel = document.getElementById("paymentDetailPanel");
+          if (panel) panel.classList.add("mobile-open");
+          const b = document.getElementById("detailBackdrop");
+          if (b) b.classList.add("show");
+        }
+      }
 
       document.getElementById("pTxnId").innerText = p.id;
       const d = p.created_at ? new Date(p.created_at) : new Date();

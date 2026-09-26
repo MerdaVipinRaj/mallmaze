@@ -2931,7 +2931,7 @@ function renderLogin() {
     const otpInput = el('login-otp');
     if (otpInput) {
       if (devOtp) otpInput.value = devOtp;
-      else otpInput.value = '123456';
+      else otpInput.value = '';
       otpInput.focus();
     }
     startResendTimer();
@@ -2949,18 +2949,24 @@ function renderLogin() {
     const identifier = (el('login-identifier')?.value || '').trim();
     if (!name || !identifier) return;
     const payload = authChannel === 'phone' ? { phone: identifier, name, role: loginRole } : { email: identifier, name, role: loginRole };
+    const resendBtn = el('resend-otp-btn');
+    if (resendBtn) resendBtn.disabled = true;
     try {
       let res = null;
       if (window.MM_API?.hasApi?.()) {
         res = await window.MM_API.requestOtp(payload);
         if (res?.challenge_id) challengeId = res.challenge_id;
+      } else {
+        challengeId = `local-otp-${Date.now()}`;
+        res = { dev_otp: '123456' };
       }
-      toast(`OTP code ready: ${res?.dev_otp || '123456'}`, { type: 'ok', title: 'Resent OTP' });
+      toast(res?.dev_otp ? `OTP code ready: ${res.dev_otp}` : `OTP sent to ${identifier}`, { type: 'ok', title: 'Resent OTP' });
       const otpInput = el('login-otp');
-      if (otpInput) otpInput.value = res?.dev_otp || '123456';
+      if (otpInput) otpInput.value = res?.dev_otp || '';
       startResendTimer();
     } catch (err) {
       toast(err.message || 'Could not resend OTP', { type: 'bad', title: 'OTP Error' });
+      if (resendBtn) resendBtn.disabled = false;
     }
   });
 
@@ -2968,6 +2974,7 @@ function renderLogin() {
     e.preventDefault();
     const name = (el('login-name')?.value || '').trim();
     const identifier = (el('login-identifier')?.value || '').trim();
+    const sendBtn = el('send-otp-btn');
 
     if (!name || !identifier) {
       toast('Please enter your name and phone/email address.', { type: 'bad', title: 'Input Required' });
@@ -2979,24 +2986,26 @@ function renderLogin() {
       : { email: identifier, name, role: loginRole };
 
     try {
+      if (sendBtn) sendBtn.disabled = true;
       let response = null;
       if (window.MM_API?.hasApi?.()) {
-        try {
-          response = await window.MM_API.requestOtp(payload);
-        } catch {}
+        response = await window.MM_API.requestOtp(payload);
       }
 
       if (response?.challenge_id) {
         challengeId = response.challenge_id;
       } else {
         challengeId = `local-otp-${Date.now()}`;
+        response = { dev_otp: '123456' };
       }
 
       const targetText = authChannel === 'phone' ? `SMS OTP code dispatched to ${identifier}` : `Email OTP code dispatched to ${identifier}`;
-      toast(`OTP code generated for ${identifier}`, { type: 'ok', title: 'OTP Ready' });
+      toast(response?.dev_otp ? `OTP code ready for ${identifier}` : `OTP sent to ${identifier}`, { type: 'ok', title: 'OTP Ready' });
       showVerify(targetText, response?.dev_otp);
     } catch (error) {
       toast(error.message || String(error), { type: 'bad', title: 'Login Error' });
+    } finally {
+      if (sendBtn) sendBtn.disabled = false;
     }
   });
 
@@ -3014,17 +3023,16 @@ function renderLogin() {
     try {
       let response = null;
       if (window.MM_API?.hasApi?.() && challengeId && !challengeId.startsWith('local-')) {
-        try {
-          response = await window.MM_API.verifyOtp({
-            challenge_id: challengeId,
-            otp: enteredOtp,
-            name,
-            role: loginRole
-          });
-        } catch {}
+        response = await window.MM_API.verifyOtp({
+          challenge_id: challengeId,
+          otp: enteredOtp,
+          name,
+          role: loginRole
+        });
       }
 
       if (!response?.user) {
+        if (enteredOtp !== '123456') throw new Error('Invalid OTP');
         const role = loginRole === 'admin' || identifier.includes('admin') ? 'admin' : loginRole === 'shop' || identifier.includes('store') ? 'shop' : 'user';
         response = {
           token: `token-${role}-${Date.now()}`,

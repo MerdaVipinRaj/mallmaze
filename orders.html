@@ -239,7 +239,7 @@
       box-shadow: var(--shadow-sm);
     }
 
-    .user-info {
+    .user-inf✕{
       display: flex;
       flex-direction: column;
       line-height: 1.25;
@@ -775,7 +775,7 @@
       </a>
 
       <!-- Home Redirect Link in Sidebar -->
-      <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;" title="Go to MallMaze Customer Storefront">
+      <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;" title="G✕t✕MallMaze Customer Storefront">
         <span>🌐 Storefront / Home</span>
         <span>→</span>
       </a>
@@ -848,19 +848,14 @@
           <h1 class="page-title">Orders</h1>
           <div class="top-actions">
             <button style="padding: 8px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: none; background: #121620; color: #ffffff;" onclick="openOfflineSaleModal()">
-              ➕ Record Offline Sale
+              ⚡ Record Offline Sale
             </button>
             <button class="icon-btn" title="Advanced Filters" onclick="showToast('Active INR Filters Applied')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
               </svg>
             </button>
-            <button class="icon-btn" title="Search Orders" onclick="focusSearch()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-            </button>
+            
             <div class="user-profile" onclick="showToast('Merchant: Priya Sharma (Mumbai Branch)')">
               <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80" alt="Priya Sharma" class="user-avatar" />
               <div class="user-info">
@@ -885,7 +880,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <button class="dropdown-pill" onclick="togglePriceFilter()">
-              <span>₹5,000 – ₹1,50,000</span>
+              <span>₹15,000 – ₹1,50,000</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
           </div>
@@ -1147,7 +1142,7 @@
 
       const isMobile = window.innerWidth <= 900;
 
-      let filtered = ordersData.filter(o => {
+      let filtered = ordersData.filter(✕=> {
         if (orderSearchTerm) {
           const matchId = (o.id || "").toLowerCase().includes(orderSearchTerm);
           const matchName = (o.customer && o.customer.name ? o.customer.name : "").toLowerCase().includes(orderSearchTerm);
@@ -1164,7 +1159,7 @@
           <tr>
             <td colspan="7" style="text-align:center; padding:30px 16px; color:#64748b; background:#ffffff; border-radius:16px;">
               <div style="font-size:24px; margin-bottom:6px;">🛍️</div>
-              <strong style="display:block; font-size:14px; color:#0f172a;">No orders found</strong>
+              <strong style="display:block; font-size:14px; color:#0f172a;">N✕orders found</strong>
               <span style="font-size:12px;">Try adjusting your search or status filter</span>
             </td>
           </tr>
@@ -1241,7 +1236,7 @@
       updateSelectAllState();
     }
 
-    // Auto re-render on resize to flip between mobile cards and table seamlessly
+    // Aut✕re-render on resize t✕flip between mobile cards and table seamlessly
     let orderResizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(orderResizeTimer);
@@ -1267,7 +1262,7 @@
     }
 
     function renderDetailPanel() {
-      const order = ordersData.find(o => o.id === selectedOrderId) || ordersData[0];
+      const order = ordersData.find(✕=> o.id === selectedOrderId) || ordersData[0];
       window.currentOrder = order;
       document.getElementById("panelOrderId").innerText = `Order ${order.id}`;
       document.getElementById("panelBadge").innerText = order.status;
@@ -1298,7 +1293,7 @@
 
     function toggleRowCheck(event, orderId) {
       event.stopPropagation();
-      const order = ordersData.find(o => o.id === orderId);
+      const order = ordersData.find(✕=> o.id === orderId);
       if (order) {
         order.checked = !order.checked;
         renderTable();
@@ -1306,14 +1301,14 @@
     }
 
     function toggleSelectAll() {
-      const allChecked = ordersData.every(o => o.checked);
-      ordersData.forEach(o => o.checked = !allChecked);
+      const allChecked = ordersData.every(✕=> o.checked);
+      ordersData.forEach(✕=> o.checked = !allChecked);
       renderTable();
     }
 
     function updateSelectAllState() {
       const selectAll = document.getElementById("selectAllCheckbox");
-      const allChecked = ordersData.every(o => o.checked);
+      const allChecked = ordersData.every(✕=> o.checked);
       if (allChecked && ordersData.length > 0) {
         selectAll.classList.add("checked");
       } else {
@@ -1331,7 +1326,7 @@
     }
 
     function togglePriceFilter() {
-      showToast("Filtered: ₹5,000 – ₹1,50,000");
+      showToast("Filtered: ₹15,000 – ₹1,50,000");
     }
 
     function toggleSort() {
@@ -1343,21 +1338,22 @@
     }
 
     function focusSearch() {
-      const term = prompt("Search Indian orders by customer name or order ID:");
+      const input = document.getElementById("orderSearchInput");
+      if (input) { input.focus(); input.select(); return; }
       if (term) {
-        const found = ordersData.find(o => o.id.toLowerCase().includes(term.toLowerCase()) || o.customer.name.toLowerCase().includes(term.toLowerCase()));
+        const found = ordersData.find(✕=> o.id.toLowerCase().includes(term.toLowerCase()) || o.customer.name.toLowerCase().includes(term.toLowerCase()));
         if (found) {
           selectOrder(found.id);
           showToast(`Found: ${found.customer.name} (${found.id})`);
         } else {
-          showToast(`No order found matching "${term}"`);
+          showToast(`N✕order found matching "${term}"`);
         }
       }
     }
 
     function trackOrder() {
       const order = window.currentOrder || ordersData[0];
-      showToast(`Delhivery Logistics: ${order.id} is in transit to destination.`);
+      showToast(`Delhivery Logistics: ${order.id} is in transit t✕destination.`);
     }
 
     function refundOrder() {
@@ -1367,7 +1363,7 @@
         order.statusType = "delivered";
         renderTable();
         renderDetailPanel();
-        showToast(`₹ UPI Refund of ${order.total} completed to UPI ID`);
+        showToast(`₹ UPI Refund of ${order.total} completed t✕UPI ID`);
       }
     }
 

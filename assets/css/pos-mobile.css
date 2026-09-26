@@ -1,7 +1,7 @@
 /* ==========================================================================
-   MallMaze Store POS - Ultra Mobile-First Responsive Framework
-   Applies to: Orders (pos-orders.html / orders.html), Stock (inventory.html),
-   and P&L (profit-loss.html)
+   MallMaze Store POS - Ultra Modern Responsive & Mobile Framework
+   Applies to: Orders (orders.html / pos-orders.html), Stock (inventory.html),
+   Payments (payments.html), and P&L (profit-loss.html)
    ========================================================================== */
 
 html {
@@ -14,7 +14,165 @@ html {
   box-sizing: inherit;
 }
 
-/* Base Mobile Overrides (viewport <= 900px) */
+/* --------------------------------------------------------------------------
+   UNIVERSAL SEARCH BAR (Desktop, Tablet & Mobile)
+   Clean, modern, crisp styling with SVG search icon and clear trigger
+   -------------------------------------------------------------------------- */
+.mobile-search-wrap,
+.pos-search-wrap {
+  width: 100%;
+  margin: 6px 0 10px 0;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 8px 14px;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
+}
+
+.mobile-search-wrap:focus-within,
+.pos-search-wrap:focus-within {
+  border-color: #121620;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(18, 22, 32, 0.08), 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-search-wrap svg,
+.pos-search-wrap svg {
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.mobile-search-wrap:focus-within svg,
+.pos-search-wrap:focus-within svg {
+  color: #0f172a;
+}
+
+.mobile-search-input,
+.pos-search-input {
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: #0f172a;
+  padding: 0;
+  margin: 0;
+}
+
+.mobile-search-input::placeholder,
+.pos-search-input::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.mobile-search-clear,
+.pos-search-clear {
+  background: #f1f5f9;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.mobile-search-clear:hover,
+.pos-search-clear:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.search-count-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   DRAWER BACKDROP & SHEET CONTROLS (Universal)
+   -------------------------------------------------------------------------- */
+.detail-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 14, 20, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 4998;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.detail-backdrop.show {
+  display: block;
+  opacity: 1;
+}
+
+.sheet-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.sheet-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.sheet-close-btn:active {
+  transform: scale(0.95);
+}
+
+.sheet-drag-handle {
+  display: none;
+  width: 44px;
+  height: 5px;
+  background: #cbd5e1;
+  border-radius: 3px;
+  margin: 2px auto 12px auto;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE MOBILE OVERRIDES (viewport <= 900px)
+   -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   html, body {
     width: 100% !important;
@@ -50,7 +208,7 @@ html {
     padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
-  /* Desktop sidebar hidden */
+  /* Desktop sidebar hidden on phone */
   .sidebar {
     display: none !important;
   }
@@ -58,6 +216,7 @@ html {
   /* Main scrollable content view */
   .main-wrapper,
   .orders-section,
+  .section-content,
   .content-area,
   .workspace {
     flex: 1 1 auto !important;
@@ -71,7 +230,7 @@ html {
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    gap: 10px !important;
+    gap: 8px !important;
     background-color: #f7f6f0 !important;
   }
 
@@ -84,108 +243,115 @@ html {
     align-items: stretch !important;
     gap: 8px !important;
     width: 100% !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 4px !important;
   }
 
-  .header-title-row,
-  .top-header > div:first-child {
+  .top-header > div:first-child,
+  .header-title-row {
     display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    flex-direction: column !important;
+    gap: 2px !important;
     width: 100% !important;
   }
 
   .page-title,
   h1.page-title {
-    font-size: 1.35rem !important;
+    font-size: 1.3rem !important;
     font-weight: 800 !important;
-    line-height: 1.2 !important;
+    line-height: 1.25 !important;
     letter-spacing: -0.4px !important;
     color: #131722 !important;
     margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
   }
 
-  .section-subtitle {
-    font-size: 0.8rem !important;
+  .page-title .route-pill {
+    font-size: 10.5px !important;
+    padding: 3px 8px !important;
+  }
+
+  .section-subtitle,
+  .top-header p {
+    font-size: 0.78rem !important;
     color: #64748b !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
   }
 
+  /* Hide avatar card on mobile header to save screen real estate */
   .user-profile,
   .user-info {
     display: none !important;
   }
 
-  /* Quick action buttons row */
+  /* ------------------------------------------------------------------------
+     Top Action Buttons: Do NOT distort icon buttons!
+     ------------------------------------------------------------------------ */
   .top-actions {
     width: 100% !important;
     display: flex !important;
-    flex-wrap: wrap !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
     gap: 8px !important;
   }
 
-  .top-actions > a,
-  .top-actions > button,
-  .btn-header-home,
-  .btn-offline-bill,
-  .btn-action-primary,
-  .btn-primary,
-  .btn-record-offline,
-  .btn-add-expense {
-    flex: 1 1 calc(50% - 4px) !important;
-    min-height: 44px !important;
-    font-size: 0.85rem !important;
+  /* Primary text buttons stretch to fill available space */
+  .top-actions > .btn-action-primary,
+  .top-actions > .btn-simulate,
+  .top-actions > .btn-record-offline,
+  .top-actions > .btn-primary,
+  .top-actions > .btn-header-home,
+  .top-actions > a:not(.icon-btn):not(.user-profile),
+  .top-actions > button:not(.icon-btn) {
+    flex: 1 1 auto !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    font-size: 0.82rem !important;
     font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
     border-radius: 12px !important;
-    padding: 8px 12px !important;
+    padding: 8px 14px !important;
+    white-space: nowrap !important;
+    border: none !important;
   }
 
-  /* Real-time search bar */
-  .mobile-search-wrap {
-    width: 100%;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    background: #ffffff;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 4px 12px;
-    gap: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  /* Icon-only buttons remain neat compact squares (42x42px) */
+  .top-actions .icon-btn,
+  .icon-btn {
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1.5px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    cursor: pointer !important;
   }
 
-  .mobile-search-wrap svg {
-    width: 17px;
-    height: 17px;
-    color: #94a3b8;
-    flex-shrink: 0;
+  .icon-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+    color: #475569 !important;
   }
 
-  .mobile-search-input {
-    width: 100%;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 14px;
-    font-family: inherit;
-    color: #0f172a;
-    padding: 8px 0;
-  }
-
-  .mobile-search-clear {
-    background: #f1f5f9;
-    border: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: #64748b;
-    cursor: pointer;
-    flex-shrink: 0;
+  /* Search bar on mobile */
+  .mobile-search-wrap,
+  .pos-search-wrap {
+    margin: 4px 0 6px 0 !important;
+    padding: 6px 12px !important;
+    min-height: 42px !important;
   }
 
   /* Horizontally scrollable filter pills */
@@ -208,9 +374,9 @@ html {
 
   .dropdown-pill,
   .filter-chip {
-    font-size: 0.8rem !important;
-    padding: 7px 13px !important;
-    min-height: 36px !important;
+    font-size: 0.78rem !important;
+    padding: 6px 12px !important;
+    min-height: 34px !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
     border-radius: 20px !important;
@@ -224,7 +390,7 @@ html {
     grid-template-columns: 1fr 1fr !important;
     gap: 8px !important;
     width: 100% !important;
-    margin-bottom: 8px !important;
+    margin-bottom: 6px !important;
   }
 
   .kpi-card,
@@ -240,7 +406,8 @@ html {
     justify-content: space-between !important;
   }
 
-  .kpi-label {
+  .kpi-label,
+  .kpi-title {
     font-size: 0.68rem !important;
     font-weight: 700 !important;
     color: #64748b !important;
@@ -251,7 +418,7 @@ html {
 
   .kpi-value,
   .kpi-val {
-    font-size: 1.2rem !important;
+    font-size: 1.15rem !important;
     font-weight: 800 !important;
     color: #0f172a !important;
     margin: 4px 0 2px !important;
@@ -260,18 +427,21 @@ html {
   }
 
   .kpi-sub {
-    font-size: 0.7rem !important;
+    font-size: 0.68rem !important;
     color: #64748b !important;
     line-height: 1.2 !important;
   }
 
-  /* Table to Card Conversions */
+  /* ------------------------------------------------------------------------
+     Table to Card Conversions (Orders, Inventory, Payments)
+     ------------------------------------------------------------------------ */
   .table-container,
   .table-wrap,
   .data-table-wrap {
     width: 100% !important;
     min-width: 0 !important;
     overflow: visible !important;
+    margin-top: 4px !important;
   }
 
   table.orders-table,
@@ -281,11 +451,14 @@ html {
   table.data-table,
   table.reports-table,
   .main-wrapper table,
-  .orders-section table {
+  .orders-section table,
+  .section-content table {
     width: 100% !important;
     min-width: 0 !important;
     border: none !important;
     display: block !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
   }
 
   table.orders-table thead,
@@ -294,7 +467,8 @@ html {
   table.stock-table thead,
   table.data-table thead,
   .main-wrapper table thead,
-  .orders-section table thead {
+  .orders-section table thead,
+  .section-content table thead {
     display: none !important;
   }
 
@@ -304,10 +478,11 @@ html {
   table.stock-table tbody,
   table.data-table tbody,
   .main-wrapper table tbody,
-  .orders-section table tbody {
+  .orders-section table tbody,
+  .section-content table tbody {
     display: flex !important;
     flex-direction: column !important;
-    gap: 10px !important;
+    gap: 8px !important;
     width: 100% !important;
   }
 
@@ -319,13 +494,15 @@ html {
   table.data-table tbody tr,
   .main-wrapper table tbody tr,
   .orders-section table tbody tr,
+  .section-content table tbody tr,
   .order-row,
+  .payment-row,
   .data-row {
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
     background: #ffffff !important;
-    border-radius: 16px !important;
+    border-radius: 14px !important;
     padding: 12px 14px !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
     border: 1px solid #e8e5dc !important;
@@ -333,23 +510,28 @@ html {
     transition: transform 0.15s ease, background 0.15s ease !important;
     cursor: pointer !important;
     -webkit-tap-highlight-color: transparent !important;
+    box-sizing: border-box !important;
   }
 
   .order-row:active,
+  .payment-row:active,
   .data-row:active {
     transform: scale(0.99) !important;
     background-color: #faf9f6 !important;
   }
 
   .order-row.selected,
+  .payment-row.selected,
   .data-row.selected {
     border-color: #121620 !important;
     box-shadow: 0 3px 12px rgba(18, 22, 32, 0.08) !important;
   }
 
   table.orders-table tbody td,
+  table.payments-table tbody td,
   table.data-table tbody td,
   .order-row td,
+  .payment-row td,
   .data-row td {
     display: block !important;
     padding: 0 !important;
@@ -366,88 +548,105 @@ html {
 
   /* Mobile card header & content rows */
   .mob-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
   }
 
   .mob-card-body {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
   }
 
   .mob-card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding-top: 6px;
-    border-top: 1px dashed #f1f5f9;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    padding-top: 6px !important;
+    border-top: 1px dashed #f1f5f9 !important;
+  }
+
+  /* Payment Card specific mobile styling */
+  .mob-pay-breakdown {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 6px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 6px 8px !important;
+    margin-top: 4px !important;
+    text-align: center !important;
+  }
+
+  .mob-pay-breakdown > div {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .mob-pay-breakdown .val-label {
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+  }
+
+  .mob-pay-breakdown .val-amount {
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    margin-top: 1px !important;
   }
 
   /* Touch-optimized inventory quick stepper */
   .mob-stock-stepper {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: #f8fafc;
-    padding: 3px 6px;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    background: #f8fafc !important;
+    padding: 3px 6px !important;
+    border-radius: 10px !important;
+    border: 1px solid #e2e8f0 !important;
   }
 
   .mob-step-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: 700;
-    color: #0f172a;
-    cursor: pointer;
-    touch-action: manipulation;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    cursor: pointer !important;
+    touch-action: manipulation !important;
   }
 
   .mob-step-btn:active {
-    background: #e2e8f0;
-    transform: scale(0.94);
+    background: #e2e8f0 !important;
+    transform: scale(0.94) !important;
   }
 
   .mob-step-val {
-    font-size: 13.5px;
-    font-weight: 800;
-    color: #0f172a;
-    min-width: 28px;
-    text-align: center;
+    font-size: 13.5px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    min-width: 28px !important;
+    text-align: center !important;
   }
 
-  /* Dimming Backdrop for Bottom Sheets */
-  .detail-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(11, 14, 20, 0.65);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 4998;
-    opacity: 0;
-    transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .detail-backdrop.show {
-    display: block;
-    opacity: 1;
-  }
-
-  /* Mobile Bottom Sheet Drawer */
-  .detail-panel {
+  /* ------------------------------------------------------------------------
+     Mobile Bottom Sheet Drawers (Orders & Payments Details)
+     ------------------------------------------------------------------------ */
+  .detail-panel,
+  #detailPanel,
+  #paymentDetailPanel {
     display: flex !important;
     position: fixed !important;
     left: 0 !important;
@@ -459,7 +658,7 @@ html {
     max-width: 100% !important;
     max-height: 88dvh !important;
     height: auto !important;
-    border-radius: 26px 26px 0 0 !important;
+    border-radius: 24px 24px 0 0 !important;
     z-index: 5000 !important;
     background: #ffffff !important;
     box-shadow: 0 -14px 45px rgba(0, 0, 0, 0.4) !important;
@@ -473,18 +672,14 @@ html {
 
   .detail-panel.mobile-open,
   .detail-panel.open-mobile,
-  .detail-panel.open {
+  .detail-panel.open,
+  #detailPanel.mobile-open,
+  #paymentDetailPanel.mobile-open {
     transform: translateY(0%) !important;
   }
 
-  /* Sheet Drag Handle */
   .sheet-drag-handle {
-    width: 44px;
-    height: 5px;
-    background: #cbd5e1;
-    border-radius: 3px;
-    margin: 2px auto 12px auto;
-    flex-shrink: 0;
+    display: block !important;
   }
 
   .detail-header {
@@ -493,31 +688,12 @@ html {
     justify-content: space-between !important;
     width: 100% !important;
     margin-bottom: 12px !important;
-    flex-shrink: 0;
-  }
-
-  .close-btn,
-  .sheet-close-btn {
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50% !important;
-    border: none !important;
-    background: #f1f5f9 !important;
-    color: #475569 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    font-size: 18px !important;
-  }
-
-  .close-btn:active,
-  .sheet-close-btn:active {
-    background: #e2e8f0 !important;
+    flex-shrink: 0 !important;
   }
 
   /* Mobile Modals */
-  .modal-backdrop {
+  .modal-backdrop,
+  .modal-overlay {
     padding: 0 !important;
     align-items: flex-end !important;
     background: rgba(11, 14, 20, 0.7) !important;
@@ -526,12 +702,13 @@ html {
   }
 
   .modal-box,
+  .modal-content,
   .modal-backdrop > div {
     max-width: 100% !important;
     width: 100% !important;
     max-height: 92dvh !important;
-    border-radius: 26px 26px 0 0 !important;
-    padding: 20px 18px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 24px 24px 0 0 !important;
+    padding: 18px 16px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
     overflow-y: auto !important;
   }
 
@@ -543,8 +720,8 @@ html {
   input[type="number"],
   select,
   textarea {
-    font-size: 16px !important; /* Prevents iOS auto-zoom */
-    min-height: 46px !important;
+    font-size: 16px !important; /* Prevents iOS auto-zoom on focus */
+    min-height: 44px !important;
     max-width: 100% !important;
     border-radius: 12px !important;
   }
@@ -558,7 +735,7 @@ html {
     bottom: 0 !important;
     height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
     padding: 4px 6px env(safe-area-inset-bottom, 0px) !important;
-    background: rgba(18, 22, 32, 0.96) !important;
+    background: rgba(18, 22, 32, 0.98) !important;
     backdrop-filter: blur(14px) !important;
     -webkit-backdrop-filter: blur(14px) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -578,15 +755,15 @@ html {
     text-decoration: none !important;
     font-size: 0.68rem !important;
     font-weight: 700 !important;
-    min-width: 54px !important;
+    min-width: 52px !important;
     padding: 5px 6px !important;
     border-radius: 10px !important;
     transition: color 0.15s ease, background 0.15s ease !important;
   }
 
   .mob-nav-btn svg {
-    width: 21px !important;
-    height: 21px !important;
+    width: 20px !important;
+    height: 20px !important;
     stroke: currentColor !important;
   }
 
@@ -602,7 +779,7 @@ html {
   .toast {
     left: 14px !important;
     right: 14px !important;
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
     max-width: none !important;
     text-align: center !important;
     z-index: 6000 !important;
@@ -621,9 +798,14 @@ html {
     font-size: 1.05rem !important;
   }
 
-  .top-actions > a,
-  .top-actions > button,
-  .btn-action-primary {
-    flex: 1 1 100% !important;
+  .top-actions {
+    flex-wrap: nowrap !important;
+  }
+
+  .top-actions > .btn-action-primary,
+  .top-actions > .btn-simulate,
+  .top-actions > .btn-record-offline {
+    font-size: 0.76rem !important;
+    padding: 6px 10px !important;
   }
 }
