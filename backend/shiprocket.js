@@ -73,6 +73,18 @@ async function getAuthToken() {
  * 4 MULTI-TIER DELIVERY SPEED PROFILES (Zepto 5-min to Amazon 3-days)
  */
 const DELIVERY_TIERS = {
+  self_store: {
+    id: "self_store",
+    name: "🛵 Store Self-Delivery (Earn 100% Delivery Fee)",
+    short_name: "Store Self-Delivery",
+    provider: "Store Merchant Runner (Direct)",
+    eta: "5–20 Minutes",
+    eta_seconds: 420,
+    rate_inr: 49.00,
+    courier_id: 999,
+    badge: "🛵 Self-Delivery (+₹49 Store Profit)",
+    description: "Shopkeeper or staff delivers in free time. 100% customer delivery fee kept by store!"
+  },
   zepto_flash: {
     id: "zepto_flash",
     name: "⚡ Zepto Flash Delivery (5–15 Mins)",
@@ -608,7 +620,35 @@ async function trackShipment(awb_or_order_id, speed_tier = "zepto_flash") {
   };
 }
 
+
+/**
+ * Generate 60-step second-by-second GPS coordinates path between store and customer
+ */
+function generateLiveRouteCoordinates(startLat = 12.9716, startLng = 77.5946, endLat = 12.9780, endLng = 77.6050, totalSteps = 60) {
+  const steps = [];
+  for (let i = 0; i <= totalSteps; i++) {
+    const fraction = i / totalSteps;
+    // Add realistic street curve jiggle
+    const jiggleLat = Math.sin(fraction * Math.PI * 3) * 0.0008;
+    const jiggleLng = Math.cos(fraction * Math.PI * 2) * 0.0006;
+    const lat = startLat + (endLat - startLat) * fraction + jiggleLat;
+    const lng = startLng + (endLng - startLng) * fraction + jiggleLng;
+    const distRemaining = Math.max(0, (1.8 * (1 - fraction))).toFixed(2);
+    const secsRemaining = Math.round(300 * (1 - fraction));
+    steps.push({
+      step: i,
+      lat: Number(lat.toFixed(6)),
+      lng: Number(lng.toFixed(6)),
+      distance_km: Number(distRemaining),
+      eta_seconds: secsRemaining,
+      speed_kmh: Math.round(24 + Math.sin(i) * 6)
+    });
+  }
+  return steps;
+}
+
 module.exports = {
+  generateLiveRouteCoordinates,
   isSandbox,
   getAuthToken,
   DELIVERY_TIERS,

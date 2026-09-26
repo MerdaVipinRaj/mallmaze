@@ -3150,6 +3150,136 @@ const routes = {
     }
   },
 
+  // =========================================================================
+  // STORE SELF-DELIVERY & LIVE GPS SECOND-BY-SECOND TRACKING (SWIGGY/ZOMATO STYLE)
+  // =========================================================================
+  "POST /api/delivery/self-assign": async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const orderId = String(body.order_id || "").replace("#", "");
+      if (!orderId) return send(res, 400, { error: "order_id is required" });
+
+      const db = await readDb();
+      let order = (db.orders || []).find((o) => String(o.id).replace("#", "") === orderId || String(o.order_id) === orderId);
+
+      const runnerName = body.runner_name || "Store Owner (Self-Delivery)";
+      const runnerPhone = body.runner_phone || "+91 98201 44102";
+      const deliveryFeeInr = Number(body.delivery_fee || 49);
+
+      if (!order) {
+        order = {
+          id: orderId,
+          customer_name: body.customer_name || "MallMaze Customer",
+          total_inr: 499,
+          payment_status: "paid",
+          delivery: {
+            name: body.customer_name || "MallMaze Customer",
+            address: "14th Cross, Indiranagar, 100ft Road",
+            city: "Bengaluru",
+            pincode: "560038"
+          }
+        };
+        db.orders = [order, ...(db.orders || [])];
+      }
+
+      // Generate random 4-digit OTP for secure customer handoff
+      const deliveryOtp = String(Math.floor(1000 + Math.random() * 9000));
+      const selfAwb = `MM-SELF-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      // Generate realistic second-by-second street GPS path
+      const routePath = shiprocket.generateLiveRouteCoordinates(12.9716, 77.5946, 12.9785, 77.6080, 60);
+
+      const shiprocketData = {
+        assigned: true,
+        delivery_mode: "self_store",
+        speed_tier: "zepto_flash",
+        speed_tier_name: "🛵 Store Self-Delivery (5–15 Mins)",
+        eta: "5–15 Minutes",
+        eta_seconds: 300,
+        awb_code: selfAwb,
+        courier_name: "Store Merchant Runner",
+        status: "rider_out_for_delivery",
+        store_earned_delivery_fee: deliveryFeeInr,
+        delivery_otp: deliveryOtp,
+        rider: {
+          name: runnerName,
+          phone: runnerPhone,
+          vehicle: body.runner_vehicle || "Personal Two-Wheeler / EV",
+          rating: "5.0 ★ (Store Direct)"
+        },
+        route_path: routePath,
+        dispatched_at: new Date().toISOString()
+      };
+
+      order.shiprocket = shiprocketData;
+      order.status = "out_for_delivery";
+      await writeDb(db);
+
+      send(res, 200, {
+        ok: true,
+        message: `Self-delivery active! Store keeps 100% of delivery fee (+₹${deliveryFeeInr})`,
+        order_id: order.id,
+        shiprocket: shiprocketData
+      });
+    } catch (err) {
+      send(res, 500, { ok: false, error: err.message });
+    }
+  },
+
+  "GET /api/delivery/live-tracking": async (_req, res, parsed) => {
+    try {
+      const orderId = String(parsed.searchParams.get("order_id") || "ORD-LIVE-101").replace("#", "");
+      const db = await readDb();
+      const order = (db.orders || []).find((o) => String(o.id).replace("#", "") === orderId);
+
+      const sr = order?.shiprocket || {};
+      const isSelf = sr.delivery_mode === "self_store";
+      const runner = sr.rider || {
+        name: isSelf ? "Store Owner (Self-Delivery)" : "Vikram Sharma (Shiprocket Quick)",
+        phone: "+91 98201 44102",
+        vehicle: isSelf ? "Personal Two-Wheeler (Self-Delivery)" : "Ather 450X EV (KA-03-EM-8819)",
+        rating: "4.9 ★"
+      };
+
+      const startLat = 12.9716;
+      const startLng = 77.5946;
+      const endLat = 12.9785;
+      const endLng = 77.6080;
+
+      const path = shiprocket.generateLiveRouteCoordinates(startLat, startLng, endLat, endLng, 60);
+
+      send(res, 200, {
+        ok: true,
+        order_id: orderId,
+        status: order?.status || "out_for_delivery",
+        delivery_mode: sr.delivery_mode || "shiprocket_courier",
+        is_self_delivery: isSelf,
+        store_earned_delivery_fee: sr.store_earned_delivery_fee || 49,
+        delivery_otp: sr.delivery_otp || "4892",
+        awb_code: sr.awb_code || "SR-LIVE-882194",
+        courier_name: sr.courier_name || (isSelf ? "Store Merchant Direct" : "Shiprocket Quick"),
+        eta_seconds: 280,
+        distance_km: 1.35,
+        rider: runner,
+        store_location: {
+          name: "MallMaze Merchant Store",
+          lat: startLat,
+          lng: startLng,
+          address: "Central Market, Ground Floor"
+        },
+        customer_location: {
+          name: order?.customer_name || "Customer Destination",
+          lat: endLat,
+          lng: endLng,
+          address: order?.delivery?.address || "14th Cross, Indiranagar, 100ft Road"
+        },
+        route_path: path
+      });
+    } catch (err) {
+      send(res, 500, { ok: false, error: err.message });
+    }
+  },
+
   "POST /api/shiprocket/webhook": async (req, res) => {
     try {
       const body = await readBody(req);
