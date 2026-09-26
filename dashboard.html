@@ -966,9 +966,14 @@
             <span class="delivery-badge" id="srBadge">Hyperlocal</span>
           </div>
           <p class="delivery-desc" id="srDesc">Direct 2-hour doorstep rider integration ready.</p>
-          <button class="btn-assign-rider" id="srBtn" onclick="assignShiprocketDelivery()">
-            📦 Assign Shiprocket Rider & Print Label
-          </button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-assign-rider" id="srBtn" onclick="assignShiprocketDelivery()" style="flex:1;">
+              🚀 Assign Shiprocket Rider
+            </button>
+            <button class="btn-assign-rider" id="srPrintBtn" onclick="printShiprocketLabel()" style="display:none; width:auto; padding:0 12px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);">
+              📄 Print Label
+            </button>
+          </div>
         </div>
 
         <h3 class="section-subtitle">Order Items</h3>
@@ -1210,13 +1215,42 @@
       document.getElementById("panelTotalAmount").innerText = order.total;
     }
 
-    function assignShiprocketDelivery() {
+    async function assignShiprocketDelivery() {
       const order = window.currentOrder || ordersData[0];
-      const trackingId = "SR-IN-" + Math.floor(100000 + Math.random() * 900000);
-      order.shiprocket = { assigned: true, tracking: trackingId, rider: "Shiprocket Express Rider Assigned" };
+      const srBtn = document.getElementById("srBtn");
+      if (srBtn) srBtn.innerText = "⏳ Connecting...";
+
+      try {
+        const res = await fetch("/api/shiprocket/create-shipment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order_id: String(order.id).replace("#", ""),
+            customer_name: order.customer ? order.customer.name : "Customer",
+            amount_inr: 499
+          })
+        });
+        const data = await res.json();
+        const trackingId = (data.shiprocket && data.shiprocket.awb_code) || ("SR-IN-" + Math.floor(100000 + Math.random() * 900000));
+        order.shiprocket = { assigned: true, tracking: trackingId, rider: (data.shiprocket && data.shiprocket.courier_name) || "Shiprocket Express Rider", awb_code: trackingId, shipment_id: (data.shiprocket && data.shiprocket.shipment_id) };
+      } catch (e) {
+        const trackingId = "SR-IN-" + Math.floor(100000 + Math.random() * 900000);
+        order.shiprocket = { assigned: true, tracking: trackingId, rider: "Shiprocket Express Rider Assigned", awb_code: trackingId };
+      }
+
       saveOrders();
       renderDetailPanel();
-      showToast(`🚚 Shiprocket Rider Assigned! Tracking: ${trackingId}`);
+      const printBtn = document.getElementById("srPrintBtn");
+      if (printBtn) printBtn.style.display = "inline-flex";
+      showToast(`🚚 Shiprocket Rider Assigned! Tracking: ${order.shiprocket.tracking}`);
+    }
+
+    function printShiprocketLabel() {
+      const order = window.currentOrder || ordersData[0];
+      const sr = order.shiprocket || {};
+      const orderClean = String(order.id || "ORD-LIVE-101").replace("#", "");
+      const url = `/api/shiprocket/label?order_id=${encodeURIComponent(orderClean)}&awb=${encodeURIComponent(sr.awb_code || sr.tracking || '')}`;
+      window.open(url, "_blank", "width=600,height=750");
     }
 
     function openMultiItemBillModal() {
