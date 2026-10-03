@@ -1,3 +1,7 @@
+/**
+ * MallMaze Store POS - Ultra Modern Responsive & Mobile Framework
+ * Full Feature Parity: Left Navigation Drawer + Middle Content + Right Details Drawer
+ */
 (function () {
   // Ensure modern mobile viewport
   var viewport = document.querySelector('meta[name="viewport"]');
@@ -8,136 +12,215 @@
   }
   viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover");
 
-  function currentPage() {
-    var path = (location.pathname.split("/").pop() || "dashboard.html").toLowerCase();
-    if (!path || path === "") return "dashboard.html";
-    return path;
+  function isMobile() {
+    return window.innerWidth <= 900;
   }
 
-  function icon(pathD) {
-    return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + pathD + "</svg>";
-  }
-
-  // Ensure Backdrop and Bottom Sheet Drawer helpers
-  function setupDrawerBackdrop() {
-    var backdrop = document.getElementById("detailBackdrop");
-    if (!backdrop) {
-      backdrop = document.createElement("div");
-      backdrop.id = "detailBackdrop";
-      backdrop.className = "detail-backdrop";
-      document.body.appendChild(backdrop);
+  // --- DRAWER TOGGLE HELPERS (ACCESSIBLE GLOBALLY) ---
+  window.openMobileSidebar = function () {
+    var sidebar = document.querySelector(".sidebar, aside.sidebar");
+    if (sidebar) {
+      sidebar.classList.add("mobile-open");
+      var backdrop = document.getElementById("posBackdrop");
+      if (backdrop) backdrop.classList.add("show");
     }
+  };
 
-    backdrop.addEventListener("click", function () {
+  window.closeMobileSidebar = function () {
+    var sidebar = document.querySelector(".sidebar, aside.sidebar");
+    if (sidebar) sidebar.classList.remove("mobile-open");
+    checkBackdropState();
+  };
+
+  window.toggleMobileSidebar = function () {
+    var sidebar = document.querySelector(".sidebar, aside.sidebar");
+    if (sidebar && sidebar.classList.contains("mobile-open")) {
+      window.closeMobileSidebar();
+    } else {
       window.closeMobileDetailPanel();
-    });
-
-    // Ensure drag handle in detail panels
-    var panels = document.querySelectorAll(".detail-panel, #detailPanel, #paymentDetailPanel");
-    panels.forEach(function (panel) {
-      if (!panel.querySelector(".sheet-drag-handle")) {
-        var handle = document.createElement("div");
-        handle.className = "sheet-drag-handle";
-        panel.insertBefore(handle, panel.firstChild);
-      }
-    });
-
-    // Escape key closes open drawers
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") {
-        window.closeMobileDetailPanel();
-      }
-    });
-  }
+      window.openMobileSidebar();
+    }
+  };
 
   window.openMobileDetailPanel = function (panelId) {
-    var panel = (panelId && document.getElementById(panelId)) || document.querySelector(".detail-panel");
+    var panel = (panelId && document.getElementById(panelId)) || document.querySelector(".detail-panel, aside.detail-panel, #detailPanel");
     if (panel) {
       panel.classList.add("mobile-open");
-      var backdrop = document.getElementById("detailBackdrop");
+      var backdrop = document.getElementById("posBackdrop");
       if (backdrop) backdrop.classList.add("show");
     }
   };
 
   window.closeMobileDetailPanel = function () {
-    var panels = document.querySelectorAll(".detail-panel, #detailPanel, #paymentDetailPanel");
+    var panels = document.querySelectorAll(".detail-panel, aside.detail-panel, #detailPanel, #paymentDetailPanel");
     panels.forEach(function (p) {
       p.classList.remove("mobile-open");
     });
-    var backdrop = document.getElementById("detailBackdrop");
-    if (backdrop) backdrop.classList.remove("show");
+    checkBackdropState();
   };
 
-  function ensureBottomNav() {
-    // If on desktop (> 900px), remove any mobile bottom nav and do not create one
-    if (window.innerWidth > 900) {
-      var allNavs = document.querySelectorAll(".mobile-bottom-nav");
-      allNavs.forEach(function (el) { el.remove(); });
-      return;
+  window.toggleMobileDetailPanel = function () {
+    var panel = document.querySelector(".detail-panel, aside.detail-panel, #detailPanel");
+    if (panel && panel.classList.contains("mobile-open")) {
+      window.closeMobileDetailPanel();
+    } else {
+      window.closeMobileSidebar();
+      window.openMobileDetailPanel();
     }
+  };
 
-    // Clean up any existing mobile-bottom-nav instances
-    var existingNavs = document.querySelectorAll(".mobile-bottom-nav");
-    existingNavs.forEach(function (el) { el.remove(); });
-
-    // Always attach to document.body, NEVER inside .app-container flex layout
-    var host = document.body;
-    var page = currentPage();
-    var items = [
-      { 
-        href: "dashboard.html", 
-        label: "Home", 
-        match: ["dashboard.html", "store-dashboard.html", "admin-dashboard.html"], 
-        svg: icon('<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>') 
-      },
-      { 
-        href: "orders.html", 
-        label: "Orders", 
-        match: ["orders.html", "pos-orders.html", "pos.html", "order.html"], 
-        svg: icon('<rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>') 
-      },
-      { 
-        href: "inventory.html", 
-        label: "Stock", 
-        match: ["inventory.html"], 
-        svg: icon('<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>') 
-      },
-      { 
-        href: "payments.html", 
-        label: "Payments", 
-        match: ["payments.html"], 
-        svg: icon('<rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line>') 
-      },
-      { 
-        href: "profit-loss.html", 
-        label: "P&L", 
-        match: ["profit-loss.html", "statistics.html", "statistic.html", "reports.html", "expenses.html"], 
-        svg: icon('<line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>') 
-      }
-    ];
-
-    var nav = document.createElement("nav");
-    nav.className = "mobile-bottom-nav";
-    nav.setAttribute("aria-label", "POS mobile navigation");
-    nav.innerHTML = items.map(function (item) {
-      var active = item.match.indexOf(page) !== -1 ? " active" : "";
-      return '<a href="' + item.href + '" class="mob-nav-btn' + active + '">' + item.svg + "<span>" + item.label + "</span></a>";
-    }).join("");
-    host.appendChild(nav);
+  function checkBackdropState() {
+    var sidebar = document.querySelector(".sidebar.mobile-open");
+    var detail = document.querySelector(".detail-panel.mobile-open, #detailPanel.mobile-open");
+    var backdrop = document.getElementById("posBackdrop");
+    if (backdrop && !sidebar && !detail) {
+      backdrop.classList.remove("show");
+    }
   }
 
-  function init() {
-    setupDrawerBackdrop();
-    ensureBottomNav();
-    window.addEventListener("resize", function () {
-      if (window.innerWidth > 900) {
-        var navs = document.querySelectorAll(".mobile-bottom-nav");
-        navs.forEach(function (el) { el.remove(); });
-      } else {
-        ensureBottomNav();
+  // --- SETUP BACKDROP ---
+  function setupBackdrop() {
+    var backdrop = document.getElementById("posBackdrop");
+    if (!backdrop) {
+      backdrop = document.createElement("div");
+      backdrop.id = "posBackdrop";
+      backdrop.className = "pos-backdrop";
+      document.body.appendChild(backdrop);
+    }
+    backdrop.addEventListener("click", function () {
+      window.closeMobileSidebar();
+      window.closeMobileDetailPanel();
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        window.closeMobileSidebar();
+        window.closeMobileDetailPanel();
       }
     });
   }
+
+  // --- SETUP FLOATING EDGE TABS (HOVER / CLICK AT LEFT & RIGHT) ---
+  function setupEdgeTabs() {
+    if (window.innerWidth > 900) return;
+
+    // 1. Left Edge Tab ("⚡ FEATURES & MENU")
+    if (!document.getElementById("posEdgePillLeft")) {
+      var leftTab = document.createElement("button");
+      leftTab.id = "posEdgePillLeft";
+      leftTab.className = "pos-edge-pill-left";
+      leftTab.setAttribute("aria-label", "Open Features & Tools Menu");
+      leftTab.title = "Click to open left navigation buttons";
+      leftTab.innerHTML = '<span class="pos-pulse-dot"></span><span>⚡</span><span>MENU & TOOLS</span>';
+      leftTab.addEventListener("click", function (e) {
+        e.stopPropagation();
+        window.toggleMobileSidebar();
+      });
+      document.body.appendChild(leftTab);
+    }
+
+    // 2. Right Edge Tab ("📋 ORDER DETAILS")
+    if (!document.getElementById("posEdgePillRight")) {
+      var rightTab = document.createElement("button");
+      rightTab.id = "posEdgePillRight";
+      rightTab.className = "pos-edge-pill-right";
+      rightTab.setAttribute("aria-label", "Open Order Details Panel");
+      rightTab.title = "Click to open right order details";
+      rightTab.innerHTML = '<span>📋</span><span>ORDER DETAILS</span>';
+      rightTab.addEventListener("click", function (e) {
+        e.stopPropagation();
+        window.toggleMobileDetailPanel();
+      });
+      document.body.appendChild(rightTab);
+    }
+  }
+
+  // --- SETUP CLOSE BUTTONS IN SIDEBAR & DETAIL PANELS ---
+  function setupCloseButtons() {
+    var sidebar = document.querySelector(".sidebar, aside.sidebar");
+    if (sidebar && !sidebar.querySelector(".sidebar-drawer-close")) {
+      var closeBtn = document.createElement("button");
+      closeBtn.className = "sidebar-drawer-close";
+      closeBtn.setAttribute("aria-label", "Close Menu");
+      closeBtn.innerHTML = "&times;";
+      closeBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        window.closeMobileSidebar();
+      });
+      sidebar.insertBefore(closeBtn, sidebar.firstChild);
+    }
+
+    var detailPanels = document.querySelectorAll(".detail-panel, aside.detail-panel, #detailPanel");
+    detailPanels.forEach(function (panel) {
+      if (!panel.querySelector(".detail-drawer-close") && !panel.querySelector(".sheet-close-btn")) {
+        var dClose = document.createElement("button");
+        dClose.className = "sheet-close-btn detail-drawer-close";
+        dClose.setAttribute("aria-label", "Close Details");
+        dClose.style.cssText = "position:absolute; top:16px; right:16px; font-size:20px; font-weight:800; background:rgba(0,0,0,0.06); border:none; border-radius:50%; width:32px; height:32px; cursor:pointer;";
+        dClose.innerHTML = "&times;";
+        dClose.addEventListener("click", function (e) {
+          e.stopPropagation();
+          window.closeMobileDetailPanel();
+        });
+        panel.insertBefore(dClose, panel.firstChild);
+      }
+    });
+  }
+
+  // --- SETUP MOBILE TOP QUICK ACTION BAR ---
+  function setupMobileTopbar() {
+    if (window.innerWidth > 900) return;
+    var topHeader = document.querySelector(".top-header, .page-header");
+    if (topHeader && !topHeader.querySelector(".pos-mobile-topbar")) {
+      var topbar = document.createElement("div");
+      topbar.className = "pos-mobile-topbar";
+      topbar.innerHTML = [
+        '<button type="button" class="pos-btn-top-menu" onclick="window.toggleMobileSidebar()">',
+        '  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>',
+        '  <span>Features Menu</span>',
+        '</button>',
+        '<div class="pos-top-brand-text">',
+        '  <span>MallMaze POS</span>',
+        '</div>',
+        '<button type="button" class="pos-btn-top-details" onclick="window.toggleMobileDetailPanel()">',
+        '  <span>Details</span>',
+        '  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>',
+        '</button>'
+      ].join("");
+      topHeader.insertBefore(topbar, topHeader.firstChild);
+    }
+  }
+
+  // --- AUTOMATIC ORDER ROW CLICK LISTENER ---
+  function setupOrderRowInteractions() {
+    document.addEventListener("click", function (e) {
+      if (window.innerWidth > 900) return;
+      var row = e.target.closest(".order-row, tr[onclick], tr[data-order-id], .orders-table tbody tr");
+      if (row && !e.target.closest("button, a, input, select")) {
+        setTimeout(function () {
+          window.openMobileDetailPanel();
+        }, 120);
+      }
+    });
+  }
+
+  function init() {
+    setupBackdrop();
+    setupCloseButtons();
+    setupEdgeTabs();
+    setupMobileTopbar();
+    setupOrderRowInteractions();
+  }
+
+  window.addEventListener("resize", function () {
+    if (window.innerWidth > 900) {
+      window.closeMobileSidebar();
+      window.closeMobileDetailPanel();
+    } else {
+      setupEdgeTabs();
+      setupMobileTopbar();
+    }
+  });
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);

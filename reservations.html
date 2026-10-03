@@ -3,39 +3,686 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Reserve items at local stores to try in-person before purchasing on MallMaze." />
+    <meta name="description" content="Reserve items at verified local stores with a 7% token payment, try in-person, and pay the rest at pickup on MallMaze." />
 
-    <title>MallMaze - Reservations</title>
+    <title>MallMaze - Reserve & Pick Up (7% Token Flow)</title>
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <link rel="stylesheet" href="assets/css/react-styles.css">
     <link rel="stylesheet" href="assets/css/styles.css">
-      <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
-      <meta property="og:title" content="MallMaze - Reserve & Try" />
-    <meta property="og:description" content="Reserve items at local stores to try in-person before purchasing on MallMaze." />
-    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        background-color: #f8fafc;
+        color: #0f172a;
+      }
+      .font-mono-code {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+      }
+      .gradient-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31104b 100%);
+      }
+      .token-badge {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      }
+      .store-badge {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      }
+      .pulse-dot {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.1); }
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
+      }
+    </style>
   </head>
-  <body class="bg-white">
-    <nav></nav>
-    <main class="container mx-auto px-4 py-12">
-      <h1 class="text-4xl font-bold mb-8">Reserve &amp; Try</h1>
-      <div id="reservations-container"></div>
-    </main>
-    <footer class="bg-gray-900 text-white mt-16 py-12">
-      <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div><h3 class="font-bold mb-4">MallMaze</h3><p class="text-sm">Your ultimate shopping destination</p></div>
-          <div><h4 class="font-semibold mb-4">Quick Links</h4><ul class="space-y-2 text-sm"><li><a href="index.html">Home</a></li><li><a href="malls.html">Malls</a></li><li><a href="products.html">Products</a></li></ul></div>
-          <div><h4 class="font-semibold mb-4">Support</h4><ul class="space-y-2 text-sm"><li><a href="feedback.html">Feedback</a></li><li><a href="login.html">Contact Us</a></li></ul></div>
-          <div><h4 class="font-semibold mb-4">Legal</h4><ul class="space-y-2 text-sm"><li><a href="login.html">Terms</a></li><li><a href="login.html">Privacy</a></li></ul></div>
+  <body class="min-h-screen flex flex-col antialiased">
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-8">
+          <a href="index.html" class="flex items-center gap-2">
+            <span class="text-2xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">MallMaze</span>
+            <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Hyperlocal</span>
+          </a>
+          <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+            <a href="index.html" class="hover:text-indigo-600 transition">Explore Malls</a>
+            <a href="products.html" class="hover:text-indigo-600 transition">Products</a>
+            <a href="reservations.html" class="text-indigo-600 border-b-2 border-indigo-600 pb-1">Reserve & Pick Up</a>
+            <a href="orders.html" class="hover:text-indigo-600 transition">Delivery Orders</a>
+            <a href="store-dashboard.html" class="hover:text-indigo-600 transition">Vendor Portal</a>
+          </nav>
         </div>
-        <div class="border-t border-gray-700 pt-8 text-center text-sm"><p>&copy; 2026 MallMaze. All rights reserved.</p></div>
+        <div class="flex items-center gap-3">
+          <button id="btn-counter-mode" onclick="toggleCounterMode()" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition shadow-sm">
+            <span>🏬</span> Store Counter Mode
+          </button>
+          <button onclick="openNewReservationModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md shadow-indigo-100">
+            <span>+</span> Reserve Item
+          </button>
+          <a href="cart.html" class="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition relative">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+          </a>
+        </div>
       </div>
-    </footer>
-    <script src="assets/js/config.js" defer></script>
-    <script src="assets/js/api-client.js" defer></script>
-    <script src="assets/js/runtime-guard.js" defer></script>
-    <script src="assets/js/marketplace.js" defer></script>
-    <script src="assets/js/main.js?v=marketplace-20260614" defer></script>
+    </header>
+
+    <!-- Hero Header -->
+    <section class="gradient-hero text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden shadow-xl">
+      <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+      <div class="max-w-7xl mx-auto relative z-10">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+          <div class="max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 mb-4 backdrop-blur-sm">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
+              7% TOKEN PAYMENT MODEL (PLATFORM COMMISSION SECURED)
+            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-3">
+              Reserve & Pick Up In-Store
+            </h1>
+            <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+              Lock desired sizes & stock at verified neighborhood shops for 48 hours. Pay just a <b>7% token upfront</b> to reserve. Try in-store and pay the remaining 93% at the shop counter!
+            </p>
+          </div>
+
+          <!-- Quick Explainer Card -->
+          <div class="glass-card rounded-2xl p-6 text-slate-900 shadow-2xl max-w-md w-full border border-white/20">
+            <h3 class="text-xs font-black uppercase tracking-wider text-indigo-700 mb-3 flex items-center justify-between">
+              <span>Financial Safeguard Formula</span>
+              <span class="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-bold">100% Anti-Bypass</span>
+            </h3>
+            <div class="space-y-2.5 text-xs">
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-slate-500">Typical Order Value</span>
+                <span class="font-bold text-slate-800">₹600</span>
+              </div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-emerald-700 font-semibold flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 7% Token Paid Online (Now)
+                </span>
+                <span class="font-black text-emerald-700">₹42</span>
+              </div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-blue-700 font-semibold flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-blue-500"></span> 93% Balance Due at Counter
+                </span>
+                <span class="font-black text-blue-700">₹558</span>
+              </div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-slate-500">Delivery Fee (Self Pickup)</span>
+                <span class="font-bold text-emerald-600">₹0 (Free)</span>
+              </div>
+              <div class="pt-1 flex justify-between items-center text-xs">
+                <span class="text-slate-600 font-medium">Net Platform Commission Safe</span>
+                <span class="font-extrabold text-indigo-600">₹41.16</span>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+              <span>Even if customer visits store directly, platform cut is already banked!</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Counter Pills -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-800">
+          <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <p class="text-xs font-semibold text-slate-400">Active Holds</p>
+            <p id="stat-active-count" class="text-2xl font-black text-white mt-1">--</p>
+          </div>
+          <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <p class="text-xs font-semibold text-slate-400">7% Token Paid Online</p>
+            <p id="stat-token-paid" class="text-2xl font-black text-emerald-400 mt-1">₹0</p>
+          </div>
+          <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <p class="text-xs font-semibold text-slate-400">Balance to Pay at Counter</p>
+            <p id="stat-balance-due" class="text-2xl font-black text-blue-400 mt-1">₹0</p>
+          </div>
+          <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <p class="text-xs font-semibold text-slate-400">Completed Pickups</p>
+            <p id="stat-completed-count" class="text-2xl font-black text-indigo-300 mt-1">--</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+      <!-- Store Counter Quick Verify Banner (collapsible) -->
+      <div id="counter-mode-panel" class="hidden mb-8 bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🏬</span>
+              <h2 class="text-lg font-bold text-amber-900">Merchant Pickup Verification Counter</h2>
+            </div>
+            <p class="text-xs text-amber-800 mt-1">
+              Ask customer for their <b>4-digit Pickup OTP</b> or scan their QR code to verify reservation and collect the remaining balance.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <input id="quick-resv-id" type="text" placeholder="Reservation ID (e.g. RSV-...)" class="px-3 py-2 text-xs rounded-xl border border-amber-300 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 w-48">
+            <input id="quick-otp-code" type="text" maxlength="4" placeholder="4-Digit OTP" class="px-3 py-2 text-xs font-mono font-bold tracking-widest text-center rounded-xl border border-amber-300 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 w-28">
+            <button onclick="handleCounterVerification()" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition shadow-sm">
+              Verify & Complete Pickup
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Controls -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="filterReservations('all')" id="tab-all" class="tab-btn active px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-sm">
+            All Holds (<span id="count-all">0</span>)
+          </button>
+          <button onclick="filterReservations('ready_for_pickup')" id="tab-ready" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-700 border border-slate-200 hover:bg-slate-50">
+            Ready for Pickup (<span id="count-ready">0</span>)
+          </button>
+          <button onclick="filterReservations('completed')" id="tab-completed" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-700 border border-slate-200 hover:bg-slate-50">
+            Completed (<span id="count-completed">0</span>)
+          </button>
+          <button onclick="filterReservations('cancelled')" id="tab-cancelled" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-700 border border-slate-200 hover:bg-slate-50">
+            Cancelled
+          </button>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <input id="search-input" onkeyup="handleSearch()" type="text" placeholder="Search by item or store..." class="pl-9 pr-4 py-2 rounded-xl text-xs border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 shadow-sm">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <button onclick="loadReservations()" class="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition border border-slate-200" title="Refresh">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Reservations Container / Cards Grid -->
+      <div id="reservations-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically -->
+        <div class="col-span-full py-16 text-center text-slate-400">
+          <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p class="text-sm font-semibold">Loading your reserved items...</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal: Pickup Pass (QR + OTP) -->
+    <div id="pass-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative animate-scale-up border border-slate-100 text-center">
+        <button onclick="closePassModal()" class="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="inline-flex p-3 rounded-2xl bg-indigo-50 text-indigo-600 mb-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+        </div>
+
+        <h3 class="text-xl font-extrabold text-slate-900" id="modal-product-name">Product Name</h3>
+        <p class="text-xs text-slate-500 mt-0.5" id="modal-store-name">Store Name</p>
+
+        <!-- Canvas for QR Code -->
+        <div class="bg-slate-50 p-4 rounded-2xl inline-block my-4 border border-slate-200 shadow-inner">
+          <canvas id="modal-qr-canvas" width="180" height="180" class="mx-auto"></canvas>
+          <p class="text-[10px] text-slate-400 font-mono mt-1" id="modal-resv-id">RSV-XXXX</p>
+        </div>
+
+        <!-- Secret OTP Badge -->
+        <div class="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 mb-4">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Your In-Store Pickup OTP</p>
+          <div class="text-3xl font-black font-mono tracking-widest text-emerald-700 mt-1" id="modal-otp-code">----</div>
+          <p class="text-[11px] text-emerald-600 mt-1">Show this OTP to store associate at counter</p>
+        </div>
+
+        <!-- Payment Breakdown in Modal -->
+        <div class="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 text-left mb-4 border border-slate-200">
+          <div class="flex justify-between text-emerald-700 font-semibold">
+            <span>7% Token Paid:</span>
+            <span id="modal-token-paid">₹42</span>
+          </div>
+          <div class="flex justify-between text-blue-700 font-black text-sm pt-1 border-t border-slate-200">
+            <span>Remaining at Counter:</span>
+            <span id="modal-balance-due">₹558</span>
+          </div>
+        </div>
+
+        <button onclick="closePassModal()" class="w-full py-3 rounded-xl text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 transition">
+          Done
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal: Reserve New Item Demo -->
+    <div id="reserve-demo-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative animate-scale-up border border-slate-100">
+        <button onclick="closeNewReservationModal()" class="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <h3 class="text-xl font-extrabold text-slate-900 mb-1">Reserve & Pick Up In-Store</h3>
+        <p class="text-xs text-slate-500 mb-6">Choose an item to lock at your nearby shop. 7% token will be paid online, remaining 93% paid when picking up.</p>
+
+        <form id="new-resv-form" onsubmit="handleCreateReservation(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Select Store</label>
+            <select id="modal-store-select" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+              <option value="store-1790518797286-860">Test Organic Mart Live (Hyderabad - 500028)</option>
+              <option value="store-balaji">Balaji Super Bazaar (Hyderabad - 500035)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Product Name</label>
+            <input id="modal-prod-name" type="text" value="Handcrafted Linen Shirt" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Item Price (₹)</label>
+              <input id="modal-prod-price" type="number" value="600" oninput="updateLiveCalc()" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Quantity</label>
+              <input id="modal-prod-qty" type="number" value="1" min="1" max="5" oninput="updateLiveCalc()" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Size / Variant</label>
+              <input id="modal-prod-size" type="text" value="L" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Color</label>
+              <input id="modal-prod-color" type="text" value="Navy Blue" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+
+          <!-- Live 7% Token Calculation Preview -->
+          <div class="rounded-2xl p-4 bg-slate-50 border border-slate-200 space-y-2 text-xs">
+            <div class="flex justify-between text-slate-600">
+              <span>Order Total:</span>
+              <span id="calc-total" class="font-bold text-slate-900">₹600</span>
+            </div>
+            <div class="flex justify-between text-emerald-700 font-bold">
+              <span>7% Token Paid Online (Commission):</span>
+              <span id="calc-token">₹42</span>
+            </div>
+            <div class="flex justify-between text-blue-700 font-extrabold text-sm pt-2 border-t border-slate-200">
+              <span>Balance Due at Store:</span>
+              <span id="calc-balance">₹558</span>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-submit-resv" class="w-full py-3 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
+            <span>Pay 7% Token & Reserve</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-xs font-bold text-white shadow-2xl transition transform translate-y-24 opacity-0 pointer-events-none flex items-center gap-2">
+      <span id="toast-icon">✅</span>
+      <span id="toast-msg">Notification</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api-client.js"></script>
+    <script src="assets/js/qr.js"></script>
+    <script>
+      let reservationsList = [];
+      let currentFilter = 'all';
+
+      // Load on start
+      document.addEventListener("DOMContentLoaded", () => {
+        loadReservations();
+        updateLiveCalc();
+      });
+
+      async function loadReservations() {
+        const grid = document.getElementById("reservations-grid");
+        try {
+          const res = await window.MM_API.reservations();
+          reservationsList = res.reservations || [];
+          updateStats(reservationsList);
+          renderGrid(reservationsList);
+        } catch (err) {
+          console.error("Error loading reservations:", err);
+          grid.innerHTML = `
+            <div class="col-span-full py-12 text-center">
+              <p class="text-rose-500 font-semibold mb-3">Failed to load reservations</p>
+              <button onclick="loadReservations()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">Try Again</button>
+            </div>
+          `;
+        }
+      }
+
+      function updateStats(items) {
+        const active = items.filter(r => r.status === "ready_for_pickup" || r.status === "confirmed");
+        const completed = items.filter(r => r.status === "completed");
+
+        let totalTokenPaid = 0;
+        let totalBalanceDue = 0;
+
+        items.forEach(r => {
+          const tok = r.pricing?.token_amount_inr || r.token_payment?.token_amount_inr || 42;
+          const bal = r.pricing?.balance_due_at_store_inr || (r.pricing?.total_order_inr ? r.pricing.total_order_inr - tok : 558);
+          totalTokenPaid += tok;
+          if (r.status === "ready_for_pickup") {
+            totalBalanceDue += bal;
+          }
+        });
+
+        document.getElementById("stat-active-count").innerText = active.length;
+        document.getElementById("stat-completed-count").innerText = completed.length;
+        document.getElementById("stat-token-paid").innerText = "₹" + totalTokenPaid;
+        document.getElementById("stat-balance-due").innerText = "₹" + totalBalanceDue;
+
+        document.getElementById("count-all").innerText = items.length;
+        document.getElementById("count-ready").innerText = active.length;
+        document.getElementById("count-completed").innerText = completed.length;
+      }
+
+      function renderGrid(items) {
+        const grid = document.getElementById("reservations-grid");
+        let filtered = items;
+
+        if (currentFilter === 'ready_for_pickup') {
+          filtered = items.filter(r => r.status === 'ready_for_pickup' || r.status === 'confirmed');
+        } else if (currentFilter === 'completed') {
+          filtered = items.filter(r => r.status === 'completed');
+        } else if (currentFilter === 'cancelled') {
+          filtered = items.filter(r => r.status === 'cancelled');
+        }
+
+        if (!filtered.length) {
+          grid.innerHTML = `
+            <div class="col-span-full py-16 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-8">
+              <div class="w-16 h-16 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-4 text-2xl">🏬</div>
+              <h3 class="text-base font-bold text-slate-800">No Reservations Found</h3>
+              <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Lock items from neighborhood stores with just a 7% token and pick them up whenever ready.</p>
+              <button onclick="openNewReservationModal()" class="mt-4 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md shadow-indigo-100">
+                + Reserve a Demo Item Now
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = filtered.map(r => {
+          const totalVal = r.pricing?.total_order_inr || 600;
+          const tokenVal = r.pricing?.token_amount_inr || r.token_payment?.token_amount_inr || Math.round(totalVal * 0.07);
+          const balanceVal = r.pricing?.balance_due_at_store_inr || (totalVal - tokenVal);
+          const isReady = r.status === 'ready_for_pickup' || r.status === 'confirmed';
+          const isCompleted = r.status === 'completed';
+
+          return `
+            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
+              <!-- Card Header -->
+              <div class="p-5 flex-1">
+                <div class="flex items-start justify-between gap-3 mb-3">
+                  <div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${isReady ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : isCompleted ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-600'}">
+                      <span class="w-1.5 h-1.5 rounded-full ${isReady ? 'bg-emerald-500' : isCompleted ? 'bg-indigo-500' : 'bg-slate-400'}"></span>
+                      ${isReady ? 'Ready for Pickup' : isCompleted ? 'Completed & Handed Over' : r.status}
+                    </span>
+                    <p class="text-[10px] text-slate-400 font-mono mt-1">${r.id}</p>
+                  </div>
+                  ${isReady ? `
+                    <div class="text-right">
+                      <span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                        ⏳ 48h Hold
+                      </span>
+                    </div>
+                  ` : ''}
+                </div>
+
+                <div class="flex gap-4">
+                  <img src="${r.product_image || 'assets/media/hero-mall.jpg'}" alt="${r.product_name}" class="w-20 h-20 rounded-2xl object-cover border border-slate-100 flex-shrink-0">
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-base font-extrabold text-slate-900 truncate">${r.product_name}</h3>
+                    <p class="text-xs font-semibold text-indigo-600 mt-0.5 flex items-center gap-1">
+                      <span>🏬</span> ${r.store_name || 'Neighborhood Store'}
+                    </p>
+                    <p class="text-[11px] text-slate-500 truncate mt-0.5">📍 ${r.store_address || 'Hyderabad'}</p>
+                    ${r.size || r.color ? `
+                      <div class="flex gap-2 mt-2">
+                        ${r.size ? `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-bold text-slate-700">Size: ${r.size}</span>` : ''}
+                        ${r.color ? `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-bold text-slate-700 capitalize">${r.color}</span>` : ''}
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+
+                <!-- Financial Breakdown Section -->
+                <div class="mt-4 pt-4 border-t border-slate-100 bg-slate-50/70 -mx-5 -mb-5 p-5">
+                  <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                    <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-2.5">
+                      <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-800">7% Token Paid</p>
+                      <p class="text-base font-black text-emerald-700 mt-0.5">₹${tokenVal}</p>
+                      <p class="text-[10px] text-emerald-600">Online UPI / Razorpay</p>
+                    </div>
+                    <div class="bg-blue-50/70 border border-blue-200/80 rounded-xl p-2.5">
+                      <p class="text-[10px] font-bold uppercase tracking-wider text-blue-800">Due at Store</p>
+                      <p class="text-base font-black text-blue-700 mt-0.5">₹${balanceVal}</p>
+                      <p class="text-[10px] text-blue-600">Pay upon inspecting</p>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex items-center gap-2">
+                    ${isReady ? `
+                      <button onclick="showPickupPass('${r.id}')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                        <span>📱</span> Show Pickup Pass
+                      </button>
+                      <a href="https://maps.google.com/?q=${encodeURIComponent(r.store_address || r.store_name)}" target="_blank" class="py-2.5 px-3 rounded-xl text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition" title="Get Directions">
+                        📍
+                      </a>
+                      <button onclick="cancelReservation('${r.id}')" class="p-2.5 rounded-xl text-xs text-rose-500 hover:bg-rose-50 transition" title="Cancel">
+                        ✕
+                      </button>
+                    ` : `
+                      <div class="w-full text-center py-2 text-xs font-semibold text-slate-500 bg-slate-100 rounded-xl">
+                        ${isCompleted ? '✅ Picked up on ' + new Date(r.picked_up_at || r.created_at).toLocaleDateString() : 'Cancelled'}
+                      </div>
+                    `}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function filterReservations(type) {
+        currentFilter = type;
+        document.querySelectorAll(".tab-btn").forEach(b => {
+          b.classList.remove("bg-indigo-600", "text-white", "shadow-sm");
+          b.classList.add("bg-white", "text-slate-700");
+        });
+        const activeBtn = document.getElementById("tab-" + (type === 'all' ? 'all' : type === 'ready_for_pickup' ? 'ready' : type));
+        if (activeBtn) {
+          activeBtn.classList.remove("bg-white", "text-slate-700");
+          activeBtn.classList.add("bg-indigo-600", "text-white", "shadow-sm");
+        }
+        renderGrid(reservationsList);
+      }
+
+      function handleSearch() {
+        const query = document.getElementById("search-input").value.toLowerCase();
+        const filtered = reservationsList.filter(r => 
+          (r.product_name || "").toLowerCase().includes(query) ||
+          (r.store_name || "").toLowerCase().includes(query) ||
+          (r.id || "").toLowerCase().includes(query)
+        );
+        renderGrid(filtered);
+      }
+
+      function showPickupPass(id) {
+        const resv = reservationsList.find(r => r.id === id);
+        if (!resv) return;
+
+        document.getElementById("modal-product-name").innerText = resv.product_name;
+        document.getElementById("modal-store-name").innerText = resv.store_name + " • " + (resv.store_address || "");
+        document.getElementById("modal-resv-id").innerText = resv.id;
+        document.getElementById("modal-otp-code").innerText = resv.otp_code || "----";
+
+        const totalVal = resv.pricing?.total_order_inr || 600;
+        const tokenVal = resv.pricing?.token_amount_inr || Math.round(totalVal * 0.07);
+        const balVal = resv.pricing?.balance_due_at_store_inr || (totalVal - tokenVal);
+
+        document.getElementById("modal-token-paid").innerText = "₹" + tokenVal;
+        document.getElementById("modal-balance-due").innerText = "₹" + balVal;
+
+        const canvas = document.getElementById("modal-qr-canvas");
+        const qrPayload = resv.qr_token || `MM-PICKUP-${resv.id}-${resv.otp_code}`;
+        if (window.MM_QR && window.MM_QR.draw) {
+          window.MM_QR.draw(canvas, qrPayload, 180);
+        }
+
+        document.getElementById("pass-modal").classList.remove("hidden");
+      }
+
+      function closePassModal() {
+        document.getElementById("pass-modal").classList.add("hidden");
+      }
+
+      function openNewReservationModal() {
+        document.getElementById("reserve-demo-modal").classList.remove("hidden");
+      }
+
+      function closeNewReservationModal() {
+        document.getElementById("reserve-demo-modal").classList.add("hidden");
+      }
+
+      function updateLiveCalc() {
+        const price = Number(document.getElementById("modal-prod-price")?.value || 600);
+        const qty = Number(document.getElementById("modal-prod-qty")?.value || 1);
+        const total = price * qty;
+        const token = Math.max(10, Math.round(total * 0.07));
+        const balance = total - token;
+
+        document.getElementById("calc-total").innerText = "₹" + total;
+        document.getElementById("calc-token").innerText = "₹" + token;
+        document.getElementById("calc-balance").innerText = "₹" + balance;
+      }
+
+      async function handleCreateReservation(e) {
+        e.preventDefault();
+        const btn = document.getElementById("btn-submit-resv");
+        btn.disabled = true;
+        btn.innerText = "Processing 7% Token Payment...";
+
+        const storeSelect = document.getElementById("modal-store-select");
+        const storeId = storeSelect.value;
+        const storeName = storeSelect.options[storeSelect.selectedIndex].text.split(" (")[0];
+        const productName = document.getElementById("modal-prod-name").value;
+        const price = Number(document.getElementById("modal-prod-price").value);
+        const qty = Number(document.getElementById("modal-prod-qty").value);
+        const size = document.getElementById("modal-prod-size").value;
+        const color = document.getElementById("modal-prod-color").value;
+
+        try {
+          const payload = {
+            product_id: "prod-" + Date.now(),
+            store_id: storeId,
+            product_name: productName,
+            store_name: storeName,
+            price: price,
+            qty: qty,
+            size: size,
+            color: color,
+            payment_method: "Razorpay / UPI Instant (7% Token)",
+            customer_name: "Customer",
+            customer_phone: "9876543210"
+          };
+
+          const res = await window.MM_API.createReservation(payload);
+          closeNewReservationModal();
+          showToast("Reserved! 7% Token Paid. Pickup OTP: " + res.reservation?.otp_code, "success");
+          await loadReservations();
+          showPickupPass(res.reservation?.id);
+        } catch (err) {
+          showToast(err.message || "Failed to create reservation", "error");
+        } finally {
+          btn.disabled = false;
+          btn.innerText = "Pay 7% Token & Reserve";
+        }
+      }
+
+      async function cancelReservation(id) {
+        if (!confirm("Are you sure you want to cancel this reservation?")) return;
+        try {
+          await window.MM_API.cancelReservation({ id });
+          showToast("Reservation cancelled.", "info");
+          loadReservations();
+        } catch (err) {
+          showToast(err.message || "Cancel failed", "error");
+        }
+      }
+
+      function toggleCounterMode() {
+        const panel = document.getElementById("counter-mode-panel");
+        panel.classList.toggle("hidden");
+      }
+
+      async function handleCounterVerification() {
+        const resvId = document.getElementById("quick-resv-id").value.trim();
+        const otp = document.getElementById("quick-otp-code").value.trim();
+
+        if (!resvId || !otp) {
+          alert("Please enter both Reservation ID and the 4-Digit OTP.");
+          return;
+        }
+
+        try {
+          const res = await window.MM_API.verifyPickup({
+            reservation_id: resvId,
+            otp_code: otp,
+            balance_payment_method: "Store Counter UPI / Cash"
+          });
+          showToast(res.message || "Pickup verified successfully!", "success");
+          document.getElementById("quick-resv-id").value = "";
+          document.getElementById("quick-otp-code").value = "";
+          loadReservations();
+        } catch (err) {
+          showToast(err.message || "Verification failed", "error");
+        }
+      }
+
+      function showToast(msg, type = "success") {
+        const toast = document.getElementById("toast");
+        const msgEl = document.getElementById("toast-msg");
+        const iconEl = document.getElementById("toast-icon");
+
+        msgEl.innerText = msg;
+        iconEl.innerText = type === "success" ? "✅" : type === "error" ? "❌" : "ℹ️";
+        toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-xs font-bold text-white shadow-2xl transition transform duration-300 flex items-center gap-2 ${type === "error" ? 'bg-rose-600' : type === 'info' ? 'bg-slate-800' : 'bg-emerald-600'}`;
+        
+        toast.classList.remove("translate-y-24", "opacity-0", "pointer-events-none");
+        setTimeout(() => {
+          toast.classList.add("translate-y-24", "opacity-0", "pointer-events-none");
+        }, 4000);
+      }
+    </script>
   </body>
 </html>
-

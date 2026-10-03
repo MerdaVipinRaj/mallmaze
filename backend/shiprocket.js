@@ -253,17 +253,23 @@ async function createOrder(order, store = {}, speedTierKey = "zepto_flash") {
     order_id: String(order.id).replace("#", ""),
     order_date: new Date().toISOString().slice(0, 19).replace("T", " "),
     pickup_location: pickupLocation,
-    billing_customer_name: customerName,
+    billing_customer_name: customerName.split(" ")[0] || customerName,
+    billing_last_name: customerName.split(" ").slice(1).join(" ") || ".",
     billing_address: address,
     billing_city: city,
     billing_pincode: pincode,
     billing_state: state,
     billing_country: "India",
     billing_phone: customerPhone,
+    billing_email: order.customer_email || order.delivery?.email || "customer@mallmaze.in",
+    shipping_is_billing: 1,
     order_items: orderItems,
-    payment_method: "Prepaid",
+    payment_method: order.payment_method === "cod" ? "COD" : "Prepaid",
     sub_total: subTotal,
-    weight: 0.5
+    weight: 0.5,
+    length: 10,
+    breadth: 10,
+    height: 5
   });
 
   return {
@@ -299,9 +305,14 @@ async function assignAwb({ shipment_id, courier_id, speed_tier = "zepto_flash" }
 /**
  * Generate Printable Thermal Shipping Label (4x6 format with Speed Stamp)
  */
-function generatePrintableLabelHtml({ order, shipment_id, awb_code, courier_name, speed_tier }) {
+function generatePrintableLabelHtml({ order, store = {}, shipment_id, awb_code, courier_name, speed_tier }) {
   const tier = DELIVERY_TIERS[speed_tier] || DELIVERY_TIERS.zepto_flash;
-  const storeName = order.store_name || "MallMaze Partner Store";
+  const storeName = store.name || order.store_name || order.store?.name || "MallMaze Partner Store";
+  const storeAddress = store.address || store.address_line || order.store_address || "Plot 14, Main Road";
+  const storeCity = store.city || order.store_city || "Hyderabad";
+  const storeState = store.state || order.store_state || "Telangana";
+  const storePincode = store.pincode || store.postal_code || order.store_pincode || "500035";
+  const storePhone = store.phone || order.store_phone || "8309427763";
   const customerName = order.customer_name || order.delivery?.name || (order.customer ? order.customer.name : "Valued Customer");
   const address = order.delivery?.address || "MG Road, Suite 4B";
   const city = order.delivery?.city || "Bengaluru";
@@ -510,22 +521,28 @@ function generatePrintableLabelHtml({ order, shipment_id, awb_code, courier_name
       <span>PREPAID (₹${total})</span>
     </div>
 
-    <div class="address-grid">
+    <div style="text-align:center; padding:6px; background:#0f172a; color:#f8fafc; font-size:10px; font-weight:800; border-radius:4px; margin-bottom:8px;">
+      🚚 DELIVERY PARTNER INSTRUCTION: Collect package from Shop (${storeName}) ➔ Deliver to Customer (${customerName})
+    </div>
+
+    <div class="address-grid" style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:6px; padding:8px; margin-bottom:8px;">
       <div>
-        <div class="addr-title">SHIP TO (DELIVERY ADDRESS):</div>
-        <div class="addr-name">${customerName}</div>
-        <div class="addr-body">${address}, ${city}</div>
-        <div style="font-weight:700; margin-top:2px;">Phone: +91 ${phone}</div>
-        <div class="pin-badge">PIN: ${pincode}</div>
+        <div class="addr-title" style="color:#0f172a; font-weight:900;">📍 PICKUP FROM (SHOP LOCATION):</div>
+        <div class="addr-name" style="color:#0f172a; font-size:13px;">${storeName}</div>
+        <div class="addr-body" style="color:#334155; font-size:11px;">${storeAddress}, ${storeCity}, ${storeState}</div>
+        <div style="font-weight:700; margin-top:2px; font-size:11px; color:#1e293b;">PIN: <strong>${storePincode}</strong> | Shop Phone: +91 ${storePhone}</div>
       </div>
     </div>
 
-    <div class="address-grid">
+    <div class="address-grid" style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:6px; padding:8px; margin-bottom:8px;">
       <div>
-        <div class="addr-title">DISPATCH STORE:</div>
-        <div style="font-weight:800;">${storeName}</div>
-        <div style="font-size:10px;">MallMaze Verified Merchant Partner • ETA: ${tier.eta}</div>
+        <div class="addr-title" style="color:#1e40af; font-weight:900;">🏠 DELIVER TO (CUSTOMER DESTINATION):</div>
+        <div class="addr-name" style="color:#1e3a8a; font-size:13px;">${customerName}</div>
+        <div class="addr-body" style="color:#1e293b; font-size:11px;">${address}, ${city}</div>
+        <div style="font-weight:700; margin-top:2px; font-size:11px;">Customer Phone: +91 ${phone}</div>
+        <div class="pin-badge" style="background:#1d4ed8; color:#fff; font-size:11px; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:3px;">DELIVERY PIN: ${pincode}</div>
       </div>
+    </div>
     </div>
 
     <div class="order-summary">
@@ -624,6 +641,105 @@ async function trackShipment(awb_or_order_id, speed_tier = "zepto_flash") {
 /**
  * Generate 60-step second-by-second GPS coordinates path between store and customer
  */
+
+/**
+ * Register a Store's Physical Address in Shiprocket as a Pickup Location
+ * - Pickup location name is set directly to the Store's Name
+ * - Courier physically collects from THIS shop and delivers to the customer
+ */
+async function registerStorePickupAddress(storeDetails = {}) {
+  const storeName = String(storeDetails.store_name || storeDetails.name || "Store").trim();
+  const storeId = String(storeDetails.store_id || storeDetails.id || "");
+
+  // Pickup location code in Shiprocket: Clean alphanumeric and spaces/hyphens, max 36 chars
+  let pickupName = storeName.replace(/[^a-zA-Z0-9 _-]/g, "").trim().substring(0, 36);
+  if (!pickupName) {
+    pickupName = ("Shop_" + (storeId ? storeId.replace(/[^a-zA-Z0-9]/g, "").slice(-8) : Date.now())).substring(0, 36);
+  }
+
+  const rawPhone = String(storeDetails.phone || storeDetails.mobile || "9876543210").replace(/\D/g, "");
+  const phone = rawPhone.length >= 10 ? rawPhone.slice(-10) : "9876543210";
+  const email = String(storeDetails.email || storeDetails.owner_email || process.env.SHIPROCKET_EMAIL || "store@mallmaze.in").trim();
+  const address = String(storeDetails.address || storeDetails.address_line || storeDetails.location || "Main Road").trim();
+  const address2 = String(storeDetails.address_2 || storeDetails.area || "").trim();
+  const city = String(storeDetails.city || "Hyderabad").trim();
+  const state = String(storeDetails.state || "Telangana").trim();
+  const pincode = String(storeDetails.pincode || storeDetails.pin_code || storeDetails.postal_code || "500001").trim();
+  const ownerName = String(storeDetails.owner_name || storeDetails.owner || storeName).trim();
+
+  if (isSandbox()) {
+    return {
+      ok: true,
+      sandbox: true,
+      pickup_location_name: pickupName,
+      address,
+      city,
+      state,
+      pincode,
+      phone,
+      message: `Pickup location '${pickupName}' registered in Sandbox`
+    };
+  }
+
+  try {
+    const token = await getAuthToken();
+    const payload = {
+      pickup_location: pickupName,
+      name: ownerName || storeName,
+      email: email,
+      phone: phone,
+      address: address,
+      address_2: address2,
+      city: city,
+      state: state,
+      country: "India",
+      pin_code: pincode
+    };
+
+    const res = await httpsRequest({
+      hostname: "apiv2.shiprocket.in",
+      path: "/v1/external/settings/company/addpickup",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      }
+    }, payload);
+
+    const isOk = res.status === 200 || res.status === 201;
+    const bodyStr = JSON.stringify(res.body || {});
+    const alreadyExists = bodyStr.toLowerCase().includes("already");
+
+    if (isOk || alreadyExists) {
+      return {
+        ok: true,
+        sandbox: false,
+        pickup_location_name: pickupName,
+        address,
+        city,
+        state,
+        pincode,
+        phone,
+        already_registered: alreadyExists,
+        data: res.body
+      };
+    } else {
+      return {
+        ok: false,
+        error: res.body?.message || "Failed to register pickup in Shiprocket",
+        pickup_location_name: pickupName,
+        detail: res.body
+      };
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      error: err.message,
+      pickup_location_name: pickupName
+    };
+  }
+}
+
 function generateLiveRouteCoordinates(startLat = 12.9716, startLng = 77.5946, endLat = 12.9780, endLng = 77.6050, totalSteps = 60) {
   const steps = [];
   for (let i = 0; i <= totalSteps; i++) {
@@ -648,6 +764,7 @@ function generateLiveRouteCoordinates(startLat = 12.9716, startLng = 77.5946, en
 }
 
 module.exports = {
+  registerStorePickupAddress,
   generateLiveRouteCoordinates,
   isSandbox,
   getAuthToken,

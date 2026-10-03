@@ -838,7 +838,7 @@
         overflow: hidden;
       }
 
-      .sidebar { display: none; }
+      /* sidebar drawer handled by pos-mobile.css */
 
       .main-wrapper {
         flex: 1;
@@ -1023,11 +1023,36 @@
   }
 </style>
 
+  <link rel="stylesheet" href="assets/css/pos-mobile.css">
+  <script src="assets/js/pos-mobile.js"></script>
 </head>
 <body>
 
   <div class="app-container">
-    <!-- Mobile Bottom Navigation -->
+    <!-- Mobile Bottom Navigation Dock (hidden on desktop via CSS) -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+      <a href="store-dashboard.html" class="mob-nav-btn active" id="mbn-dash">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="orders.html" class="mob-nav-btn" id="mbn-orders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Orders</span>
+      </a>
+      <a href="inventory.html" class="mob-nav-btn" id="mbn-stock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+        <span>Stock</span>
+      </a>
+      <a href="payments.html" class="mob-nav-btn" id="mbn-pay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+        <span>Payments</span>
+      </a>
+      <button type="button" class="mob-nav-btn" onclick="window.toggleMobileSidebar()" id="mbn-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <span>More</span>
+      </button>
+    </nav>
+
 
     <!-- SIDEBAR -->
     <aside class="sidebar">
@@ -1054,6 +1079,10 @@
         <a class="nav-item" href="orders.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
           <span>Orders</span>
+        </a>
+        <a class="nav-item" href="javascript:void(0)" onclick="showReservationsSection(this)" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; margin: 3px 0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span style="color:#10b981; font-weight:700;">Pickups (7% Token)</span>
         </a>
         <a class="nav-item" href="inventory.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
@@ -1525,6 +1554,9 @@
       selectedOrderId = orderId;
       renderTable();
       renderDetailPanel();
+      if (window.innerWidth <= 900 && typeof window.openMobileDetailPanel === 'function') {
+        window.openMobileDetailPanel();
+      }
     }
 
     function renderDetailPanel() {
@@ -1690,6 +1722,124 @@
       if (qrSec) qrSec.style.display = "flex";
 
       renderDashboardQr();
+    }
+
+    function showReservationsSection(navEl) {
+      document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+      if (navEl) navEl.classList.add("active");
+
+      const ordersSec = document.getElementById("orders-main-section");
+      const detailSec = document.querySelector(".detail-panel");
+      const qrSec = document.getElementById("store-qr-section");
+      const rsvSec = document.getElementById("reservations-section");
+
+      if (ordersSec) ordersSec.style.display = "none";
+      if (detailSec) detailSec.style.display = "none";
+      if (qrSec) qrSec.style.display = "none";
+      if (rsvSec) rsvSec.style.display = "flex";
+
+      loadDashboardReservations();
+    }
+
+    async function loadDashboardReservations() {
+      const tbody = document.getElementById("dash-reservations-tbody");
+      if (!tbody) return;
+      try {
+        const res = await (window.MM_API ? window.MM_API.reservations() : fetch('/api/reservations').then(r => r.json()));
+        const list = res.reservations || [];
+        
+        let pending = 0;
+        let completed = 0;
+        let balSum = 0;
+
+        tbody.innerHTML = list.length ? list.map(r => {
+          const isPending = r.status === 'ready_for_pickup' || r.status === 'confirmed';
+          if (isPending) {
+            pending++;
+            balSum += (r.pricing?.balance_due_at_store_inr || 558);
+          } else if (r.status === 'completed') {
+            completed++;
+          }
+
+          const tot = r.pricing?.total_order_inr || 600;
+          const tok = r.pricing?.token_amount_inr || 42;
+          const bal = r.pricing?.balance_due_at_store_inr || (tot - tok);
+
+          return `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+              <td style="padding: 12px; font-family: monospace; font-weight: 700; color: #334155;">${r.id}</td>
+              <td style="padding: 12px;">
+                <div style="font-weight: 700; color: #0f172a;">${r.customer_name || 'Customer'}</div>
+                <div style="font-size: 11px; color: #64748b;">${r.customer_phone || ''}</div>
+              </td>
+              <td style="padding: 12px;">
+                <div style="font-weight: 700; color: #0f172a;">${r.product_name}</div>
+                ${r.size ? `<span style="font-size: 10px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Size: ${r.size}</span>` : ''}
+              </td>
+              <td style="padding: 12px; font-weight: 700;">₹${tot}</td>
+              <td style="padding: 12px; color: #16a34a; font-weight: 700;">₹${tok} <span style="font-size:10px; color:#15803d; background:#dcfce7; padding:2px 5px; border-radius:4px;">Online</span></td>
+              <td style="padding: 12px; color: #2563eb; font-weight: 800; font-size: 13.5px;">₹${bal}</td>
+              <td style="padding: 12px;">
+                <span style="display:inline-block; font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 3px 8px; border-radius: 12px; ${isPending ? 'background:#dcfce7; color:#166534; border:1px solid #86efac;' : 'background:#f1f5f9; color:#475569;'}">
+                  ${isPending ? 'Ready for Pickup' : r.status}
+                </span>
+              </td>
+              <td style="padding: 12px; text-align: right;">
+                ${isPending ? `
+                  <button onclick="prefillVerify('${r.id}', '${r.otp_code}')" style="background:#166534; color:#fff; font-size:11px; font-weight:800; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">
+                    Verify OTP
+                  </button>
+                ` : `<span style="font-size:11px; color:#64748b; font-weight:600;">✓ Completed</span>`}
+              </td>
+            </tr>
+          `;
+        }).join("") : '<tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No customer reservations yet.</td></tr>';
+
+        const elPending = document.getElementById("dash-stat-pending");
+        if (elPending) elPending.innerText = pending;
+        const elBal = document.getElementById("dash-stat-balance");
+        if (elBal) elBal.innerText = "₹" + balSum;
+        const elComp = document.getElementById("dash-stat-completed");
+        if (elComp) elComp.innerText = completed;
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px; color: #ef4444;">Failed to load reservations: ${err.message}</td></tr>`;
+      }
+    }
+
+    function prefillVerify(id, otp) {
+      document.getElementById("dash-verify-resv-id").value = id;
+      document.getElementById("dash-verify-otp").value = otp;
+      dashVerifyPickup();
+    }
+
+    async function dashVerifyPickup() {
+      const resvId = document.getElementById("dash-verify-resv-id").value.trim();
+      const otp = document.getElementById("dash-verify-otp").value.trim();
+      if (!resvId || !otp) {
+        showToast("Please enter Reservation ID & 4-Digit OTP");
+        return;
+      }
+
+      showToast("Verifying pickup OTP...");
+      try {
+        const resp = await fetch("/api/reservations/verify-pickup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reservation_id: resvId, otp_code: otp, balance_payment_method: "Store Counter Cash / UPI" })
+        }).then(r => r.json());
+
+        if (resp.ok) {
+          showToast(resp.message || "Pickup verified successfully!");
+          document.getElementById("dash-verify-resv-id").value = "";
+          document.getElementById("dash-verify-otp").value = "";
+          loadDashboardReservations();
+        } else {
+          showToast(resp.error || "Verification failed");
+        }
+      } catch (err) {
+        showToast(err.message || "Error verifying pickup");
+      }
     }
 
     function showOrdersSection() {

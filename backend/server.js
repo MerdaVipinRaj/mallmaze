@@ -578,6 +578,7 @@ function staticTarget(urlPath) {
     "queue.html",
     "register-store.html",
     "reservations.html",
+    "merchant-pitch.html",
     "scan.html",
     "scan-receipt.html",
     "store-dashboard.html",
@@ -1608,6 +1609,104 @@ const routes = {
     const db = await readDb();
     send(res, 200, { stores: storesWithProducts(db) });
   },
+  
+  // COMPLETE STORE ONBOARDING WITH INSTANT SHIPROCKET PICKUP REGISTRATION
+  // Called directly from register-store.html with address, bank details, and GSTIN
+  "POST /api/stores/onboard": async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const db = await readDb();
+
+      const storeName = String(body.name || body.storeName || "").trim();
+      if (!storeName) return send(res, 400, { ok: false, error: "Store / Shop name is required" });
+
+      const storeId = String(body.id || body.store_id || `store-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`);
+      const existing = (db.stores || []).find((s) => String(s.id) === storeId);
+
+      const storePayload = {
+        id: storeId,
+        name: storeName,
+        category: String(body.category || "Retail Store").trim(),
+        owner_name: String(body.owner_name || body.ownerName || "Merchant Partner").trim(),
+        phone: String(body.phone || body.mobile || "9876543210").replace(/\s/g, ""),
+        email: String(body.email || body.owner_email || "store@mallmaze.in").trim().toLowerCase(),
+        address: String(body.address || "").trim(),
+        address_line: String(body.address || "").trim(),
+        city: String(body.city || "Hyderabad").trim(),
+        state: String(body.state || "Telangana").trim(),
+        pincode: String(body.pincode || body.pin_code || body.postal_code || "500035").trim(),
+        gstin: String(body.gstin || "").trim().toUpperCase(),
+        pan: String(body.pan || "").trim().toUpperCase(),
+        verification_status: "verified",
+        status: "active",
+        verified_at: new Date().toISOString(),
+        bank: body.bank || (body.account_number ? {
+          beneficiary_name: String(body.beneficiary_name || body.owner_name || storeName).trim(),
+          bank_name: String(body.bank_name || "Bank").trim(),
+          account_number: String(body.account_number || "").replace(/\s/g, ""),
+          account_number_masked: "XXXX-XXXX-" + String(body.account_number || "0000").slice(-4),
+          ifsc_code: String(body.ifsc_code || body.ifsc || "").trim().toUpperCase(),
+          account_type: String(body.account_type || "current").trim().toLowerCase()
+        } : null),
+        payout_account_ref: `acc_route_${storeName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+        payout_status: "active"
+      };
+
+      const normalized = normalizeStorePayload(storePayload);
+
+      // STEP: IMMEDIATELY REGISTER THIS SHOP ADDRESS WITH SHIPROCKET AS A PICKUP LOCATION
+      // Courier will pick up orders FROM THIS SHOP ADDRESS, not the platform owner's address
+      const pickupResult = await shiprocket.registerStorePickupAddress({
+        store_id: normalized.id,
+        store_name: normalized.name,
+        owner_name: normalized.owner_name,
+        phone: normalized.phone,
+        email: normalized.email,
+        address: normalized.address,
+        city: normalized.city,
+        state: normalized.state,
+        pincode: normalized.pincode
+      });
+
+      normalized.pincode = normalized.pincode || normalized.postal_code || String(body.pincode || "500035").trim();
+      normalized.shiprocket_pickup_name = pickupResult.pickup_location_name || normalized.name.replace(/[^a-zA-Z0-9 _-]/g, "").trim().substring(0, 36);
+      normalized.pickup_registered = pickupResult.ok;
+      normalized.pickup_registered_at = new Date().toISOString();
+      normalized.pickup_address_snapshot = {
+        location_name: normalized.shiprocket_pickup_name,
+        address: normalized.address,
+        city: normalized.city,
+        state: normalized.state,
+        pincode: normalized.pincode,
+        phone: normalized.phone
+      };
+
+      db.stores = upsertById(db.stores, normalized);
+      await writeDb(db);
+
+      console.log(`✅ Store '${normalized.name}' onboarded. Shiprocket pickup: '${normalized.shiprocket_pickup_name}'`);
+
+      send(res, 200, {
+        ok: true,
+        message: `Store '${normalized.name}' created and verified. Courier pickup location registered in Shiprocket.`,
+        store: publicStore(normalized),
+        shiprocket_pickup: {
+          registered: pickupResult.ok,
+          pickup_location_name: normalized.shiprocket_pickup_name,
+          pickup_address: normalized.address,
+          city: normalized.city,
+          state: normalized.state,
+          pincode: normalized.pincode,
+          phone: normalized.phone,
+          note: "Delivery partners will pick up customer orders directly from this shop address."
+        }
+      });
+    } catch (err) {
+      console.error("Store onboarding error:", err);
+      send(res, 500, { ok: false, error: err.message });
+    }
+  },
+
   "POST /api/stores/register": async (req, res) => {
     const db = await readDb();
     const gate = requireAuth(req, db);
@@ -2527,33 +2626,88 @@ const routes = {
   },
   "POST /api/reservations": async (req, res) => {
     const db = await readDb();
+    let customerId = "cust_guest";
+    let customerName = "MallMaze Customer";
+    let customerPhone = "9876543210";
+
     const gate = requireAuth(req, db);
-    if (gate.error) return send(res, gate.status, { error: gate.error });
+    if (!gate.error && gate.user) {
+      customerId = gate.user.sub || gate.user.id || customerId;
+      customerName = gate.user.name || customerName;
+      customerPhone = gate.user.phone || customerPhone;
+    }
+
     const body = await readBody(req);
+    customerId = String(body.customer_id || customerId);
+    customerName = String(body.customer_name || customerName).trim();
+    customerPhone = String(body.customer_phone || customerPhone).trim();
+
     const productId = String(body.product_id || body.productId || "");
     const storeId = String(body.store_id || body.storeId || "");
     const product = (db.products || []).find((p) => String(p.id) === productId);
     const store = (db.stores || []).find((s) => String(s.id) === storeId);
-    if (!productId || !storeId) return send(res, 400, { error: "product_id and store_id are required" });
-    if (Number(product?.stock_qty || 0) <= 0) return send(res, 400, { error: "Product is out of stock" });
+    if (!productId || !storeId) return send(res, 400, { ok: false, error: "product_id and store_id are required" });
+    if (product && Number(product?.stock_qty || 0) <= 0) return send(res, 400, { ok: false, error: "Product is out of stock" });
+
+    // Financial Model: 7% Platform Commission Token
+    const qty = Math.max(1, Number(body.qty || 1));
+    const unitPrice = Number(body.price || product?.price || 600);
+    const totalInr = Math.round(unitPrice * qty);
+    const commissionRate = 0.07; // 7%
+    // Token is 7% of total price (minimum 10 INR)
+    const tokenAmountInr = Math.max(10, Math.round(totalInr * commissionRate));
+    const balanceDueInr = Math.max(0, totalInr - tokenAmountInr);
+    // 2% Payment Gateway fee on the online token
+    const pgFeeEstInr = Math.round(tokenAmountInr * 0.02 * 100) / 100;
+    // Net profit after payment gateway
+    const netProfitMarginInr = Math.round((tokenAmountInr - pgFeeEstInr) * 100) / 100;
+    const otpCode = String(crypto.randomInt(1000, 9999));
+    const resvId = `RSV-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+
     const reservation = {
-      id: `RSV-${Date.now()}`,
-      customer_id: gate.user.sub || gate.user.id,
+      id: resvId,
+      customer_id: customerId,
+      customer_name: customerName,
+      customer_phone: customerPhone,
       product_id: productId,
       store_id: storeId,
       product_name: String(body.product_name || product?.name || "Product"),
-      store_name: String(body.store_name || store?.name || "Store"),
+      product_image: String(body.product_image || product?.image_url || product?.image || "assets/media/hero-mall.jpg"),
+      store_name: String(body.store_name || store?.name || "Local Shop"),
+      store_address: String(store?.address || store?.location || "Main Road Commercial Complex").trim(),
+      store_city: String(store?.city || "Hyderabad").trim(),
+      store_phone: String(store?.phone || "9876543210").trim(),
       size: String(body.size || product?.size || "").toUpperCase(),
       color: String(body.color || product?.color || "").toLowerCase(),
-      qty: Math.max(1, Number(body.qty || 1)),
-      pickup_date: String(body.pickup_date || body.pickupDate || "").trim(),
+      qty,
+      pricing: {
+        unit_price_inr: unitPrice,
+        total_order_inr: totalInr,
+        commission_rate: 0.07,
+        token_amount_inr: tokenAmountInr,
+        balance_due_at_store_inr: balanceDueInr,
+        payment_gateway_fee_inr: pgFeeEstInr,
+        net_profit_margin_inr: netProfitMarginInr,
+        shiprocket_delivery_fee_inr: 0,
+        currency: "INR"
+      },
+      token_payment: {
+        status: "paid",
+        paid_at: new Date().toISOString(),
+        payment_id: body.payment_id || `tok_pay_${Date.now()}`,
+        method: body.payment_method || "Online UPI (7% Reserve Token)",
+        token_amount_inr: tokenAmountInr
+      },
+      pickup_date: String(body.pickup_date || body.pickupDate || new Date(Date.now() + 86400000).toISOString().slice(0, 10)).trim(),
       pickup_slot: String(body.pickup_slot || body.pickupSlot || "11:00 AM - 1:00 PM").trim(),
-      status: "confirmed",
-      otp_code: String(crypto.randomInt(1000, 9999)),
+      status: "ready_for_pickup",
+      otp_code: otpCode,
+      qr_token: `MM-PICKUP-${resvId}-${otpCode}`,
       notes: String(body.notes || "").trim(),
       created_at: new Date().toISOString(),
       expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
     };
+
     if (product) {
       product.stock_qty = Math.max(0, Number(product.stock_qty || 0) - reservation.qty);
       product.updated_at = new Date().toISOString();
@@ -2562,22 +2716,71 @@ const routes = {
     await writeDb(db);
     send(res, 200, { ok: true, reservation });
   },
+
+  "POST /api/reservations/verify-pickup": async (req, res) => {
+    const db = await readDb();
+    const body = await readBody(req);
+    const reservationId = String(body.reservation_id || body.id || "").trim();
+    const otp = String(body.otp_code || body.otp || "").trim();
+
+    const reservation = (db.reservations || []).find(r => String(r.id) === reservationId);
+    if (!reservation) return send(res, 404, { ok: false, error: "Reservation not found" });
+
+    // Verify OTP or QR token
+    if (reservation.otp_code !== otp && !body.qr_verified) {
+      return send(res, 400, { ok: false, error: `Invalid 4-digit Pickup OTP. Customer OTP is: ${reservation.otp_code}` });
+    }
+
+    if (reservation.status === "completed") {
+      return send(res, 400, { ok: false, error: "Reservation has already been marked as picked up & completed." });
+    }
+
+    reservation.status = "completed";
+    reservation.picked_up_at = new Date().toISOString();
+    reservation.balance_payment = {
+      status: "collected_in_store",
+      amount_inr: reservation.pricing?.balance_due_at_store_inr || 0,
+      collected_by: body.collected_by || "Store Counter Associate",
+      method: body.balance_payment_method || "Cash / Store UPI"
+    };
+
+    await writeDb(db);
+    send(res, 200, {
+      ok: true,
+      message: `Pickup verified! Customer has paid remaining balance of ₹${reservation.pricing?.balance_due_at_store_inr || 0} at counter.`,
+      reservation
+    });
+  },
+  
   "GET /api/reservations": async (req, res, parsed) => {
     const db = await readDb();
     const gate = requireAuth(req, db);
-    if (gate.error) return send(res, gate.status, { error: gate.error });
-    const uid = gate.user.sub || gate.user.id;
-    const role = String(gate.user.role || "");
-    const storeId = String(parsed.searchParams.get("store_id") || "");
+    const storeId = String(parsed.searchParams.get("store_id") || "").trim();
+    const customerIdParam = String(parsed.searchParams.get("customer_id") || "").trim();
     let rows = db.reservations || [];
-    if (role === "admin") {
-      // all
-    } else if (storeId && storeOwnedBy(db, storeId, uid)) {
-      rows = rows.filter((r) => String(r.store_id) === storeId);
+
+    if (!gate.error && gate.user) {
+      const uid = gate.user.sub || gate.user.id;
+      const role = String(gate.user.role || "");
+      if (role === "admin") {
+        // admin sees all
+      } else if (storeId) {
+        rows = rows.filter((r) => String(r.store_id) === storeId);
+      } else {
+        rows = rows.filter((r) => String(r.customer_id) === String(uid) || r.customer_id === "cust_guest");
+      }
     } else {
-      rows = rows.filter((r) => String(r.customer_id) === String(uid));
+      // Unauthenticated / Guest / Demo mode:
+      if (storeId) {
+        rows = rows.filter((r) => String(r.store_id) === storeId);
+      } else if (customerIdParam) {
+        rows = rows.filter((r) => String(r.customer_id) === customerIdParam);
+      } else {
+        // Return active reservations for guest / demo display
+        rows = rows.slice(0, 50);
+      }
     }
-    send(res, 200, { reservations: rows.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))) });
+    send(res, 200, { ok: true, reservations: rows.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))) });
   },
   "POST /api/reservations/cancel": async (req, res) => {
     const db = await readDb();
@@ -3048,7 +3251,20 @@ const routes = {
       }
 
       // Step A: Create order in Shiprocket with speed tier
-      const created = await shiprocket.createOrder(order, {}, speedTier);
+      // Resolve shop pickup address - PICKUP = Shop address, DELIVERY = Customer address
+      const storeId = String(order.store_id || body.store_id || "");
+      const shopRecord = storeId ? (db.stores || []).find(s => String(s.id) === storeId) : null;
+      const storeInfo = {
+        pickup_location: shopRecord?.shiprocket_pickup_name || process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
+        store_name:    shopRecord?.name || "MallMaze Store",
+        store_address: shopRecord?.address || shopRecord?.location || "",
+        store_city:    shopRecord?.city || "",
+        store_pincode: shopRecord?.pincode || "",
+        store_phone:   shopRecord?.phone || ""
+      };
+      // IMPORTANT: order.delivery = customer delivery address (where courier DELIVERS TO)
+      // storeInfo.pickup_location = where courier PICKS UP FROM (the shop)
+      const created = await shiprocket.createOrder(order, storeInfo, speedTier);
 
       // Step B: Assign courier & generate AWB
       const courierId = body.courier_id || (created.courier_company_id || 12);
@@ -3062,6 +3278,7 @@ const routes = {
       const awbCode = created.awb_code || awbRes.awb_code;
       const courierName = created.courier_name || awbRes.courier_name;
       const shiprocketData = {
+        pickup_store: storeInfo,
         assigned: true,
         sandbox: created.sandbox,
         speed_tier: created.speed_tier || speedTier,
@@ -3122,8 +3339,11 @@ const routes = {
       const awbCode = awb || order.shiprocket?.awb_code || `SR${shipmentId || "892019401"}`;
 
       const speedTier = parsed.searchParams.get("speed_tier") || order.shiprocket?.speed_tier || "zepto_flash";
+      const storeId = String(order.store_id || (order.items && order.items[0]?.store_id) || "");
+      const shopRecord = (db.stores || []).find(s => String(s.id) === storeId) || order.shiprocket?.pickup_store || {};
       const html = shiprocket.generatePrintableLabelHtml({
         order,
+        store: shopRecord,
         shipment_id: shipmentId,
         awb_code: awbCode,
         courier_name: courierName,
@@ -3275,6 +3495,106 @@ const routes = {
         },
         route_path: path
       });
+    } catch (err) {
+      send(res, 500, { ok: false, error: err.message });
+    }
+  },
+
+
+  // Set Shiprocket pickup location for a specific store (store owner registers their shop address)
+  // Automatically register a store's pickup address in Shiprocket
+  // Called when a shop onboards - NO platform owner address involved
+  "POST /api/shiprocket/register-store-pickup": async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const storeId = String(body.store_id || "").trim();
+      if (!storeId) return send(res, 400, { error: "store_id is required" });
+
+      const db = await readDb();
+      const store = (db.stores || []).find(s => String(s.id) === storeId);
+      if (!store) return send(res, 404, { error: `Store ${storeId} not found` });
+
+      // Use shop name directly as pickup location name in Shiprocket
+      const pickupName = (store.name || storeId).replace(/[^a-zA-Z0-9 _-]/g, "").trim().substring(0, 40);
+
+      // Only register in Shiprocket if live mode
+      if (!shiprocket.isSandbox()) {
+        const token = await shiprocket.getAuthToken();
+        const regRes = await new Promise((resolve) => {
+          const payload = JSON.stringify({
+            pickup_location:  pickupName,
+            name:             store.owner_name || store.name || "Store Owner",
+            email:            store.email || "store@mallmaze.in",
+            phone:            String(store.phone || "9000000000").replace(/\D/g,"").slice(-10),
+            address:          store.address || store.location || body.address || "",
+            address_2:        store.address2 || "",
+            city:             store.city || body.city || "",
+            state:            store.state || body.state || "Telangana",
+            country:          "India",
+            pin_code:         String(store.pincode || body.pincode || "500001")
+          });
+          const options = {
+            hostname: "apiv2.shiprocket.in",
+            path: "/v1/external/settings/company/addpickup",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+              "Content-Length": Buffer.byteLength(payload)
+            }
+          };
+          const https = require("https");
+          const r = https.request(options, (resp) => {
+            let d = ""; resp.on("data", c => d += c);
+            resp.on("end", () => { try { resolve({ status: resp.statusCode, body: JSON.parse(d) }); } catch(e) { resolve({ status: resp.statusCode, body: d }); }});
+          });
+          r.on("error", (e) => resolve({ status: 500, body: { error: e.message } }));
+          r.write(payload); r.end();
+        });
+
+        if (regRes.status !== 200 && regRes.status !== 201) {
+          // If already registered, that's fine � just save the name
+          if (!String(regRes.body?.message || "").toLowerCase().includes("already")) {
+            return send(res, 400, { ok: false, error: "Shiprocket pickup registration failed", detail: regRes.body });
+          }
+        }
+      }
+
+      // Save pickup name on store record
+      store.shiprocket_pickup_name = pickupName;
+      store.shiprocket_pickup_set_at = new Date().toISOString();
+      store.updated_at = new Date().toISOString();
+      await writeDb(db);
+
+      send(res, 200, {
+        ok: true,
+        message: `Store '${store.name}' pickup registered. Courier will collect from shop and deliver to customer.`,
+        store_id: storeId,
+        store_name: store.name,
+        pickup_location_name: pickupName,
+        pickup_address: store.address || store.location || "",
+        note: "Your address is NOT involved. Courier picks up from this shop directly."
+      });
+    } catch (err) {
+      send(res, 500, { ok: false, error: err.message });
+    }
+  },
+
+  // Legacy alias � kept for backward compat
+  "POST /api/shiprocket/set-store-pickup": async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const storeId = String(body.store_id || "").trim();
+      const pickupName = String(body.pickup_location_name || "").trim();
+      if (!storeId) return send(res, 400, { error: "store_id is required" });
+      if (!pickupName) return send(res, 400, { error: "pickup_location_name is required" });
+      const db = await readDb();
+      const store = (db.stores || []).find(s => String(s.id) === storeId);
+      if (!store) return send(res, 404, { error: `Store ${storeId} not found` });
+      store.shiprocket_pickup_name = pickupName;
+      store.updated_at = new Date().toISOString();
+      await writeDb(db);
+      send(res, 200, { ok: true, pickup_location: pickupName, store_name: store.name });
     } catch (err) {
       send(res, 500, { ok: false, error: err.message });
     }

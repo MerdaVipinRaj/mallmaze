@@ -118,6 +118,7 @@
       return request(`/reservations${q.toString() ? `?${q.toString()}` : ""}`);
     },
     cancelReservation: (payload) => request("/reservations/cancel", { method: "POST", body: payload }),
+    verifyPickup: (payload) => request("/reservations/verify-pickup", { method: "POST", body: payload }),
     storeAnalytics: (storeId) => request(`/store/analytics?store_id=${encodeURIComponent(String(storeId || ""))}`),
     myStores: () => request("/stores/mine"),
     adminStores: (status) => request(`/admin/stores${status ? `?status=${encodeURIComponent(status)}` : ""}`),

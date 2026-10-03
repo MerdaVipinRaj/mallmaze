@@ -125,21 +125,42 @@
   }
 
   async function reserveProduct(product, options) {
-    if (!(await ensureLogin())) return;
+    const price = Number(product.price || 600);
+    const tokenAmount = Math.max(10, Math.round(price * 0.07));
+    const balanceDue = price - tokenAmount;
+    
+    const confirmed = confirm(
+      `🏬 Reserve & Pick Up In-Store (48h Hold)\n\n` +
+      `Product: ${product.name}\n` +
+      `Total Value: ₹${price}\n` +
+      `• 7% Token Due Online: ₹${tokenAmount} (Platform Cut)\n` +
+      `• Remaining Balance at Shop: ₹${balanceDue}\n` +
+      `• Delivery Fee: ₹0 (In-Store Pickup)\n\n` +
+      `Would you like to pay the ₹${tokenAmount} reservation token and lock this item?`
+    );
+    if (!confirmed) return;
+
     const payload = {
       product_id: product.id,
-      store_id: product.storeId || product.store_id,
+      store_id: product.storeId || product.store_id || "store-1790518797286-860",
       product_name: product.name,
-      store_name: product.storeName || product.store_name,
+      store_name: product.storeName || product.store_name || "Neighborhood Partner Store",
+      price: price,
       size: options?.size || product.size || "",
       color: options?.color || product.color || "",
       pickup_date: options?.pickup_date || new Date(Date.now() + 86400000).toISOString().slice(0, 10),
       pickup_slot: options?.pickup_slot || "11:00 AM - 1:00 PM",
+      payment_method: "UPI (7% Token Paid)",
       qty: 1
     };
-    const result = await window.MM_API.createReservation(payload);
-    toast?.(`Reserved! Pickup OTP: ${result.reservation?.otp_code || "sent"}`, { type: "ok", title: "Reservation", ms: 5000 });
-    setTimeout(() => { window.location.href = "reservations.html"; }, 800);
+
+    try {
+      const result = await window.MM_API.createReservation(payload);
+      toast?.(`🔒 Reserved! 7% Token (₹${tokenAmount}) Paid. Pickup OTP: ${result.reservation?.otp_code || "sent"}`, { type: "ok", title: "Reservation Confirmed", ms: 5000 });
+      setTimeout(() => { window.location.href = "reservations.html"; }, 700);
+    } catch (err) {
+      toast?.(err.message || "Reservation failed", { type: "bad", title: "Reservation Error" });
+    }
   }
 
   async function renderRegisterStorePage() {

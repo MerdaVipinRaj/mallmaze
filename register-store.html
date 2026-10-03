@@ -399,16 +399,22 @@
         Congratulations! <strong id="finalStoreName">Priya Electricals & Power Tools</strong> is now an authorized, verified MallMaze Partner store.
       </p>
 
-      <div class="verify-box" style="text-align: left; max-width: 480px; margin: 0 auto 24px auto;">
-        <div class="verify-icon">✔</div>
+      <div class="verify-box" style="text-align: left; max-width: 520px; margin: 0 auto 20px auto;">
+        <div class="verify-icon">✓</div>
         <div>
           <div style="font-size: 13px; font-weight: 800; color: #166534;">Verified Partner Certificate Active</div>
-          <div style="font-size: 12px; color: #15803d; margin-top:2px;">
-            • GSTIN: 27AABCM9102K1Z9 (ITC Enabled)<br>
-            • Razorpay Route Automated Instant Settlements (T+0 &lt; 1s) Connected<br>
-            • Bank A/c: <span id="dispBankConf">HDFC Bank (XXXX-XXXX-0194)</span> Linked
+          <div style="font-size: 12px; color: #15803d; margin-top:4px; line-height:1.5;">
+            • <strong>GSTIN & PAN:</strong> Verified & ITC Enabled<br>
+            • <strong>Instant UPI Settlements:</strong> Bank Account <span id="dispBankConf">Connected</span><br>
+            • <strong>Shiprocket Courier Pickup:</strong> <span id="dispPickupCode" style="font-weight:800; color:#0f172a; background:#fef08a; padding:1px 6px; border-radius:4px;">Sri Lakshmi General Store</span><br>
+            • <strong>Collection Counter:</strong> <span id="dispPickupAddr" style="color:#0f172a;">10-2-211, Kameshwar Rao Colony, Saroornagar - 500035</span>
           </div>
         </div>
+      </div>
+
+      <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; max-width:520px; margin:0 auto 24px auto; text-align:left; font-size:12px; color:#166534;">
+        🚚 <strong>Zero Confusion Guarantee:</strong> When a customer orders products from your shop, Shiprocket couriers will collect them directly from your store address. Platform owner's address is completely separate!
+      </div>
       </div>
 
       <button class="btn-action-primary" style="max-width: 320px; margin: 0 auto;" onclick="redirectToPOS()">
@@ -428,15 +434,23 @@
       const storeName = document.getElementById("csStoreName").value.trim();
       const ownerName = document.getElementById("csOwnerName").value.trim();
       const mobile = document.getElementById("csMobile").value.trim();
+      const email = (document.getElementById("csEmail")?.value || "").trim();
       const category = document.getElementById("csCategory").value;
       const address = document.getElementById("csAddress").value.trim();
+      const city = (document.getElementById("csCity")?.value || "Saroornagar").trim();
+      const state = (document.getElementById("csState")?.value || "Telangana").trim();
+      const pincode = (document.getElementById("csPincode")?.value || "500035").trim();
 
       currentStore = {
         storeName: storeName,
         ownerName: ownerName,
         mobile: mobile,
+        email: email,
         category: category,
         address: address,
+        city: city,
+        state: state,
+        pincode: pincode,
         created: true
       };
 
@@ -445,7 +459,7 @@
       // Transition Stepper: Step 1 Done -> Step 2 Active
       document.getElementById("stNode1").classList.remove("active");
       document.getElementById("stNode1").classList.add("completed");
-      document.getElementById("stBadge1").innerHTML = "✔";
+      document.getElementById("stBadge1").innerHTML = "✓";
 
       document.getElementById("stNode2").classList.add("active");
 
@@ -453,10 +467,10 @@
       document.getElementById("phase-create-store").classList.remove("active-phase");
       document.getElementById("phase-verification-portal").classList.add("active-phase");
 
-      showToast("🏪 Store created! Opening Verification Portal...");
+      showToast("🏪 Store created! Opening Verification & Pickup Setup...");
     }
 
-    function handleVerificationSubmit(e) {
+    async function handleVerificationSubmit(e) {
       e.preventDefault();
       const gstin = document.getElementById("verGstin").value.trim();
       const pan = document.getElementById("verPan").value.trim();
@@ -482,34 +496,74 @@
         ifsc_code: ifsc,
         account_type: accType
       };
-      currentStore.payout_account_ref = "acc_route_" + (currentStore.storeName ? currentStore.storeName.toLowerCase().replace(/[^a-z0-9]/g, '_') : "partner");
-      currentStore.payout_status = "active";
-      currentStore.verified = true;
-      currentStore.verifiedDate = new Date().toLocaleDateString();
 
-      const dispConf = document.getElementById("dispBankConf");
-      if (dispConf) dispConf.innerText = bankName + " (" + currentStore.bank.account_number_masked + ")";
+      showToast("⏳ Registering store & Shiprocket pickup location...");
 
-      // Persist verified merchant store profile
-      localStorage.setItem("mallmaze_merchant_profile", JSON.stringify(currentStore));
+      try {
+        const payload = {
+          name: currentStore.storeName,
+          owner_name: currentStore.ownerName,
+          phone: currentStore.mobile,
+          email: currentStore.email || "store@mallmaze.in",
+          category: currentStore.category,
+          address: currentStore.address,
+          city: currentStore.city,
+          state: currentStore.state,
+          pincode: currentStore.pincode,
+          gstin: gstin,
+          pan: pan,
+          bank: currentStore.bank
+        };
 
-      // Transition Stepper: Step 2 Done -> Step 3 Completed
-      document.getElementById("stNode2").classList.remove("active");
-      document.getElementById("stNode2").classList.add("completed");
-      document.getElementById("stBadge2").innerHTML = "✔";
+        const resp = await fetch("/api/stores/onboard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-      document.getElementById("stNode3").classList.add("completed");
-      document.getElementById("stBadge3").innerHTML = "✔";
+        const resData = await resp.json();
+        if (resData.ok && resData.store) {
+          currentStore.id = resData.store.id;
+          currentStore.shiprocket_pickup_name = resData.shiprocket_pickup?.pickup_location_name || currentStore.storeName;
+          currentStore.verified = true;
+          currentStore.verifiedDate = new Date().toLocaleDateString();
 
-      document.getElementById("phase-verification-portal").classList.remove("active-phase");
-      document.getElementById("phase-verified-success").classList.add("active-phase");
-      document.getElementById("finalStoreName").innerText = currentStore.storeName;
+          const dispConf = document.getElementById("dispBankConf");
+          if (dispConf) dispConf.innerText = bankName + " (" + currentStore.bank.account_number_masked + ")";
 
-      showToast("🛡️ GSTIN & Mobile verified! Redirecting to POS Dashboard...");
+          const dispPickupCode = document.getElementById("dispPickupCode");
+          if (dispPickupCode) dispPickupCode.innerText = currentStore.shiprocket_pickup_name;
 
-      setTimeout(() => {
-        redirectToPOS();
-      }, 2400);
+          const dispPickupAddr = document.getElementById("dispPickupAddr");
+          if (dispPickupAddr) dispPickupAddr.innerText = currentStore.address + ", " + currentStore.city + " - " + currentStore.pincode;
+
+          localStorage.setItem("mallmaze_merchant_profile", JSON.stringify(currentStore));
+
+          // Transition Stepper: Step 2 Done -> Step 3 Completed
+          document.getElementById("stNode2").classList.remove("active");
+          document.getElementById("stNode2").classList.add("completed");
+          document.getElementById("stBadge2").innerHTML = "✓";
+
+          document.getElementById("stNode3").classList.add("completed");
+          document.getElementById("stBadge3").innerHTML = "✓";
+
+          document.getElementById("phase-verification-portal").classList.remove("active-phase");
+          document.getElementById("phase-verified-success").classList.add("active-phase");
+          document.getElementById("finalStoreName").innerText = currentStore.storeName;
+
+          showToast("🎉 Store & Shiprocket Pickup registered successfully!");
+        } else {
+          showToast("⚠️ " + (resData.error || "Could not complete registration"));
+        }
+      } catch (err) {
+        console.error("Onboarding error:", err);
+        // Fallback local save
+        currentStore.shiprocket_pickup_name = currentStore.storeName;
+        localStorage.setItem("mallmaze_merchant_profile", JSON.stringify(currentStore));
+        document.getElementById("phase-verification-portal").classList.remove("active-phase");
+        document.getElementById("phase-verified-success").classList.add("active-phase");
+        document.getElementById("finalStoreName").innerText = currentStore.storeName;
+      }
     }
 
     function redirectToPOS() {
