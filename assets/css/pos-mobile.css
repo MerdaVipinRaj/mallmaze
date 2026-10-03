@@ -1223,3 +1223,99 @@ html {
     overflow-x: hidden !important;
   }
 }
+
+/* ==========================================================================
+   ENHANCED STORE MOBILE SUITE (Dashboard, Customers, Reports, Statistics, P&L)
+   ========================================================================== */
+
+.btn-mobile-sidebar-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: #121620;
+  color: #facc15;
+  border: 1.5px solid rgba(250, 204, 21, 0.4);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.btn-mobile-sidebar-toggle:hover,
+.btn-mobile-sidebar-toggle:active {
+  background: #1c2230;
+  border-color: #facc15;
+  transform: scale(0.96);
+}
+
+@media (max-width: 900px) {
+  .btn-mobile-sidebar-toggle {
+    display: inline-flex !important;
+  }
+
+  .top-header {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .top-header > div:first-child {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .top-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .btn-header-home,
+  .btn-offline-bill {
+    font-size: 11.5px !important;
+    padding: 7px 11px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Padding at bottom of main content so bottom dock never overlaps cards */
+  .main-wrapper,
+  .orders-section,
+  .section-content,
+  .container,
+  .content-area {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Customers CRM Table on Mobile */
+  .customers-table,
+  table.customers-table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Reports & Stats grid responsive collapse */
+  .reports-grid,
+  .stats-grid,
+  .analytics-grid,
+  .pnl-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Safe interactive scrollable tables */
+  .table-responsive,
+  .table-container {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 14px !important;
+  }
+}
