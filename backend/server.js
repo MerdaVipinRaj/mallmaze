@@ -1551,7 +1551,19 @@ const routes = {
     });
   },
 
-  "GET /api/health": async (_req, res) => send(res, 200, { ok: true, service: "mallmaze-api", time: new Date().toISOString() }),
+  "GET /api/health": async (_req, res) => {
+    let dbStatus = "local-json";
+    if (usePostgres()) {
+      try {
+        const pool = await getPgPool();
+        await pool.query("select 1");
+        dbStatus = "postgresql-connected";
+      } catch (err) {
+        dbStatus = "postgresql-error: " + err.message;
+      }
+    }
+    send(res, 200, { ok: true, service: "mallmaze-api", database: dbStatus, time: new Date().toISOString() });
+  },
   "GET /api/version": async (_req, res) => send(res, 200, { ok: true, service: "mallmaze-api", version: "2.1.0", branch: "master", time: new Date().toISOString() }),
   "GET /api/catalog": async (_req, res, parsed) => {
     send(res, 200, await catalogResponse({
