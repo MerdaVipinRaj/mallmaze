@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -513,16 +513,16 @@
     .toast.show { transform: translateY(0); opacity: 1; }
 
     /* Mobile overrides handled dynamically by assets/css/pos-mobile.css */
-    }
+
   </style>
-  <link rel="stylesheet" href="assets/css/pos-mobile.css">
+  <link rel="stylesheet" href="assets/css/pos-mobile.css?v=20261014-v4">
 
   <meta name="description" content="MallMaze - Profit & Loss Architecture - MallMaze unified local commerce." />
 
   <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
 
   <script src="assets/js/api-client.js" defer></script>
-  <script src="assets/js/pos-mobile.js"></script>
+  <script src="assets/js/pos-mobile.js?v=20261014-v4"></script>
 
 <style>
   /* Ensure mobile dock is NEVER visible on desktop */
@@ -579,8 +579,8 @@
 
       <!-- Home Redirect Link in Sidebar -->
       <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;" title="Go to MallMaze Customer Storefront">
-        <span>🌐 Storefront / Home</span>
-        <span>→</span>
+        <span>ðŸŒ Storefront / Home</span>
+        <span>â†’</span>
       </a>
 
       <div class="nav-group">
@@ -654,10 +654,10 @@
           <h1 class="page-title">Profit & Loss OS</h1>
           <div class="top-actions">
             <button class="btn-action-primary btn-record-offline" onclick="openModal('offlineModal')">
-              ➕ Record Offline / Cash Sale
+              âž• Record Offline / Cash Sale
             </button>
             <button class="btn-action-primary btn-add-expense" onclick="openModal('expenseModal')">
-              ➕ Log Shop Expense
+              âž• Log Shop Expense
             </button>
             <div class="user-profile">
               <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80" alt="Priya Sharma" class="user-avatar" />
@@ -673,25 +673,25 @@
         <div class="pnl-kpi-grid">
           <div class="kpi-card">
             <div class="kpi-label">Gross Sales Revenue</div>
-            <div class="kpi-val inflow" id="dispGross">₹48,92,400</div>
+            <div class="kpi-val inflow" id="dispGross">â‚¹48,92,400</div>
             <div class="kpi-sub"><span style="color:#15803d; font-weight:700;">+18.4%</span> vs last month</div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-label">Wholesale Cost (COGS)</div>
-            <div class="kpi-val" id="dispCogs">₹32,28,000</div>
+            <div class="kpi-val" id="dispCogs">â‚¹32,28,000</div>
             <div class="kpi-sub">Direct inventory purchase</div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-label">Shop Expenses (Khata)</div>
-            <div class="kpi-val outflow" id="dispExp">- ₹5,14,200</div>
+            <div class="kpi-val outflow" id="dispExp">- â‚¹5,14,200</div>
             <div class="kpi-sub">Rent, Payroll, Power, Tax</div>
           </div>
 
           <div class="kpi-card highlight">
             <div class="kpi-label">Pure Take-Home Profit</div>
-            <div class="kpi-val inflow" id="dispNet">₹11,50,200</div>
+            <div class="kpi-val inflow" id="dispNet">â‚¹11,50,200</div>
             <div class="kpi-sub" style="color:#15803d;"><strong>23.5% Net Margin in Hand</strong></div>
           </div>
         </div>
@@ -701,16 +701,16 @@
         <div class="mobile-search-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input type="text" id="pnlSearchInput" class="mobile-search-input" placeholder="Search ledger by transaction, vendor, category..." oninput="handlePnlSearch(this.value)" />
-          <button id="pnlSearchClear" class="mobile-search-clear" onclick="clearPnlSearch()">✕</button>
+          <button id="pnlSearchClear" class="mobile-search-clear" onclick="clearPnlSearch()">âœ•</button>
         </div>
 
         <div class="filters-bar">
           <div class="filter-group">
             <button class="dropdown-pill active-pill" id="filterAllBtn" onclick="filterLedger('ALL', this)">All Financial Heads</button>
-            <button class="dropdown-pill" onclick="filterLedger('INCOME', this)">🟢 Sales Inflow</button>
-            <button class="dropdown-pill" onclick="filterLedger('EXPENSE', this)">🔴 Shop Overhead</button>
+            <button class="dropdown-pill" onclick="filterLedger('INCOME', this)">ðŸŸ¢ Sales Inflow</button>
+            <button class="dropdown-pill" onclick="filterLedger('EXPENSE', this)">ðŸ”´ Shop Overhead</button>
             <button class="dropdown-pill" onclick="togglePriceFilter()">
-              <span>₹10,000 – ₹20,00,000</span>
+              <span>â‚¹10,000 â€“ â‚¹20,00,000</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
           </div>
@@ -736,7 +736,7 @@
                 <th>Financial Head</th>
                 <th>Channel / Category</th>
                 <th>Status / ITC</th>
-                <th>Amount (₹)</th>
+                <th>Amount (â‚¹)</th>
                 <th>Period</th>
                 <th class="th-action"></th>
               </tr>
@@ -751,7 +751,7 @@
       <aside class="detail-panel" id="detailPanel">
         <div class="detail-header">
           <h2 class="detail-title" id="panelOrderId">Offline Counter Sales</h2>
-          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close details">✕</button>
+          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close details">âœ•</button>
         </div>
 
         <div class="detail-sub-meta">
@@ -782,7 +782,7 @@
         </div>
 
         <div class="advisor-tip-box" id="panelAdvisorTip">
-          💡 <strong>Business Guidance:</strong> Offline walk-in counter sales represent 37.8% of total revenue.
+          ðŸ’¡ <strong>Business Guidance:</strong> Offline walk-in counter sales represent 37.8% of total revenue.
         </div>
 
         <h3 class="section-subtitle">Account Breakdown</h3>
@@ -790,7 +790,7 @@
 
         <div class="detail-total-row">
           <span class="total-label">Total Amount</span>
-          <span class="total-amount" id="panelTotalAmount">+ ₹18,50,000</span>
+          <span class="total-amount" id="panelTotalAmount">+ â‚¹18,50,000</span>
         </div>
 
         <div class="detail-ctas">
@@ -811,8 +811,8 @@
   <div class="modal-backdrop" id="offlineModal">
     <div class="modal-box" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">➕ Quick Multi-Item Counter Bill</h3>
-        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('offlineModal')">✕</button>
+        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">âž• Quick Multi-Item Counter Bill</h3>
+        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('offlineModal')">âœ•</button>
       </div>
       <form onsubmit="handleMultiOfflineSale(event)">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
@@ -836,7 +836,7 @@
           <thead>
             <tr style="border-bottom:1px solid #e2e8f0; font-size:11px; color:#64748b; text-align:left;">
               <th style="padding:4px;">Product Title / Custom Item</th>
-              <th style="padding:4px; width:25%;">Price (₹)</th>
+              <th style="padding:4px; width:25%;">Price (â‚¹)</th>
               <th style="padding:4px; width:15%;">Qty</th>
               <th style="width:10%;"></th>
             </tr>
@@ -846,18 +846,18 @@
               <td style="padding:4px;"><input type="text" class="form-input pnl-item-name" value="Bosch Heavy Duty Drill Machine" required /></td>
               <td style="padding:4px;"><input type="number" class="form-input pnl-item-price" value="34000" min="0" oninput="calcPnlModalTotal()" required /></td>
               <td style="padding:4px;"><input type="number" class="form-input pnl-item-qty" value="1" min="1" oninput="calcPnlModalTotal()" required /></td>
-              <td style="padding:4px; text-align:right;"><button type="button" style="background:#fee2e2; border:none; color:#dc2626; border-radius:6px; width:24px; height:24px; cursor:pointer;" onclick="this.closest('tr').remove(); calcPnlModalTotal();">✕</button></td>
+              <td style="padding:4px; text-align:right;"><button type="button" style="background:#fee2e2; border:none; color:#dc2626; border-radius:6px; width:24px; height:24px; cursor:pointer;" onclick="this.closest('tr').remove(); calcPnlModalTotal();">âœ•</button></td>
             </tr>
           </tbody>
         </table>
 
         <button type="button" style="background:#f8fafc; border:1px dashed #94a3b8; color:#0f172a; font-weight:700; font-size:12px; padding:7px; border-radius:10px; cursor:pointer; width:100%; margin-bottom:14px;" onclick="addPnlBillRow()">
-          ➕ Add Another Item / Custom Product
+          âž• Add Another Item / Custom Product
         </button>
 
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 14px; margin-bottom:14px; display:flex; justify-content:space-between; font-weight:800; font-size:14px;">
           <span>Grand Total Bill Amount:</span>
-          <span style="color:#15803d;" id="pnlModalGrandTotal">₹34,000</span>
+          <span style="color:#15803d;" id="pnlModalGrandTotal">â‚¹34,000</span>
         </div>
 
         <button type="submit" class="modal-btn-submit">Generate Bill & Update P&L</button>
@@ -869,8 +869,8 @@
   <div class="modal-backdrop" id="expenseModal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-size:17px; font-weight:800;">➕ Log Shop Expense (Rent/Salary)</h3>
-        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('expenseModal')">✕</button>
+        <h3 style="font-size:17px; font-weight:800;">âž• Log Shop Expense (Rent/Salary)</h3>
+        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('expenseModal')">âœ•</button>
       </div>
       <form onsubmit="handleNewExpense(event)">
         <div class="form-group">
@@ -889,8 +889,8 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Amount (₹)</label>
-            <input type="number" id="expAmount" class="form-input" placeholder="₹ Amount" required />
+            <label class="form-label">Amount (â‚¹)</label>
+            <input type="number" id="expAmount" class="form-input" placeholder="â‚¹ Amount" required />
           </div>
         </div>
         <button type="submit" class="modal-btn-submit" style="background:#dc2626;">Save & Deduct from Profit</button>
@@ -910,75 +910,75 @@
         id: "#REV-OFFLINE-01", type: "INCOME",
         name: "Offline Cash / Counter Bills", category: "Physical Walk-in Sales",
         avatar: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=150&auto=format&fit=crop&q=80",
-        badge: "Cash Inflow", badgeType: "income", total: "+ ₹18,50,000", numericTotal: 1850000, period: "Monthly Total", checked: true,
-        advice: "🟢 <strong>Cash Flow Strength:</strong> Direct walk-in counter sales generate instantaneous daily cash liquidity for store operations.",
+        badge: "Cash Inflow", badgeType: "income", total: "+ â‚¹18,50,000", numericTotal: 1850000, period: "Monthly Total", checked: true,
+        advice: "ðŸŸ¢ <strong>Cash Flow Strength:</strong> Direct walk-in counter sales generate instantaneous daily cash liquidity for store operations.",
         items: [
-          { name: "Counter Cash Transactions", price: "₹12,40,000" },
-          { name: "Direct Counter POS Card Swipes", price: "₹6,10,000" }
+          { name: "Counter Cash Transactions", price: "â‚¹12,40,000" },
+          { name: "Direct Counter POS Card Swipes", price: "â‚¹6,10,000" }
         ]
       },
       {
         id: "#REV-UPI-02", type: "INCOME",
         name: "UPI & QR Code Payments", category: "Digital Counter Scans",
         avatar: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=150&auto=format&fit=crop&q=80",
-        badge: "UPI Inflow", badgeType: "income", total: "+ ₹19,15,000", numericTotal: 1915000, period: "Monthly Total", checked: false,
-        advice: "📱 <strong>Digital Settlements:</strong> Google Pay, PhonePe, and Paytm auto-settled daily to your HDFC bank account.",
+        badge: "UPI Inflow", badgeType: "income", total: "+ â‚¹19,15,000", numericTotal: 1915000, period: "Monthly Total", checked: false,
+        advice: "ðŸ“± <strong>Digital Settlements:</strong> Google Pay, PhonePe, and Paytm auto-settled daily to your HDFC bank account.",
         items: [
-          { name: "PhonePe QR Counter Scans", price: "₹9,80,000" },
-          { name: "Google Pay Merchant UPI", price: "₹7,15,000" },
-          { name: "Paytm Soundbox Payments", price: "₹2,20,000" }
+          { name: "PhonePe QR Counter Scans", price: "â‚¹9,80,000" },
+          { name: "Google Pay Merchant UPI", price: "â‚¹7,15,000" },
+          { name: "Paytm Soundbox Payments", price: "â‚¹2,20,000" }
         ]
       },
       {
         id: "#REV-ONLINE-03", type: "INCOME",
         name: "MallMaze Online Delivery", category: "Hyperlocal App Marketplace",
         avatar: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=150&auto=format&fit=crop&q=80",
-        badge: "Online Inflow", badgeType: "income", total: "+ ₹11,27,400", numericTotal: 1127400, period: "Monthly Total", checked: false,
-        advice: "🚀 <strong>Marketplace Synergy:</strong> 2-hour delivery through MallMaze expanded your customer orders across a 3.5km radius.",
+        badge: "Online Inflow", badgeType: "income", total: "+ â‚¹11,27,400", numericTotal: 1127400, period: "Monthly Total", checked: false,
+        advice: "ðŸš€ <strong>Marketplace Synergy:</strong> 2-hour delivery through MallMaze expanded your customer orders across a 3.5km radius.",
         items: [
-          { name: "Hyperlocal App Direct Orders", price: "₹8,40,000" },
-          { name: "B2C Catalog Deliveries", price: "₹2,87,400" }
+          { name: "Hyperlocal App Direct Orders", price: "â‚¹8,40,000" },
+          { name: "B2C Catalog Deliveries", price: "â‚¹2,87,400" }
         ]
       },
       {
         id: "#EXP-SALARY-01", type: "EXPENSE",
         name: "Staff Salaries & Payroll", category: "Staff Wages (4 Members)",
         avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&auto=format&fit=crop&q=80",
-        badge: "Payroll Outflow", badgeType: "expense", total: "- ₹1,80,000", numericTotal: -180000, period: "1 Jan 2026", checked: false,
-        advice: "⚡ <strong>Payroll Efficiency:</strong> Staff salaries represent 35.0% of total shop overhead. Revenue per technician is ₹12.2L/month.",
+        badge: "Payroll Outflow", badgeType: "expense", total: "- â‚¹1,80,000", numericTotal: -180000, period: "1 Jan 2026", checked: false,
+        advice: "âš¡ <strong>Payroll Efficiency:</strong> Staff salaries represent 35.0% of total shop overhead. Revenue per technician is â‚¹12.2L/month.",
         items: [
-          { name: "Senior Technician (Ramesh)", price: "₹55,000" },
-          { name: "Billing Clerk (Amit)", price: "₹45,000" },
-          { name: "Workshop Technician (Suresh)", price: "₹42,000" },
-          { name: "Logistics Assistant (Vijay)", price: "₹38,000" }
+          { name: "Senior Technician (Ramesh)", price: "â‚¹55,000" },
+          { name: "Billing Clerk (Amit)", price: "â‚¹45,000" },
+          { name: "Workshop Technician (Suresh)", price: "â‚¹42,000" },
+          { name: "Logistics Assistant (Vijay)", price: "â‚¹38,000" }
         ]
       },
       {
         id: "#EXP-RENT-02", type: "EXPENSE",
         name: "Commercial Shop Rent", category: "Bandra West Showroom Lease",
         avatar: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=80&auto=format&fit=crop&q=80",
-        badge: "18% ITC Eligible", badgeType: "expense", total: "- ₹1,50,000", numericTotal: -150000, period: "1 Jan 2026", checked: false,
-        advice: "💡 <strong>Tally Tax Note:</strong> Commercial rent invoice is eligible for 18% GST Input Tax Credit (saves ₹27,000 this month).",
+        badge: "18% ITC Eligible", badgeType: "expense", total: "- â‚¹1,50,000", numericTotal: -150000, period: "1 Jan 2026", checked: false,
+        advice: "ðŸ’¡ <strong>Tally Tax Note:</strong> Commercial rent invoice is eligible for 18% GST Input Tax Credit (saves â‚¹27,000 this month).",
         items: [
-          { name: "Ground Floor Retail 1,200 sq.ft", price: "₹1,20,000" },
-          { name: "Basement Inventory Storage", price: "₹30,000" }
+          { name: "Ground Floor Retail 1,200 sq.ft", price: "â‚¹1,20,000" },
+          { name: "Basement Inventory Storage", price: "â‚¹30,000" }
         ]
       },
       {
         id: "#EXP-GST-03", type: "EXPENSE",
         name: "Output GST Tax Liability", category: "18% Output Pool (CGST+SGST)",
         avatar: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=80&auto=format&fit=crop&q=80",
-        badge: "Tax Challan", badgeType: "expense", total: "- ₹1,45,800", numericTotal: -145800, period: "5 Jan 2026", checked: false,
-        advice: "✔ <strong>Tax Compliance:</strong> Monthly GSTR-3B tax return challan filed and reconciled with bank.",
-        items: [{ name: "CGST (9%) + SGST (9%) Pool", price: "₹1,45,800" }]
+        badge: "Tax Challan", badgeType: "expense", total: "- â‚¹1,45,800", numericTotal: -145800, period: "5 Jan 2026", checked: false,
+        advice: "âœ” <strong>Tax Compliance:</strong> Monthly GSTR-3B tax return challan filed and reconciled with bank.",
+        items: [{ name: "CGST (9%) + SGST (9%) Pool", price: "â‚¹1,45,800" }]
       },
       {
         id: "#EXP-POWER-04", type: "EXPENSE",
         name: "Commercial Electricity Bill", category: "Adani Commercial Power",
         avatar: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=80&auto=format&fit=crop&q=80",
-        badge: "Utility Outflow", badgeType: "expense", total: "- ₹38,400", numericTotal: -38400, period: "7 Jan 2026", checked: false,
-        advice: "⚡ <strong>Efficiency Alert:</strong> Electricity rose +14% vs last month. Shift showroom display lights to LED to save ₹12,000.",
-        items: [{ name: "Commercial Tariff Rate Unit", price: "₹38,400" }]
+        badge: "Utility Outflow", badgeType: "expense", total: "- â‚¹38,400", numericTotal: -38400, period: "7 Jan 2026", checked: false,
+        advice: "âš¡ <strong>Efficiency Alert:</strong> Electricity rose +14% vs last month. Shift showroom display lights to LED to save â‚¹12,000.",
+        items: [{ name: "Commercial Tariff Rate Unit", price: "â‚¹38,400" }]
       }
     ];
 
@@ -995,10 +995,10 @@
     function renderPnLNumbers() {
       const net = grossRevenue - cogs - totalExpenses;
       const margin = ((net / grossRevenue) * 100).toFixed(1);
-      document.getElementById("dispGross").innerText = "₹" + grossRevenue.toLocaleString('en-IN');
-      document.getElementById("dispCogs").innerText = "₹" + cogs.toLocaleString('en-IN');
-      document.getElementById("dispExp").innerText = "- ₹" + totalExpenses.toLocaleString('en-IN');
-      document.getElementById("dispNet").innerText = `₹${net.toLocaleString('en-IN')} (${margin}%)`;
+      document.getElementById("dispGross").innerText = "â‚¹" + grossRevenue.toLocaleString('en-IN');
+      document.getElementById("dispCogs").innerText = "â‚¹" + cogs.toLocaleString('en-IN');
+      document.getElementById("dispExp").innerText = "- â‚¹" + totalExpenses.toLocaleString('en-IN');
+      document.getElementById("dispNet").innerText = `â‚¹${net.toLocaleString('en-IN')} (${margin}%)`;
     }
 
     let pnlSearchTerm = "";
@@ -1039,7 +1039,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="7" style="text-align:center; padding:30px 16px; color:#64748b; background:#ffffff; border-radius:16px;">
-              <div style="font-size:24px; margin-bottom:6px;">📊</div>
+              <div style="font-size:24px; margin-bottom:6px;">ðŸ“Š</div>
               <strong style="display:block; font-size:14px; color:#0f172a;">No ledger entries found</strong>
               <span style="font-size:12px;">Try adjusting your search or active filter</span>
             </td>
@@ -1077,14 +1077,14 @@
                 </div>
                 <div style="text-align:right; flex-shrink:0;">
                   <strong style="font-size:15px; font-weight:800; color:${amountColor}; display:block;">${item.total}</strong>
-                  <span style="font-size:10.5px; font-weight:700; color:${amountColor};">${isNegative ? '● Outflow' : '● Inflow'}</span>
+                  <span style="font-size:10.5px; font-weight:700; color:${amountColor};">${isNegative ? 'â— Outflow' : 'â— Inflow'}</span>
                 </div>
               </div>
               <div class="mob-card-footer">
                 <span style="font-size:11px; color:#64748b;">${item.items ? item.items.length + ' itemized lines' : 'Ledger line'}</span>
                 <div style="display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; color:#121620;">
                   <span>Inspect Audit</span>
-                  <span style="color:#94a3b8;">❯</span>
+                  <span style="color:#94a3b8;">â¯</span>
                 </div>
               </div>
             </td>
@@ -1108,7 +1108,7 @@
             <td><span class="order-total ${totalClass}">${item.total}</span></td>
             <td><span class="order-date">${item.period}</span></td>
             <td>
-              <button class="row-menu-btn" title="More options" onclick="event.stopPropagation(); showToast('Tally Voucher for ${item.name}')">···</button>
+              <button class="row-menu-btn" title="More options" onclick="event.stopPropagation(); showToast('Tally Voucher for ${item.name}')">Â·Â·Â·</button>
             </td>
           `;
         }
@@ -1204,13 +1204,13 @@
     }
 
     function togglePriceFilter() {
-      showToast("Filtered by value: ₹10,000 – ₹20,00,000");
+      showToast("Filtered by value: â‚¹10,000 â€“ â‚¹20,00,000");
     }
 
     function toggleSort() {
       sortAsc = !sortAsc;
       pnlHeads.sort((a, b) => sortAsc ? a.numericTotal - b.numericTotal : b.numericTotal - a.numericTotal);
-      document.getElementById("sortLabel").innerText = sortAsc ? "Sort by Value ↑" : "Sort by Value ↓";
+      document.getElementById("sortLabel").innerText = sortAsc ? "Sort by Value â†‘" : "Sort by Value â†“";
       renderTable();
       showToast(`Sorted by ${sortAsc ? 'Lowest value' : 'Highest value'}`);
     }
@@ -1226,7 +1226,7 @@
         <td style="padding:4px;"><input type="text" class="form-input pnl-item-name" placeholder="Custom product name" value="Custom Tools / Equipment" required /></td>
         <td style="padding:4px;"><input type="number" class="form-input pnl-item-price" value="15000" min="0" oninput="calcPnlModalTotal()" required /></td>
         <td style="padding:4px;"><input type="number" class="form-input pnl-item-qty" value="1" min="1" oninput="calcPnlModalTotal()" required /></td>
-        <td style="padding:4px; text-align:right;"><button type="button" style="background:#fee2e2; border:none; color:#dc2626; border-radius:6px; width:24px; height:24px; cursor:pointer;" onclick="this.closest('tr').remove(); calcPnlModalTotal();">✕</button></td>
+        <td style="padding:4px; text-align:right;"><button type="button" style="background:#fee2e2; border:none; color:#dc2626; border-radius:6px; width:24px; height:24px; cursor:pointer;" onclick="this.closest('tr').remove(); calcPnlModalTotal();">âœ•</button></td>
       `;
       tbody.appendChild(tr);
       calcPnlModalTotal();
@@ -1239,7 +1239,7 @@
         const q = parseFloat(r.querySelector(".pnl-item-qty").value) || 0;
         total += (p * q);
       });
-      document.getElementById("pnlModalGrandTotal").innerText = "₹" + total.toLocaleString('en-IN');
+      document.getElementById("pnlModalGrandTotal").innerText = "â‚¹" + total.toLocaleString('en-IN');
       return total;
     }
 
@@ -1258,7 +1258,7 @@
         const q = parseFloat(r.querySelector(".pnl-item-qty").value) || 1;
         const lineTotal = p * q;
         grandTotal += lineTotal;
-        items.push({ name: `${name} (x${q})`, price: "₹" + lineTotal.toLocaleString('en-IN') });
+        items.push({ name: `${name} (x${q})`, price: "â‚¹" + lineTotal.toLocaleString('en-IN') });
       });
 
       grossRevenue += grandTotal;
@@ -1270,14 +1270,14 @@
         id: newId, type: "INCOME",
         name: `Multi-Item Bill: ${cust}`, category: `${payMode} (${items.length} items)`,
         avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80",
-        badge: "Cash Inflow", badgeType: "income", total: "+ ₹" + grandTotal.toLocaleString('en-IN'), numericTotal: grandTotal, period: "Just now", checked: true,
-        advice: `✔ <strong>Multi-Item Bill:</strong> Recorded ₹${grandTotal.toLocaleString('en-IN')} across ${items.length} items for ${cust}.`,
+        badge: "Cash Inflow", badgeType: "income", total: "+ â‚¹" + grandTotal.toLocaleString('en-IN'), numericTotal: grandTotal, period: "Just now", checked: true,
+        advice: `âœ” <strong>Multi-Item Bill:</strong> Recorded â‚¹${grandTotal.toLocaleString('en-IN')} across ${items.length} items for ${cust}.`,
         items: items
       });
 
       selectItem(newId);
       closeModal('offlineModal');
-      showToast(`✅ Multi-item sale of ₹${grandTotal.toLocaleString('en-IN')} recorded into P&L!`);
+      showToast(`âœ… Multi-item sale of â‚¹${grandTotal.toLocaleString('en-IN')} recorded into P&L!`);
     }
 
     function handleNewExpense(e) {
@@ -1294,14 +1294,14 @@
         id: newId, type: "EXPENSE",
         name: title, category: cat,
         avatar: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=80&auto=format&fit=crop&q=80",
-        badge: "Expense Outflow", badgeType: "expense", total: "- ₹" + amt.toLocaleString('en-IN'), numericTotal: -amt, period: "Today", checked: true,
-        advice: `🔴 <strong>Tally Khata Entry:</strong> ₹${amt.toLocaleString('en-IN')} logged under ${cat}. Deducted from monthly take-home profit.`,
-        items: [{ name: title, price: "₹" + amt.toLocaleString('en-IN') }]
+        badge: "Expense Outflow", badgeType: "expense", total: "- â‚¹" + amt.toLocaleString('en-IN'), numericTotal: -amt, period: "Today", checked: true,
+        advice: `ðŸ”´ <strong>Tally Khata Entry:</strong> â‚¹${amt.toLocaleString('en-IN')} logged under ${cat}. Deducted from monthly take-home profit.`,
+        items: [{ name: title, price: "â‚¹" + amt.toLocaleString('en-IN') }]
       });
 
       selectItem(newId);
       closeModal('expenseModal');
-      showToast(`🔴 Expense of ₹${amt.toLocaleString('en-IN')} logged into Khata!`);
+      showToast(`ðŸ”´ Expense of â‚¹${amt.toLocaleString('en-IN')} logged into Khata!`);
     }
 
     function showToast(msg) {

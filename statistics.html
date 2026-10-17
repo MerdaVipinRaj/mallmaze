@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -106,10 +106,7 @@
     }
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    @media (max-width: 0px) /* disabled mobile collapse */ { .detail-panel { display: none; } }
-    @media (max-width: 0px) /* disabled mobile collapse */ {
-      .sidebar { width: 64px; min-width: 64px; padding: 16px 8px; }
-      .brand span, .nav-item span { display: none; }
+    /* Mobile overrides: see pos-mobile.css */
     }
   </style>
 
@@ -132,8 +129,8 @@
   }
 </style>
 
-  <link rel="stylesheet" href="assets/css/pos-mobile.css">
-  <script src="assets/js/pos-mobile.js"></script>
+  <link rel="stylesheet" href="assets/css/pos-mobile.css?v=20261014-v4">
+  <script src="assets/js/pos-mobile.js?v=20261014-v4"></script>
 </head>
 <body>
 
@@ -175,8 +172,8 @@
 
       <!-- Home Redirect Link in Sidebar -->
       <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;" title="Go to MallMaze Customer Storefront">
-        <span>🌐 Storefront / Home</span>
-        <span>→</span>
+        <span>ðŸŒ Storefront / Home</span>
+        <span>â†’</span>
       </a>
 
       <div class="nav-group">
@@ -253,7 +250,7 @@
         <div class="stats-kpi-grid">
           <div class="kpi-card">
             <div class="kpi-title">Monthly Run-Rate</div>
-            <div class="kpi-value" style="color:#15803d;">₹52,40,000</div>
+            <div class="kpi-value" style="color:#15803d;">â‚¹52,40,000</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-title">YoY Revenue Growth</div>
@@ -267,39 +264,39 @@
 
         <div class="chart-container">
           <div class="chart-header">
-            <div class="chart-title">Monthly Revenue Trend (in Lakhs ₹)</div>
+            <div class="chart-title">Monthly Revenue Trend (in Lakhs â‚¹)</div>
             <span style="font-size:12px; color:#64748b;">Aug 2025 - Jan 2026</span>
           </div>
 
           <div class="bar-chart">
             <div class="bar-col">
-              <span class="bar-val">₹28L</span>
-              <div class="bar-pillar" style="height: 55%;" onclick="showToast('Aug: ₹28,40,000')"></div>
+              <span class="bar-val">â‚¹28L</span>
+              <div class="bar-pillar" style="height: 55%;" onclick="showToast('Aug: â‚¹28,40,000')"></div>
               <span class="bar-label">Aug</span>
             </div>
             <div class="bar-col">
-              <span class="bar-val">₹32L</span>
-              <div class="bar-pillar" style="height: 62%;" onclick="showToast('Sep: ₹32,10,000')"></div>
+              <span class="bar-val">â‚¹32L</span>
+              <div class="bar-pillar" style="height: 62%;" onclick="showToast('Sep: â‚¹32,10,000')"></div>
               <span class="bar-label">Sep</span>
             </div>
             <div class="bar-col">
-              <span class="bar-val">₹39L</span>
-              <div class="bar-pillar" style="height: 75%;" onclick="showToast('Oct (Diwali Peak): ₹39,80,000')"></div>
+              <span class="bar-val">â‚¹39L</span>
+              <div class="bar-pillar" style="height: 75%;" onclick="showToast('Oct (Diwali Peak): â‚¹39,80,000')"></div>
               <span class="bar-label">Oct</span>
             </div>
             <div class="bar-col">
-              <span class="bar-val">₹42L</span>
-              <div class="bar-pillar" style="height: 82%;" onclick="showToast('Nov: ₹42,50,000')"></div>
+              <span class="bar-val">â‚¹42L</span>
+              <div class="bar-pillar" style="height: 82%;" onclick="showToast('Nov: â‚¹42,50,000')"></div>
               <span class="bar-label">Nov</span>
             </div>
             <div class="bar-col">
-              <span class="bar-val">₹45L</span>
-              <div class="bar-pillar" style="height: 88%;" onclick="showToast('Dec: ₹45,20,000')"></div>
+              <span class="bar-val">â‚¹45L</span>
+              <div class="bar-pillar" style="height: 88%;" onclick="showToast('Dec: â‚¹45,20,000')"></div>
               <span class="bar-label">Dec</span>
             </div>
             <div class="bar-col">
-              <span class="bar-val" style="color:#ca8a04; font-weight:800;">₹48.9L</span>
-              <div class="bar-pillar" style="height: 96%; background:#ca8a04;" onclick="showToast('Jan (Current): ₹48,92,400')"></div>
+              <span class="bar-val" style="color:#ca8a04; font-weight:800;">â‚¹48.9L</span>
+              <div class="bar-pillar" style="height: 96%; background:#ca8a04;" onclick="showToast('Jan (Current): â‚¹48,92,400')"></div>
               <span class="bar-label" style="font-weight:700; color:#0f172a;">Jan</span>
             </div>
           </div>
@@ -317,7 +314,7 @@
             <strong style="color:#0f172a;">Maharashtra</strong>
             <div style="font-size:11px; color:#94a3b8;">Mumbai, Pune, Nagpur</div>
           </div>
-          <strong style="color:#15803d;">₹18.4 Lakhs (38%)</strong>
+          <strong style="color:#15803d;">â‚¹18.4 Lakhs (38%)</strong>
         </div>
 
         <div class="stat-list-item">
@@ -325,7 +322,7 @@
             <strong style="color:#0f172a;">Karnataka</strong>
             <div style="font-size:11px; color:#94a3b8;">Bengaluru, Mysuru</div>
           </div>
-          <strong style="color:#15803d;">₹12.2 Lakhs (25%)</strong>
+          <strong style="color:#15803d;">â‚¹12.2 Lakhs (25%)</strong>
         </div>
 
         <div class="stat-list-item">
@@ -333,7 +330,7 @@
             <strong style="color:#0f172a;">Delhi NCR</strong>
             <div style="font-size:11px; color:#94a3b8;">New Delhi, Noida, Gurugram</div>
           </div>
-          <strong style="color:#15803d;">₹9.8 Lakhs (20%)</strong>
+          <strong style="color:#15803d;">â‚¹9.8 Lakhs (20%)</strong>
         </div>
 
         <div class="stat-list-item">
@@ -341,7 +338,7 @@
             <strong style="color:#0f172a;">Telangana</strong>
             <div style="font-size:11px; color:#94a3b8;">Hyderabad, Secunderabad</div>
           </div>
-          <strong style="color:#15803d;">₹5.6 Lakhs (11%)</strong>
+          <strong style="color:#15803d;">â‚¹5.6 Lakhs (11%)</strong>
         </div>
 
         <div class="stat-list-item">
@@ -349,7 +346,7 @@
             <strong style="color:#0f172a;">Other States</strong>
             <div style="font-size:11px; color:#94a3b8;">Tamil Nadu, Gujarat</div>
           </div>
-          <strong style="color:#64748b;">₹2.9 Lakhs (6%)</strong>
+          <strong style="color:#64748b;">â‚¹2.9 Lakhs (6%)</strong>
         </div>
       </aside>
     </main>

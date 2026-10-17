@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -239,7 +239,7 @@
       box-shadow: var(--shadow-sm);
     }
 
-    .user-inf✕{
+    .user-infâœ•{
       display: flex;
       flex-direction: column;
       line-height: 1.25;
@@ -752,14 +752,14 @@
     }
 
   </style>
-  <link rel="stylesheet" href="assets/css/pos-mobile.css">
+  <link rel="stylesheet" href="assets/css/pos-mobile.css?v=20261014-v4">
 
   <meta name="description" content="MallMaze - Orders POS - MallMaze unified local commerce." />
 
   <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
 
   <script src="assets/js/api-client.js" defer></script>
-  <script src="assets/js/pos-mobile.js"></script>
+  <script src="assets/js/pos-mobile.js?v=20261014-v4"></script>
 
 <style>
   /* Ensure mobile dock is NEVER visible on desktop */
@@ -818,8 +818,8 @@
 
       <!-- Home Redirect Link in Sidebar -->
       <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;" title="Go to MallMaze Customer Storefront">
-        <span>🌐 Storefront / Home</span>
-        <span>→</span>
+        <span>ðŸŒ Storefront / Home</span>
+        <span>â†’</span>
       </a>
 
       <div class="nav-group">
@@ -890,7 +890,7 @@
           <h1 class="page-title">Orders</h1>
           <div class="top-actions">
             <button style="padding: 8px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: none; background: #121620; color: #ffffff;" onclick="openOfflineSaleModal()">
-              ⚡ Record Offline Sale
+              âš¡ Record Offline Sale
             </button>
             <button class="icon-btn" title="Advanced Filters" onclick="showToast('Active INR Filters Applied')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -912,7 +912,7 @@
         <div class="mobile-search-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input type="text" id="orderSearchInput" class="mobile-search-input" placeholder="Search orders by ID, customer name, phone, item..." oninput="handleOrderSearch(this.value)" />
-          <button id="orderSearchClear" class="mobile-search-clear" onclick="clearOrderSearch()">✕</button>
+          <button id="orderSearchClear" class="mobile-search-clear" onclick="clearOrderSearch()">âœ•</button>
         </div>
 
         <div class="filters-bar">
@@ -922,7 +922,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <button class="dropdown-pill" onclick="togglePriceFilter()">
-              <span>₹15,000 – ₹1,50,000</span>
+              <span>â‚¹15,000 â€“ â‚¹1,50,000</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
           </div>
@@ -947,7 +947,7 @@
                 <th>Order</th>
                 <th>Customer</th>
                 <th>Status</th>
-                <th>Total (₹)</th>
+                <th>Total (â‚¹)</th>
                 <th>Date</th>
                 <th class="th-action"></th>
               </tr>
@@ -961,7 +961,7 @@
       <aside class="detail-panel" id="detailPanel">
         <div class="detail-header">
           <h2 class="detail-title" id="panelOrderId">Order #IND-390561</h2>
-          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close order details">✕</button>
+          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close order details">âœ•</button>
         </div>
 
         <div class="detail-sub-meta">
@@ -1001,7 +1001,7 @@
 
         <div class="detail-total-row">
           <span class="total-label">Grand Total (Incl. GST)</span>
-          <span class="total-amount" id="panelTotalAmount">₹1,34,500</span>
+          <span class="total-amount" id="panelTotalAmount">â‚¹1,34,500</span>
         </div>
 
         <!-- Shiprocket Multi-Speed Delivery Section (Zepto 5-min to Amazon 3-days) -->
@@ -1009,18 +1009,18 @@
           <!-- Delivery Mode Switch: Shiprocket vs Store Self-Delivery -->
           <div style="display:flex; background:rgba(15,23,42,0.8); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:3px; margin-bottom:12px;">
             <button type="button" id="tabModeShiprocket" onclick="switchDeliveryMode('shiprocket')" style="flex:1; padding:7px 8px; border:none; border-radius:8px; font-size:11px; font-weight:800; background:#6366f1; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.2s;">
-              <span>🚀</span> <span>Shiprocket Fleet</span>
+              <span>ðŸš€</span> <span>Shiprocket Fleet</span>
             </button>
             <button type="button" id="tabModeSelf" onclick="switchDeliveryMode('self')" style="flex:1; padding:7px 8px; border:none; border-radius:8px; font-size:11px; font-weight:800; background:transparent; color:#94a3b8; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.2s;">
-              <span>🛵</span> <span>Deliver Yourself</span>
+              <span>ðŸ›µ</span> <span>Deliver Yourself</span>
             </button>
           </div>
 
           <!-- Self-Delivery Store Incentive Banner -->
           <div id="selfDeliveryBanner" style="display:none; background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.25)); border:1px solid #10b981; border-radius:10px; padding:10px; margin-bottom:12px;">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
-              <span style="font-size:11px; font-weight:900; color:#34d399;">💰 STORE CASH BACK</span>
-              <span style="font-size:11px; font-weight:900; background:#10b981; color:#fff; padding:2px 8px; border-radius:10px;">+₹49 Earned</span>
+              <span style="font-size:11px; font-weight:900; color:#34d399;">ðŸ’° STORE CASH BACK</span>
+              <span style="font-size:11px; font-weight:900; background:#10b981; color:#fff; padding:2px 8px; border-radius:10px;">+â‚¹49 Earned</span>
             </div>
             <div style="font-size:10px; color:#cbd5e1; line-height:1.35; margin-bottom:8px;">
               Deliver in your free time or send your shop staff. 100% of customer delivery fee is kept by your store!
@@ -1028,7 +1028,7 @@
             <div style="display:flex; gap:6px;">
               <input type="text" id="selfRunnerName" placeholder="Runner Name (e.g. Ramesh / Son / Staff)" value="Store Owner (Self-Delivery)" style="flex:1; padding:6px 10px; font-size:11px; background:#0f172a; border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff;" />
               <button type="button" onclick="dispatchSelfDelivery()" style="padding:6px 12px; background:#10b981; color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap;">
-                🛵 Start Self-Delivery
+                ðŸ›µ Start Self-Delivery
               </button>
             </div>
           </div>
@@ -1038,12 +1038,12 @@
             <!-- Header with live speed badge -->
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
               <div style="display:flex; align-items:center; gap:6px;">
-                <span style="font-size:15px;">🚀</span>
+                <span style="font-size:15px;">ðŸš€</span>
                 <span style="font-size:12px; font-weight:800; color:#f8fafc;">Courier Partner Fleet</span>
               </div>
               <span id="srSpeedBadge" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); display:flex; align-items:center; gap:4px;">
                 <span style="width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block; box-shadow:0 0 8px #10b981;"></span>
-                <span id="srSpeedBadgeText">⚡ 5-Min Zepto Mode</span>
+                <span id="srSpeedBadgeText">âš¡ 5-Min Zepto Mode</span>
               </span>
             </div>
 
@@ -1051,30 +1051,30 @@
             <div style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Select Courier Speed:</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px;" id="srTierSelector">
               <button type="button" class="sr-tier-btn active" data-tier="zepto_flash" onclick="selectSpeedTier('zepto_flash')" style="padding:7px 8px; background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#f8fafc; border-radius:8px; font-size:11px; font-weight:700; text-align:left; cursor:pointer; transition:all 0.15s ease;">
-                <div style="display:flex; align-items:center; gap:4px; color:#34d399;"><span>⚡</span> <span>Zepto Flash</span></div>
-                <div style="font-size:9px; color:#cbd5e1; font-weight:500;">5–15 Mins • ₹29</div>
+                <div style="display:flex; align-items:center; gap:4px; color:#34d399;"><span>âš¡</span> <span>Zepto Flash</span></div>
+                <div style="font-size:9px; color:#cbd5e1; font-weight:500;">5â€“15 Mins â€¢ â‚¹29</div>
               </button>
               <button type="button" class="sr-tier-btn" data-tier="rapid_hyperlocal" onclick="selectSpeedTier('rapid_hyperlocal')" style="padding:7px 8px; background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; border-radius:8px; font-size:11px; font-weight:700; text-align:left; cursor:pointer; transition:all 0.15s ease;">
-                <div style="display:flex; align-items:center; gap:4px; color:#38bdf8;"><span>🚀</span> <span>Rapid Local</span></div>
-                <div style="font-size:9px; color:#94a3b8; font-weight:500;">30–45 Mins • ₹39</div>
+                <div style="display:flex; align-items:center; gap:4px; color:#38bdf8;"><span>ðŸš€</span> <span>Rapid Local</span></div>
+                <div style="font-size:9px; color:#94a3b8; font-weight:500;">30â€“45 Mins â€¢ â‚¹39</div>
               </button>
               <button type="button" class="sr-tier-btn" data-tier="amazon_prime" onclick="selectSpeedTier('amazon_prime')" style="padding:7px 8px; background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; border-radius:8px; font-size:11px; font-weight:700; text-align:left; cursor:pointer; transition:all 0.15s ease;">
-                <div style="display:flex; align-items:center; gap:4px; color:#fbbf24;"><span>📦</span> <span>Next-Day Air</span></div>
-                <div style="font-size:9px; color:#94a3b8; font-weight:500;">Prime 24h • ₹75</div>
+                <div style="display:flex; align-items:center; gap:4px; color:#fbbf24;"><span>ðŸ“¦</span> <span>Next-Day Air</span></div>
+                <div style="font-size:9px; color:#94a3b8; font-weight:500;">Prime 24h â€¢ â‚¹75</div>
               </button>
               <button type="button" class="sr-tier-btn" data-tier="standard_surface" onclick="selectSpeedTier('standard_surface')" style="padding:7px 8px; background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; border-radius:8px; font-size:11px; font-weight:700; text-align:left; cursor:pointer; transition:all 0.15s ease;">
-                <div style="display:flex; align-items:center; gap:4px; color:#e2e8f0;"><span>🚚</span> <span>Standard</span></div>
-                <div style="font-size:9px; color:#94a3b8; font-weight:500;">Amazon 2–3d • ₹45</div>
+                <div style="display:flex; align-items:center; gap:4px; color:#e2e8f0;"><span>ðŸšš</span> <span>Standard</span></div>
+                <div style="font-size:9px; color:#94a3b8; font-weight:500;">Amazon 2â€“3d â€¢ â‚¹45</div>
               </button>
             </div>
 
             <!-- Dispatch CTA Buttons -->
             <div style="display:flex; gap:8px;">
               <button id="srDispatchBtn" onclick="dispatchWithShiprocket()" style="flex:1; padding:9px 12px; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 14px rgba(16,185,129,0.3); transition:all 0.2s ease;">
-                <span>⚡</span> <span id="srBtnLabel">Dispatch Flash Rider (5 Mins)</span>
+                <span>âš¡</span> <span id="srBtnLabel">Dispatch Flash Rider (5 Mins)</span>
               </button>
               <button id="srLabelBtn" onclick="printShiprocketLabel()" style="display:none; padding:9px 12px; background:rgba(30,41,59,0.9); color:#f8fafc; border:1px solid rgba(255,255,255,0.2); border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; align-items:center; gap:4px;" title="Print 4x6 Thermal Shipping Label">
-                <span>📄</span> <span>Print Label</span>
+                <span>ðŸ“„</span> <span>Print Label</span>
               </button>
             </div>
           </div>
@@ -1082,12 +1082,12 @@
           <!-- Active Dispatch Status & Live Tracking Trigger -->
           <div id="srActiveDispatchBox" style="display:none; margin-top:10px; background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px;">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-              <span id="srActiveModeLabel" style="font-size:11px; font-weight:800; color:#38bdf8;">🛵 Store Self-Delivery En Route</span>
+              <span id="srActiveModeLabel" style="font-size:11px; font-weight:800; color:#38bdf8;">ðŸ›µ Store Self-Delivery En Route</span>
               <span id="srActiveAwbBadge" style="font-size:10px; font-family:monospace; color:#4ade80; font-weight:800;">MM-SELF-892102</span>
             </div>
             <div style="display:flex; gap:6px;">
               <button type="button" onclick="openLiveTrackingModal()" style="flex:1; padding:8px 10px; background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
-                <span>📍</span> <span>Open Live Swiggy/Zomato GPS Map</span>
+                <span>ðŸ“</span> <span>Open Live Swiggy/Zomato GPS Map</span>
               </button>
             </div>
           </div>
@@ -1121,120 +1121,120 @@
       {
         id: "#IND-390561",
         customer: { name: "Ananya Deshmukh", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&auto=format&fit=crop&q=80" },
-        status: "Paid", statusType: "paid", total: "₹64,500", numericTotal: 64500, date: "8 Jan", timestamp: "8 Jan, 13:52 IST", checked: false,
+        status: "Paid", statusType: "paid", total: "â‚¹64,500", numericTotal: 64500, date: "8 Jan", timestamp: "8 Jan, 13:52 IST", checked: false,
         items: [
-          { name: "Bosch Heavy Duty Drill Machine", price: "₹34,000", icon: "drill" },
-          { name: "Havells Modular Switch Board System", price: "₹18,500", icon: "socket" },
-          { name: "Crompton Oil-Free Air Compressor", price: "₹12,000", icon: "compressor" }
+          { name: "Bosch Heavy Duty Drill Machine", price: "â‚¹34,000", icon: "drill" },
+          { name: "Havells Modular Switch Board System", price: "â‚¹18,500", icon: "socket" },
+          { name: "Crompton Oil-Free Air Compressor", price: "â‚¹12,000", icon: "compressor" }
         ]
       },
       {
         id: "#IND-660234",
         customer: { name: "Vikram Malhotra", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80" },
-        status: "Delivered", statusType: "delivered", total: "₹1,02,500", numericTotal: 102500, date: "6 Jan", timestamp: "6 Jan, 11:20 IST", checked: false,
+        status: "Delivered", statusType: "delivered", total: "â‚¹1,02,500", numericTotal: 102500, date: "6 Jan", timestamp: "6 Jan, 11:20 IST", checked: false,
         items: [
-          { name: "TIG-200 Industrial Inverter Welder", price: "₹54,000", icon: "welder" },
-          { name: "Bosch Heavy Duty Drill Machine", price: "₹34,000", icon: "drill" },
-          { name: "Microtek Digital Solar Inverter Box", price: "₹14,500", icon: "receiver" }
+          { name: "TIG-200 Industrial Inverter Welder", price: "â‚¹54,000", icon: "welder" },
+          { name: "Bosch Heavy Duty Drill Machine", price: "â‚¹34,000", icon: "drill" },
+          { name: "Microtek Digital Solar Inverter Box", price: "â‚¹14,500", icon: "receiver" }
         ]
       },
       {
         id: "#IND-418135",
         customer: { name: "Sunita Patel", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80" },
-        status: "Paid", statusType: "paid", total: "₹44,800", numericTotal: 44800, date: "5 Jan", timestamp: "5 Jan, 09:14 IST", checked: true,
+        status: "Paid", statusType: "paid", total: "â‚¹44,800", numericTotal: 44800, date: "5 Jan", timestamp: "5 Jan, 09:14 IST", checked: true,
         items: [
-          { name: "Havells Modular Switch Board System", price: "₹18,500", icon: "socket" },
-          { name: "Microtek Digital Solar Inverter Box", price: "₹16,500", icon: "receiver" },
-          { name: "Crompton Oil-Free Air Compressor", price: "₹9,800", icon: "compressor" }
+          { name: "Havells Modular Switch Board System", price: "â‚¹18,500", icon: "socket" },
+          { name: "Microtek Digital Solar Inverter Box", price: "â‚¹16,500", icon: "receiver" },
+          { name: "Crompton Oil-Free Air Compressor", price: "â‚¹9,800", icon: "compressor" }
         ]
       },
       {
         id: "#IND-601999",
         customer: { name: "Aarav Gupta", avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=80&auto=format&fit=crop&q=80" },
-        status: "Paid", statusType: "paid", total: "₹1,21,500", numericTotal: 121500, date: "2 Jan", timestamp: "2 Jan, 16:45 IST", checked: false,
+        status: "Paid", statusType: "paid", total: "â‚¹1,21,500", numericTotal: 121500, date: "2 Jan", timestamp: "2 Jan, 16:45 IST", checked: false,
         items: [
-          { name: "TIG-200 Industrial Inverter Welder", price: "₹54,000", icon: "welder" },
-          { name: "Bosch Heavy Duty Drill Machine", price: "₹34,000", icon: "drill" },
-          { name: "Havells Modular Switch Board System", price: "₹18,500", icon: "socket" },
-          { name: "Microtek Digital Solar Inverter Box", price: "₹15,000", icon: "receiver" }
+          { name: "TIG-200 Industrial Inverter Welder", price: "â‚¹54,000", icon: "welder" },
+          { name: "Bosch Heavy Duty Drill Machine", price: "â‚¹34,000", icon: "drill" },
+          { name: "Havells Modular Switch Board System", price: "â‚¹18,500", icon: "socket" },
+          { name: "Microtek Digital Solar Inverter Box", price: "â‚¹15,000", icon: "receiver" }
         ]
       },
       {
         id: "#IND-517783",
         customer: { name: "Rohan Nair", avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=80&auto=format&fit=crop&q=80" },
-        status: "Completed", statusType: "completed", total: "₹76,000", numericTotal: 76000, date: "29 Dec", timestamp: "29 Dec, 14:10 IST", checked: false,
+        status: "Completed", statusType: "completed", total: "â‚¹76,000", numericTotal: 76000, date: "29 Dec", timestamp: "29 Dec, 14:10 IST", checked: false,
         items: [
-          { name: "Bosch Heavy Duty Drill Machine", price: "₹34,000", icon: "drill" },
-          { name: "Havells Modular Switch Board System", price: "₹18,500", icon: "socket" },
-          { name: "Crompton Oil-Free Air Compressor", price: "₹23,500", icon: "compressor" }
+          { name: "Bosch Heavy Duty Drill Machine", price: "â‚¹34,000", icon: "drill" },
+          { name: "Havells Modular Switch Board System", price: "â‚¹18,500", icon: "socket" },
+          { name: "Crompton Oil-Free Air Compressor", price: "â‚¹23,500", icon: "compressor" }
         ]
       },
       {
         id: "#IND-602992",
         customer: { name: "Rajesh Verma", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80" },
-        status: "Paid", statusType: "paid", total: "₹1,34,500", numericTotal: 134500, date: "26 Dec", timestamp: "26 Dec, 17:30 IST", checked: true,
+        status: "Paid", statusType: "paid", total: "â‚¹1,34,500", numericTotal: 134500, date: "26 Dec", timestamp: "26 Dec, 17:30 IST", checked: true,
         items: [
-          { name: "Bosch Heavy Duty Drill Machine", price: "₹34,000", icon: "drill" },
-          { name: "Havells Modular Switch Board System", price: "₹18,500", icon: "socket" },
-          { name: "Microtek Digital Solar Inverter Box", price: "₹16,000", icon: "receiver" },
-          { name: "Crompton Oil-Free Air Compressor", price: "₹12,000", icon: "compressor" },
-          { name: "TIG-200 Industrial Inverter Welder", price: "₹54,000", icon: "welder" }
+          { name: "Bosch Heavy Duty Drill Machine", price: "â‚¹34,000", icon: "drill" },
+          { name: "Havells Modular Switch Board System", price: "â‚¹18,500", icon: "socket" },
+          { name: "Microtek Digital Solar Inverter Box", price: "â‚¹16,000", icon: "receiver" },
+          { name: "Crompton Oil-Free Air Compressor", price: "â‚¹12,000", icon: "compressor" },
+          { name: "TIG-200 Industrial Inverter Welder", price: "â‚¹54,000", icon: "welder" }
         ]
       },
       {
         id: "#IND-730345",
         customer: { name: "Deepak Choudhary", avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&auto=format&fit=crop&q=80" },
-        status: "Paid", statusType: "paid", total: "₹26,000", numericTotal: 26000, date: "22 Dec", timestamp: "22 Dec, 10:15 IST", checked: false,
+        status: "Paid", statusType: "paid", total: "â‚¹26,000", numericTotal: 26000, date: "22 Dec", timestamp: "22 Dec, 10:15 IST", checked: false,
         items: [
-          { name: "Havells Modular Switch Board System", price: "₹18,500", icon: "socket" },
-          { name: "Crompton Oil-Free Air Compressor", price: "₹7,500", icon: "compressor" }
+          { name: "Havells Modular Switch Board System", price: "â‚¹18,500", icon: "socket" },
+          { name: "Crompton Oil-Free Air Compressor", price: "â‚¹7,500", icon: "compressor" }
         ]
       },
       {
         id: "#IND-128855",
         customer: { name: "Kavita Singhal", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&auto=format&fit=crop&q=80" },
-        status: "Paid", statusType: "paid", total: "₹1,05,500", numericTotal: 105500, date: "20 Dec", timestamp: "20 Dec, 15:40 IST", checked: false,
+        status: "Paid", statusType: "paid", total: "â‚¹1,05,500", numericTotal: 105500, date: "20 Dec", timestamp: "20 Dec, 15:40 IST", checked: false,
         items: [
-          { name: "TIG-200 Industrial Inverter Welder", price: "₹54,000", icon: "welder" },
-          { name: "Bosch Heavy Duty Drill Machine", price: "₹34,000", icon: "drill" },
-          { name: "Microtek Digital Solar Inverter Box", price: "₹17,500", icon: "receiver" }
+          { name: "TIG-200 Industrial Inverter Welder", price: "â‚¹54,000", icon: "welder" },
+          { name: "Bosch Heavy Duty Drill Machine", price: "â‚¹34,000", icon: "drill" },
+          { name: "Microtek Digital Solar Inverter Box", price: "â‚¹17,500", icon: "receiver" }
         ]
       },
       {
         id: "#IND-045321",
         customer: { name: "Suresh Pillai", avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&auto=format&fit=crop&q=80" },
-        status: "Completed", statusType: "completed", total: "₹24,500", numericTotal: 24500, date: "18 Dec", timestamp: "18 Dec, 12:05 IST", checked: true,
+        status: "Completed", statusType: "completed", total: "â‚¹24,500", numericTotal: 24500, date: "18 Dec", timestamp: "18 Dec, 12:05 IST", checked: true,
         items: [
-          { name: "Crompton Oil-Free Air Compressor", price: "₹11,000", icon: "compressor" },
-          { name: "Microtek Digital Solar Inverter Box", price: "₹13,500", icon: "receiver" }
+          { name: "Crompton Oil-Free Air Compressor", price: "â‚¹11,000", icon: "compressor" },
+          { name: "Microtek Digital Solar Inverter Box", price: "â‚¹13,500", icon: "receiver" }
         ]
       },
       {
         id: "#IND-082848",
         customer: { name: "Neha Kulkarni", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=80&auto=format&fit=crop&q=80" },
-        status: "Delivered", statusType: "delivered", total: "₹1,44,000", numericTotal: 144000, date: "17 Dec", timestamp: "17 Dec, 18:22 IST", checked: false,
+        status: "Delivered", statusType: "delivered", total: "â‚¹1,44,000", numericTotal: 144000, date: "17 Dec", timestamp: "17 Dec, 18:22 IST", checked: false,
         items: [
-          { name: "TIG-200 Industrial Inverter Welder", price: "₹54,000", icon: "welder" },
-          { name: "Bosch Heavy Duty Drill Machine", price: "₹34,000", icon: "drill" },
-          { name: "Siemens 3-Phase Power Distribution Panel", price: "₹56,000", icon: "socket" }
+          { name: "TIG-200 Industrial Inverter Welder", price: "â‚¹54,000", icon: "welder" },
+          { name: "Bosch Heavy Duty Drill Machine", price: "â‚¹34,000", icon: "drill" },
+          { name: "Siemens 3-Phase Power Distribution Panel", price: "â‚¹56,000", icon: "socket" }
         ]
       },
       {
         id: "#IND-646072",
         customer: { name: "Manish Reddy", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&auto=format&fit=crop&q=80" },
-        status: "Paid", statusType: "paid", total: "₹59,000", numericTotal: 59000, date: "14 Dec", timestamp: "14 Dec, 11:50 IST", checked: false,
+        status: "Paid", statusType: "paid", total: "â‚¹59,000", numericTotal: 59000, date: "14 Dec", timestamp: "14 Dec, 11:50 IST", checked: false,
         items: [
-          { name: "Bosch Heavy Duty Drill Machine", price: "₹34,000", icon: "drill" },
-          { name: "Havells Modular Switch Board System", price: "₹25,000", icon: "socket" }
+          { name: "Bosch Heavy Duty Drill Machine", price: "â‚¹34,000", icon: "drill" },
+          { name: "Havells Modular Switch Board System", price: "â‚¹25,000", icon: "socket" }
         ]
       },
       {
         id: "#IND-432019",
         customer: { name: "Amitabh Sen", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80" },
-        status: "Paid", statusType: "paid", total: "₹21,500", numericTotal: 21500, date: "13 Dec", timestamp: "13 Dec, 08:35 IST", checked: false,
+        status: "Paid", statusType: "paid", total: "â‚¹21,500", numericTotal: 21500, date: "13 Dec", timestamp: "13 Dec, 08:35 IST", checked: false,
         items: [
-          { name: "Microtek Digital Solar Inverter Box", price: "₹15,000", icon: "receiver" },
-          { name: "Crompton Oil-Free Air Compressor", price: "₹6,500", icon: "compressor" }
+          { name: "Microtek Digital Solar Inverter Box", price: "â‚¹15,000", icon: "receiver" },
+          { name: "Crompton Oil-Free Air Compressor", price: "â‚¹6,500", icon: "compressor" }
         ]
       }
     ];
@@ -1289,8 +1289,8 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="7" style="text-align:center; padding:30px 16px; color:#64748b; background:#ffffff; border-radius:16px;">
-              <div style="font-size:24px; margin-bottom:6px;">🛍️</div>
-              <strong style="display:block; font-size:14px; color:#0f172a;">N✕orders found</strong>
+              <div style="font-size:24px; margin-bottom:6px;">ðŸ›ï¸</div>
+              <strong style="display:block; font-size:14px; color:#0f172a;">Nâœ•orders found</strong>
               <span style="font-size:12px;">Try adjusting your search or status filter</span>
             </td>
           </tr>
@@ -1317,7 +1317,7 @@
             <td>
               <div class="mob-card-header">
                 <span style="font-size:11px; font-weight:800; color:#121620; background:#f1f5f9; padding:2px 8px; border-radius:6px; font-family:monospace;">${order.id}</span>
-                <span style="font-size:11px; color:#64748b;">${order.date} • ${order.timestamp}</span>
+                <span style="font-size:11px; color:#64748b;">${order.date} â€¢ ${order.timestamp}</span>
               </div>
               <div class="mob-card-body" style="margin: 8px 0 6px;">
                 <img src="${order.customer.avatar}" alt="${order.customer.name}" class="customer-thumb" style="width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0;" />
@@ -1331,10 +1331,10 @@
                 </div>
               </div>
               <div class="mob-card-footer">
-                <span style="font-size:11px; color:#15803d; font-weight:700;">● Live POS Verified</span>
+                <span style="font-size:11px; color:#15803d; font-weight:700;">â— Live POS Verified</span>
                 <div style="display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; color:#121620;">
                   <span>View Bill & Dispatch</span>
-                  <span style="color:#94a3b8;">❯</span>
+                  <span style="color:#94a3b8;">â¯</span>
                 </div>
               </div>
             </td>
@@ -1358,7 +1358,7 @@
             <td><span class="order-total">${order.total}</span></td>
             <td><span class="order-date">${order.date}</span></td>
             <td>
-              <button class="row-menu-btn" title="More options" onclick="event.stopPropagation(); showToast('GST Invoice & E-Way Bill for ${order.id}')">···</button>
+              <button class="row-menu-btn" title="More options" onclick="event.stopPropagation(); showToast('GST Invoice & E-Way Bill for ${order.id}')">Â·Â·Â·</button>
             </td>
           `;
         }
@@ -1367,7 +1367,7 @@
       updateSelectAllState();
     }
 
-    // Aut✕re-render on resize t✕flip between mobile cards and table seamlessly
+    // Autâœ•re-render on resize tâœ•flip between mobile cards and table seamlessly
     let orderResizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(orderResizeTimer);
@@ -1428,10 +1428,10 @@
       if (sr.assigned && activeBox) {
         activeBox.style.display = "block";
         if (sr.delivery_mode === "self_store") {
-          activeLabel.innerText = "🛵 Store Self-Delivery Active (+₹49 Earned)";
+          activeLabel.innerText = "ðŸ›µ Store Self-Delivery Active (+â‚¹49 Earned)";
           activeLabel.style.color = "#34d399";
         } else {
-          activeLabel.innerText = `🚀 ${sr.courier_name || 'Shiprocket'} En Route`;
+          activeLabel.innerText = `ðŸš€ ${sr.courier_name || 'Shiprocket'} En Route`;
           activeLabel.style.color = "#38bdf8";
         }
         if (activeAwb) activeAwb.innerText = sr.awb_code || "SR-LIVE";
@@ -1476,13 +1476,13 @@
     }
 
     function togglePriceFilter() {
-      showToast("Filtered: ₹15,000 – ₹1,50,000");
+      showToast("Filtered: â‚¹15,000 â€“ â‚¹1,50,000");
     }
 
     function toggleSort() {
       sortAsc = !sortAsc;
       ordersData.sort((a, b) => sortAsc ? a.numericTotal - b.numericTotal : b.numericTotal - a.numericTotal);
-      document.getElementById("sortLabel").innerText = sortAsc ? "Sort by Total ↑" : "Sort by Total ↓";
+      document.getElementById("sortLabel").innerText = sortAsc ? "Sort by Total â†‘" : "Sort by Total â†“";
       renderTable();
       showToast(`Sorted by ${sortAsc ? 'Lowest value first' : 'Highest value first'}`);
     }
@@ -1496,7 +1496,7 @@
           selectOrder(found.id);
           showToast(`Found: ${found.customer.name} (${found.id})`);
         } else {
-          showToast(`N✕order found matching "${term}"`);
+          showToast(`Nâœ•order found matching "${term}"`);
         }
       }
     }
@@ -1512,7 +1512,7 @@
         order.statusType = "delivered";
         renderTable();
         renderDetailPanel();
-        showToast(`₹ UPI Refund of ${order.total} completed to UPI ID`);
+        showToast(`â‚¹ UPI Refund of ${order.total} completed to UPI ID`);
       }
     }
 
@@ -1573,10 +1573,10 @@
       const badgeText = document.getElementById("srSpeedBadgeText");
       const btnLabel = document.getElementById("srBtnLabel");
       const tierMap = {
-        zepto_flash: { label: "⚡ 5-Min Zepto Mode", btn: "Dispatch Flash Rider (5 Mins)" },
-        rapid_hyperlocal: { label: "🛵 Rapid Local (30-45m)", btn: "Dispatch Rapid Courier (30-45m)" },
-        amazon_prime: { label: "✈️ Next-Day Air (24h)", btn: "Dispatch Prime Courier (24h)" },
-        standard_surface: { label: "🚚 Standard Ground (2-3d)", btn: "Dispatch Standard Courier" }
+        zepto_flash: { label: "âš¡ 5-Min Zepto Mode", btn: "Dispatch Flash Rider (5 Mins)" },
+        rapid_hyperlocal: { label: "ðŸ›µ Rapid Local (30-45m)", btn: "Dispatch Rapid Courier (30-45m)" },
+        amazon_prime: { label: "âœˆï¸ Next-Day Air (24h)", btn: "Dispatch Prime Courier (24h)" },
+        standard_surface: { label: "ðŸšš Standard Ground (2-3d)", btn: "Dispatch Standard Courier" }
       };
       if (badgeText && tierMap[tier]) badgeText.innerText = tierMap[tier].label;
       if (btnLabel && tierMap[tier]) btnLabel.innerText = tierMap[tier].btn;
@@ -1584,12 +1584,12 @@
 
     async function dispatchWithShiprocket() {
       const order = window.currentOrder || ordersData[0];
-      if (!order) return showToast("⚠️ No order selected");
+      if (!order) return showToast("âš ï¸ No order selected");
 
       const dispatchBtn = document.getElementById("srDispatchBtn");
       if (dispatchBtn) {
         dispatchBtn.disabled = true;
-        dispatchBtn.innerHTML = "<span>⏳</span> <span>Assigning Courier...</span>";
+        dispatchBtn.innerHTML = "<span>â³</span> <span>Assigning Courier...</span>";
       }
 
       try {
@@ -1616,9 +1616,9 @@
           const labelBtn = document.getElementById("srLabelBtn");
           if (labelBtn) labelBtn.style.display = "inline-flex";
 
-          showToast(`🚀 Courier Dispatched! AWB: ${data.shiprocket.awb_code} (${data.shiprocket.courier_name})`);
+          showToast(`ðŸš€ Courier Dispatched! AWB: ${data.shiprocket.awb_code} (${data.shiprocket.courier_name})`);
         } else {
-          showToast("⚠️ " + (data.error || "Dispatch failed"));
+          showToast("âš ï¸ " + (data.error || "Dispatch failed"));
         }
       } catch (err) {
         console.error("Dispatch error:", err);
@@ -1634,18 +1634,18 @@
         order.statusType = "delivered";
         renderTable();
         renderDetailPanel();
-        showToast("🚀 Courier Fleet Dispatched locally!");
+        showToast("ðŸš€ Courier Fleet Dispatched locally!");
       } finally {
         if (dispatchBtn) {
           dispatchBtn.disabled = false;
-          dispatchBtn.innerHTML = "<span>⚡</span> <span>" + (document.getElementById("srBtnLabel")?.innerText || "Dispatch Courier") + "</span>";
+          dispatchBtn.innerHTML = "<span>âš¡</span> <span>" + (document.getElementById("srBtnLabel")?.innerText || "Dispatch Courier") + "</span>";
         }
       }
     }
 
     async function dispatchSelfDelivery() {
       const order = window.currentOrder || ordersData[0];
-      if (!order) return showToast("⚠️ No order selected");
+      if (!order) return showToast("âš ï¸ No order selected");
       const runnerName = (document.getElementById("selfRunnerName")?.value || "Store Owner").trim();
 
       try {
@@ -1664,7 +1664,7 @@
           order.statusType = "delivered";
           renderTable();
           renderDetailPanel();
-          showToast(`🚴 Self-Delivery Started! Store keeps ₹49 delivery fee.`);
+          showToast(`ðŸš´ Self-Delivery Started! Store keeps â‚¹49 delivery fee.`);
         }
       } catch (err) {
         console.warn("Self-delivery fallback:", err);
@@ -1679,7 +1679,7 @@
         order.statusType = "delivered";
         renderTable();
         renderDetailPanel();
-        showToast("🚴 Self-Delivery Active!");
+        showToast("ðŸš´ Self-Delivery Active!");
       }
     }
 
@@ -1707,14 +1707,14 @@
 
       if (isSelf) {
         if (riderName) riderName.innerText = "Store Owner / Staff (Self-Delivery)";
-        if (riderSub) riderSub.innerText = "Direct Doorstep Runner • 100% Cash Retained";
+        if (riderSub) riderSub.innerText = "Direct Doorstep Runner â€¢ 100% Cash Retained";
         if (earningPill) earningPill.style.display = "flex";
-        if (subhead) subhead.innerText = "Store Self-Delivery Route • Real-Time GPS Telemetry";
+        if (subhead) subhead.innerText = "Store Self-Delivery Route â€¢ Real-Time GPS Telemetry";
       } else {
         if (riderName) riderName.innerText = order.shiprocket?.rider?.name || "Vikram Sharma (Shiprocket Fleet)";
-        if (riderSub) riderSub.innerText = order.shiprocket?.rider?.vehicle || "Ather 450X EV • 4.9 ★ Rating";
+        if (riderSub) riderSub.innerText = order.shiprocket?.rider?.vehicle || "Ather 450X EV â€¢ 4.9 â˜… Rating";
         if (earningPill) earningPill.style.display = "none";
-        if (subhead) subhead.innerText = "Shiprocket Quick Partner Fleet • Second-by-Second Telemetry";
+        if (subhead) subhead.innerText = "Shiprocket Quick Partner Fleet â€¢ Second-by-Second Telemetry";
       }
 
       // Initialize Leaflet Map
@@ -1740,7 +1740,7 @@
         // Center around Bangalore / Store coords
         liveTrackingMapInstance = L.map("liveTrackingMap", { zoomControl: false }).setView([12.9716, 77.5946], 15);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "© OpenStreetMap contributors",
+          attribution: "Â© OpenStreetMap contributors",
           maxZoom: 19
         }).addTo(liveTrackingMapInstance);
       } else {
@@ -1755,7 +1755,7 @@
       // Add Shop Marker (Pickup)
       const shopIcon = L.divIcon({
         className: 'custom-map-icon',
-        html: '<div style="background:#10b981; color:#fff; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.4);">🏪</div>',
+        html: '<div style="background:#10b981; color:#fff; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.4);">ðŸª</div>',
         iconSize: [30, 30]
       });
       L.marker(shopLatLng, { icon: shopIcon }).addTo(liveTrackingMapInstance).bindPopup("<b>Pickup: Shop Counter</b><br>Packages collected here");
@@ -1763,7 +1763,7 @@
       // Add Customer Marker (Destination)
       const custIcon = L.divIcon({
         className: 'custom-map-icon',
-        html: '<div style="background:#ef4444; color:#fff; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.4);">🏠</div>',
+        html: '<div style="background:#ef4444; color:#fff; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.4);">ðŸ </div>',
         iconSize: [30, 30]
       });
       L.marker(customerLatLng, { icon: custIcon }).addTo(liveTrackingMapInstance).bindPopup("<b>Delivery: Customer Doorstep</b>");
@@ -1771,7 +1771,7 @@
       // Animated Rider Marker
       const riderIcon = L.divIcon({
         className: 'custom-map-rider',
-        html: '<div style="background:#0284c7; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px; border:2.5px solid #fff; box-shadow:0 0 14px #38bdf8; animation:bounce 1s infinite alternate;">🛵</div>',
+        html: '<div style="background:#0284c7; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px; border:2.5px solid #fff; box-shadow:0 0 14px #38bdf8; animation:bounce 1s infinite alternate;">ðŸ›µ</div>',
         iconSize: [34, 34]
       });
 
@@ -1806,7 +1806,7 @@
 
         if (etaEl) etaEl.innerText = `0${mins}:${remSecs < 10 ? '0' : ''}${remSecs} MIN`;
         if (distEl) distEl.innerText = `${distKm} km away`;
-        if (speedEl) speedEl.innerText = `Speed: ${Math.round(26 + Math.sin(fraction * 10) * 6)} km/h • EV Scooter`;
+        if (speedEl) speedEl.innerText = `Speed: ${Math.round(26 + Math.sin(fraction * 10) * 6)} km/h â€¢ EV Scooter`;
       }, 1000);
     }
 
@@ -1819,7 +1819,7 @@
         renderTable();
         renderDetailPanel();
         closeLiveTrackingModal();
-        showToast("✅ Order marked as Delivered! Customer notified via SMS & WhatsApp.");
+        showToast("âœ… Order marked as Delivered! Customer notified via SMS & WhatsApp.");
       }
     }
 
@@ -1832,8 +1832,8 @@
   <div class="modal-backdrop" id="offlineModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
     <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 460px; padding: 24px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">➕ Record Offline / Counter Sale</h3>
-        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeOfflineModal()">✕</button>
+        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">âž• Record Offline / Counter Sale</h3>
+        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeOfflineModal()">âœ•</button>
       </div>
       <form onsubmit="handleNewOfflineSale(event)">
         <div style="margin-bottom:14px;">
@@ -1844,10 +1844,10 @@
           <div>
             <label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:5px;">Select Product</label>
             <select id="offProdSelect" style="width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid #e2e8f0; font-size:13px;">
-              <option value="54000">TIG-200 Welder (₹54,000)</option>
-              <option value="34000">Bosch Heavy Drill (₹34,000)</option>
-              <option value="18500">Havells Switchboard (₹18,500)</option>
-              <option value="12000">Crompton Compressor (₹12,000)</option>
+              <option value="54000">TIG-200 Welder (â‚¹54,000)</option>
+              <option value="34000">Bosch Heavy Drill (â‚¹34,000)</option>
+              <option value="18500">Havells Switchboard (â‚¹18,500)</option>
+              <option value="12000">Crompton Compressor (â‚¹12,000)</option>
             </select>
           </div>
           <div>
@@ -1887,13 +1887,13 @@
       ordersData.unshift({
         id: newId,
         customer: { name: cust, avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80" },
-        status: "Paid", statusType: "paid", total: "₹" + totalSale.toLocaleString('en-IN'), numericTotal: totalSale, date: "Today", timestamp: "Just now", checked: true,
-        items: [{ name: "Counter Sale Item", price: "₹" + totalSale.toLocaleString('en-IN'), icon: "drill" }]
+        status: "Paid", statusType: "paid", total: "â‚¹" + totalSale.toLocaleString('en-IN'), numericTotal: totalSale, date: "Today", timestamp: "Just now", checked: true,
+        items: [{ name: "Counter Sale Item", price: "â‚¹" + totalSale.toLocaleString('en-IN'), icon: "drill" }]
       });
 
       selectOrder(newId);
       closeOfflineModal();
-      showToast(`✅ Offline sale of ₹${totalSale.toLocaleString('en-IN')} recorded for ${cust}!`);
+      showToast(`âœ… Offline sale of â‚¹${totalSale.toLocaleString('en-IN')} recorded for ${cust}!`);
     }
   </script>
 
@@ -1909,10 +1909,10 @@
           <div style="width:10px; height:10px; border-radius:50%; background:#10b981; box-shadow:0 0 10px #10b981; animation:pulse 1.5s infinite;"></div>
           <div>
             <div style="font-size:13px; font-weight:800; color:#f8fafc; letter-spacing:0.5px;">LIVE GPS RIDER TRACKING</div>
-            <div id="trackModalSubhead" style="font-size:10px; color:#94a3b8;">Updating second-by-second • Swiggy / Zomato Real-Time Telemetry</div>
+            <div id="trackModalSubhead" style="font-size:10px; color:#94a3b8;">Updating second-by-second â€¢ Swiggy / Zomato Real-Time Telemetry</div>
           </div>
         </div>
-        <button onclick="closeLiveTrackingModal()" style="border:none; background:rgba(255,255,255,0.1); color:#fff; width:30px; height:30px; border-radius:50%; font-size:14px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+        <button onclick="closeLiveTrackingModal()" style="border:none; background:rgba(255,255,255,0.1); color:#fff; width:30px; height:30px; border-radius:50%; font-size:14px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;">âœ•</button>
       </div>
 
       <!-- ETA Banner -->
@@ -1923,7 +1923,7 @@
         </div>
         <div style="text-align:right;">
           <div id="modalDistRemaining" style="font-size:13px; font-weight:800;">1.2 km away</div>
-          <div id="modalSpeedLive" style="font-size:10px; opacity:0.9;">Speed: 28 km/h • EV Scooter</div>
+          <div id="modalSpeedLive" style="font-size:10px; opacity:0.9;">Speed: 28 km/h â€¢ EV Scooter</div>
         </div>
       </div>
 
@@ -1933,7 +1933,7 @@
         
         <!-- Overlay Badges on Map -->
         <div style="position:absolute; top:12px; left:12px; z-index:1000; background:rgba(15,23,42,0.9); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:6px 12px; display:flex; align-items:center; gap:8px;">
-          <span style="font-size:14px;">🛵</span>
+          <span style="font-size:14px;">ðŸ›µ</span>
           <span id="mapRiderPill" style="font-size:11px; font-weight:800; color:#38bdf8;">Rider moving on 100ft Indiranagar Road</span>
         </div>
 
@@ -1947,29 +1947,29 @@
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
           <div style="display:flex; align-items:center; gap:10px;">
             <div style="width:40px; height:40px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px;">
-              🛵
+              ðŸ›µ
             </div>
             <div>
               <div id="modalRiderName" style="font-size:14px; font-weight:800; color:#f8fafc;">Ramesh Kumar (Store Owner / Self-Delivery)</div>
-              <div id="modalRiderSub" style="font-size:11px; color:#94a3b8;">Ather 450X EV • 4.9 ★ Rating</div>
+              <div id="modalRiderSub" style="font-size:11px; color:#94a3b8;">Ather 450X EV â€¢ 4.9 â˜… Rating</div>
             </div>
           </div>
           <div style="display:flex; gap:8px;">
             <a id="modalCallBtn" href="tel:+919820144102" style="padding:8px 12px; background:#10b981; color:#fff; border-radius:8px; font-size:11px; font-weight:800; text-decoration:none; display:flex; align-items:center; gap:4px;">
-              <span>📞</span> <span>Call</span>
+              <span>ðŸ“ž</span> <span>Call</span>
             </a>
             <a id="modalWaBtn" href="https://wa.me/919820144102" target="_blank" style="padding:8px 12px; background:#25d366; color:#fff; border-radius:8px; font-size:11px; font-weight:800; text-decoration:none; display:flex; align-items:center; gap:4px;">
-              <span>💬</span> <span>WhatsApp</span>
+              <span>ðŸ’¬</span> <span>WhatsApp</span>
             </a>
           </div>
         </div>
 
         <div style="display:flex; align-items:center; justify-content:space-between; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
           <div id="modalEarningPill" style="font-size:11px; font-weight:800; color:#34d399; display:flex; align-items:center; gap:4px;">
-            <span>💰</span> <span>Store Earned: +₹49.00 Delivery Cash</span>
+            <span>ðŸ’°</span> <span>Store Earned: +â‚¹49.00 Delivery Cash</span>
           </div>
           <button type="button" onclick="confirmDeliveryCompleted()" style="padding:8px 16px; background:linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">
-            ✅ Mark Delivered
+            âœ… Mark Delivered
           </button>
         </div>
       </div>

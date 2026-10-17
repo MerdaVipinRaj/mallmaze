@@ -5,8 +5,8 @@
 (function () {
   function initClient() {
     const config = window.MM_CONFIG || {};
-    const supabaseUrl = config.SUPABASE_URL || "https://noczhsyfkfctjpbgnlcp.supabase.co";
-    const supabaseAnonKey = config.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vY3poc3lma2ZjdGpwYmdubGNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNzU5ODksImV4cCI6MjA4NjY1MTk4OX0.qmJovC4AOk6sRGI6nngsYZHCVAN3n_N6svyPFF9BflM";
+    const supabaseUrl = config.SUPABASE_URL || "https://tyorlxcsbkgewmjjensa.supabase.co";
+    const supabaseAnonKey = config.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5b3JseGNzYmtnZXdtamplbnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTg0MDAsImV4cCI6MjA5MTgzNDQwMH0.b2yUGXzkpLlgaXm6wkJHCOGZpix0ooX9NYEOkb4fxwo";
 
     if (!window.supabase || typeof window.supabase.createClient !== "function") {
       return false;

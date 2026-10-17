@@ -3,158 +3,700 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="MallMaze live PostgreSQL data viewer and database management dashboard.">
+  <meta name="description" content="MallMaze live PostgreSQL & Backend data viewer and database management dashboard.">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <title>MallMaze - PostgreSQL Data Viewer</title>
+  <title>MallMaze - PostgreSQL Backend Data Explorer</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-    body { background: #0f172a; color: #e2e8f0; padding: 20px; }
-    .container { max-width: 1200px; margin: 0 auto; }
-    h1 { color: #facc15; margin-bottom: 20px; }
-    .api-status { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-    .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
-    .status-online { background: #22c55e; }
-    .status-offline { background: #ef4444; }
-    .data-section { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    .data-section h2 { color: #facc15; margin-bottom: 15px; font-size: 18px; }
-    .btn-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-    .btn { 
-      background: #3b82f6; color: white; border: none; padding: 10px 20px; 
-      border-radius: 6px; cursor: pointer; font-weight: 600; 
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: #111726;
+      --bg-card-subtle: #172033;
+      --border-subtle: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-gold: #facc15;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-red: #ef4444;
     }
-    .btn:hover { background: #2563eb; }
-    .btn:disabled { background: #64748b; cursor: not-allowed; }
-    .data-display { 
-      background: #0f172a; padding: 15px; border-radius: 6px; 
-      font-family: 'Courier New', monospace; font-size: 12px; 
-      max-height: 400px; overflow-y: auto; white-space: pre-wrap;
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg-dark); color: var(--text-main); padding: 24px; min-height: 100vh; }
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    /* Header */
+    .explorer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 16px;
     }
-    .loading { color: #facc15; font-style: italic; }
-    .error { color: #ef4444; }
-    .success { color: #22c55e; }
-    .table-info { color: #94a3b8; font-size: 14px; margin-bottom: 10px; }
+    .header-title-block h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-title-block p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-nav {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: #ffffff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .btn-nav:hover { background: var(--bg-card-subtle); border-color: #3b82f6; }
+
+    /* Status Grid */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .status-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 16px;
+      position: relative;
+    }
+    .status-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .status-card-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pulse-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+    .status-card-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Main Explorer Grid */
+    .explorer-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+    }
+
+    /* Sidebar Tables List */
+    .tables-sidebar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sidebar-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 6px 10px;
+    }
+    .table-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: #94a3b8;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s;
+    }
+    .table-btn:hover {
+      background: var(--bg-card-subtle);
+      color: #ffffff;
+    }
+    .table-btn.active {
+      background: var(--accent-gold);
+      color: #0f172a;
+      border-color: var(--accent-gold);
+      font-weight: 800;
+    }
+    .table-btn .count-tag {
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: inherit;
+    }
+    .table-btn.active .count-tag {
+      background: #0f172a;
+      color: var(--accent-gold);
+    }
+
+    /* Data Display Workspace */
+    .data-workspace {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .workspace-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .active-table-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .table-schema-badge {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .view-toggles {
+      display: flex;
+      gap: 6px;
+    }
+    .view-btn {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .view-btn.active {
+      background: #3b82f6;
+      color: #ffffff;
+      border-color: #3b82f6;
+    }
+
+    /* Raw JSON view */
+    .json-box {
+      background: #060911;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      color: #38bdf8;
+      max-height: 540px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Structured Cards View */
+    .records-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
+      max-height: 540px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .record-card {
+      background: #080c14;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .record-card:hover { border-color: #3b82f6; }
+    .record-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 6px;
+    }
+    .record-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
+    .record-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .record-field {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .record-field strong {
+      color: #cbd5e1;
+    }
+
+    /* Connection Guide Drawer */
+    .guide-box {
+      margin-top: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .guide-box h3 {
+      font-size: 16px;
+      color: var(--accent-gold);
+      margin-bottom: 10px;
+    }
+    .code-snippet {
+      background: #060911;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #a7f3d0;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+
+    @media (max-width: 900px) {
+      .status-grid { grid-template-columns: 1fr 1fr; }
+      .explorer-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
+
   <div class="container">
-    <h1>🗄️ MallMaze PostgreSQL Data Viewer</h1>
     
-    <div class="api-status">
-      <span class="status-indicator status-offline" id="statusIndicator"></span>
-      <span id="statusText">Checking API status...</span>
-    </div>
-
-    <div class="data-section">
-      <h2>📊 Quick Data Access</h2>
-      <div class="table-info">Click buttons to fetch data from your PostgreSQL database via API</div>
-      <div class="btn-group">
-        <button class="btn" onclick="fetchData('stores')">🏪 Stores</button>
-        <button class="btn" onclick="fetchData('products')">📦 Products</button>
-        <button class="btn" onclick="fetchData('users')">👥 Users</button>
-        <button class="btn" onclick="fetchData('orders')">🛒 Orders</button>
-        <button class="btn" onclick="fetchData('catalog')">🌐 Full Catalog</button>
-        <button class="btn" onclick="fetchData('autoshelf')">🔧 AutoShelf Data</button>
+    <!-- Top Header -->
+    <header class="explorer-header">
+      <div class="header-title-block">
+        <h1>
+          <span>🐘</span> MallMaze PostgreSQL & Backend Data Explorer
+        </h1>
+        <p>Live Database Schema, Store Catalog, POS Orders, and Table Inspector</p>
       </div>
-      <div class="data-display" id="dataDisplay">Click a button above to view data...</div>
-    </div>
-
-    <div class="data-section">
-      <h2>🔗 Direct API Endpoints</h2>
-      <div class="table-info">Access these endpoints directly via browser or API client:</div>
-      <div class="data-display">
-/api/autoshelf/stores    - All stores with products
-/api/catalog/all         - All products and stores  
-/api/stores/all          - Store listings only
-/api/db/export           - Complete database export (requires auth)
-/api/admin/users         - All users (requires admin auth)
-/api/admin/orders        - All orders (requires admin auth)
-/api/admin/products      - All products (requires admin auth)
+      <div class="top-actions">
+        <a href="dashboard.html" class="btn-nav">⚡ Store POS Terminal</a>
+        <a href="admin-dashboard.html" class="btn-nav">📊 Admin Dashboard</a>
+        <a href="index.html" class="btn-nav">🌐 Customer Storefront</a>
       </div>
-    </div>
+    </header>
 
-    <div class="data-section">
-      <h2>💾 PostgreSQL Tables</h2>
-      <div class="table-info">Your PostgreSQL database contains these projection tables:</div>
-      <div class="data-display">
-mm_users          - User accounts and profiles
-mm_stores         - Store information and verification status
-mm_products       - Product inventory and pricing
-mm_orders         - Order details and payment status
-mm_scan_receipts  - Scan & Go receipt records
-mm_stock_events   - Stock change history
-mm_delivery_jobs  - Delivery tracking information
-mm_support_tickets- Customer support requests
-mm_feedback       - User feedback submissions
-mm_otp_challenges - OTP verification records
-mm_reservations   - Product reservations
+    <!-- Operational Connection Status -->
+    <div class="status-grid">
+      <div class="status-card">
+        <div class="status-card-label">Backend API Status</div>
+        <div class="status-card-val" id="apiStatusVal">
+          <div class="pulse-dot"></div> Online
+        </div>
+        <div class="status-card-sub" id="apiEndpointSub">http://localhost:4000/api</div>
+      </div>
+
+      <div class="status-card">
+        <div class="status-card-label">Active Database Engine</div>
+        <div class="status-card-val" id="dbEngineVal">
+          <span>🐘 PostgreSQL</span>
+        </div>
+        <div class="status-card-sub" id="dbEngineSub">Supabase / Local DB</div>
+      </div>
+
+      <div class="status-card">
+        <div class="status-card-label">Total Stores in DB</div>
+        <div class="status-card-val" id="storesCountVal">— Stores</div>
+        <div class="status-card-sub">Table: public.stores</div>
+      </div>
+
+      <div class="status-card">
+        <div class="status-card-label">Total Catalog Products</div>
+        <div class="status-card-val" id="productsCountVal">— Products</div>
+        <div class="status-card-sub">Table: public.products</div>
       </div>
     </div>
+
+    <!-- Main Explorer Layout -->
+    <div class="explorer-grid">
+      
+      <!-- Tables Sidebar -->
+      <aside class="tables-sidebar">
+        <div class="sidebar-title">PostgreSQL Tables</div>
+        
+        <button class="table-btn active" onclick="loadTableData('stores', this)">
+          <span>🏪 Stores (mm_stores)</span>
+          <span class="count-tag" id="tagStores">8</span>
+        </button>
+
+        <button class="table-btn" onclick="loadTableData('products', this)">
+          <span>🛍️ Products (mm_products)</span>
+          <span class="count-tag" id="tagProducts">28</span>
+        </button>
+
+        <button class="table-btn" onclick="loadTableData('orders', this)">
+          <span>📦 Orders (mm_orders)</span>
+          <span class="count-tag" id="tagOrders">7</span>
+        </button>
+
+        <button class="table-btn" onclick="loadTableData('users', this)">
+          <span>👤 Users (mm_users)</span>
+          <span class="count-tag" id="tagUsers">4</span>
+        </button>
+
+        <button class="table-btn" onclick="loadTableData('malls', this)">
+          <span>🏢 Malls & Kiosks</span>
+          <span class="count-tag" id="tagMalls">4</span>
+        </button>
+
+        <button class="table-btn" onclick="loadTableData('reservations', this)">
+          <span>🎟️ Fast Pickups / OTPs</span>
+          <span class="count-tag" id="tagResv">3</span>
+        </button>
+
+        <button class="table-btn" onclick="loadTableData('delivery_jobs', this)">
+          <span>🛵 Delivery Jobs (Shiprocket)</span>
+          <span class="count-tag" id="tagJobs">6</span>
+        </button>
+
+        <button class="table-btn" onclick="loadTableData('schema', this)">
+          <span>📑 Full Schema & Tables</span>
+          <span class="count-tag">26</span>
+        </button>
+      </aside>
+
+      <!-- Data Display Workspace -->
+      <main class="data-workspace">
+        <div class="workspace-top-bar">
+          <div>
+            <div class="active-table-title" id="activeTableHeading">
+              🏪 Stores Table Data
+              <span class="table-schema-badge" id="activeSchemaBadge">public.stores</span>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:2px;" id="activeTableDesc">
+              Showing active store records, addresses, category, and public QR tokens.
+            </p>
+          </div>
+
+          <div class="view-toggles">
+            <button class="view-btn active" id="btnCardsView" onclick="switchDisplayMode('cards')">Cards View</button>
+            <button class="view-btn" id="btnJsonView" onclick="switchDisplayMode('json')">Raw JSON</button>
+            <button class="view-btn" onclick="refreshCurrentTable()">🔄 Refresh</button>
+          </div>
+        </div>
+
+        <!-- Cards View Container -->
+        <div id="cardsContainer" class="records-grid"></div>
+
+        <!-- Raw JSON Container -->
+        <div id="jsonContainer" class="json-box" style="display:none;"></div>
+      </main>
+
+    </div>
+
+    <!-- PostgreSQL Connection Setup Guide -->
+    <section class="guide-box">
+      <h3>🔌 How PostgreSQL is Connected in MallMaze</h3>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
+        MallMaze is configured to use <strong>PostgreSQL via Supabase or any standard PostgreSQL instance</strong> (Render, Neon, AWS RDS, or localhost).
+      </p>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+        <div>
+          <strong style="font-size:13px; color:#ffffff;">1. Direct Terminal Inspection:</strong>
+          <div class="code-snippet">
+# Test PostgreSQL connection & view sample rows directly:
+node scripts/test-pg-connection.js
+node scripts/view-postgres-data.js
+          </div>
+        </div>
+
+        <div>
+          <strong style="font-size:13px; color:#ffffff;">2. Connecting PostgreSQL Database:</strong>
+          <div class="code-snippet">
+# Add your PostgreSQL connection URI to backend/.env:
+DATABASE_URL="postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres"
+PGSSLMODE="disable" # or require
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
 
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+
   <script>
-    const API_BASE = window.location.origin + '/api';
-    
-    // Check API status on load
-    async function checkApiStatus() {
+    // ── Supabase direct client (uses real table names: stores, products, orders, malls) ──
+    const SUPABASE_URL = (window.MM_CONFIG || {}).SUPABASE_URL || 'https://tyorlxcsbkgewmjjensa.supabase.co';
+    const SUPABASE_KEY = (window.MM_CONFIG || {}).SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5b3JseGNzYmtnZXdtamplbnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTg0MDAsImV4cCI6MjA5MTgzNDQwMH0.b2yUGXzkpLlgaXm6wkJHCOGZpix0ooX9NYEOkb4fxwo';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Table config: maps UI key → Supabase table name + display info
+    const TABLE_MAP = {
+      stores:          { table: 'stores',          icon: '🏪', label: 'Stores',         nameField: 'name' },
+      products:        { table: 'products',         icon: '🛍️', label: 'Products',        nameField: 'name' },
+      orders:          { table: 'orders',           icon: '📦', label: 'Orders',          nameField: 'id' },
+      malls:           { table: 'malls',            icon: '🏢', label: 'Malls',           nameField: 'name' },
+      inventory:       { table: 'inventory',        icon: '📦', label: 'Inventory',       nameField: 'id' },
+      scan_sessions:   { table: 'scan_sessions',    icon: '📱', label: 'Scan Sessions',   nameField: 'id' },
+      support_tickets: { table: 'support_tickets',  icon: '🎫', label: 'Support Tickets', nameField: 'subject' },
+    };
+
+    const TAG_MAP = {
+      stores: 'tagStores', products: 'tagProducts', orders: 'tagOrders',
+      malls: 'tagMalls', inventory: 'tagInventory', scan_sessions: 'tagScans',
+      support_tickets: 'tagSupport'
+    };
+
+    let currentTableKey = 'stores';
+    let currentDisplayMode = 'cards';
+    let loadedDataCache = {};
+
+    // ── Check Supabase connectivity ──
+    async function checkHealth() {
       try {
-        const response = await fetch(`${API_BASE}/health`);
-        if (response.ok) {
-          document.getElementById('statusIndicator').className = 'status-indicator status-online';
-          document.getElementById('statusText').textContent = 'API Online - PostgreSQL Connected';
+        const { data, error } = await sb.from('stores').select('id', { count: 'exact', head: true });
+        if (!error) {
+          document.getElementById('apiStatusVal').innerHTML = `<div class="pulse-dot"></div> Supabase Live`;
+          document.getElementById('dbEngineVal').innerHTML = '🐘 PostgreSQL';
+          document.getElementById('dbEngineSub').innerText = SUPABASE_URL.replace('https://', '');
+          document.getElementById('apiEndpointSub').innerText = SUPABASE_URL;
         } else {
-          throw new Error('API not responding');
+          throw new Error(error.message);
         }
-      } catch (error) {
-        document.getElementById('statusIndicator').className = 'status-indicator status-offline';
-        document.getElementById('statusText').textContent = 'API Offline - Start the backend server';
+      } catch (e) {
+        document.getElementById('apiStatusVal').innerHTML = `<span style="color:#ef4444;">Check RLS</span>`;
+        document.getElementById('dbEngineSub').innerText = e.message.substring(0, 60);
       }
     }
-    
-    async function fetchData(type) {
-      const display = document.getElementById('dataDisplay');
-      display.innerHTML = '<div class="loading">Loading data...</div>';
-      
-      try {
-        let endpoint;
-        switch(type) {
-          case 'stores':
-            endpoint = '/autoshelf/stores';
-            break;
-          case 'products':
-            endpoint = '/catalog/all';
-            break;
-          case 'users':
-            endpoint = '/admin/users';
-            break;
-          case 'orders':
-            endpoint = '/admin/orders';
-            break;
-          case 'catalog':
-            endpoint = '/catalog';
-            break;
-          case 'autoshelf':
-            endpoint = '/autoshelf/stores';
-            break;
-          default:
-            endpoint = '/catalog';
-        }
-        
-        const response = await fetch(`${API_BASE}${endpoint}`);
-        const data = await response.json();
-        
-        if (response.ok) {
-          display.innerHTML = `<div class="success">✅ Data loaded successfully!</div>\n\n${JSON.stringify(data, null, 2)}`;
-        } else {
-          display.innerHTML = `<div class="error">❌ Error: ${data.error || 'Failed to fetch data'}</div>\n\n${JSON.stringify(data, null, 2)}`;
-        }
-      } catch (error) {
-        display.innerHTML = `<div class="error">❌ Connection Error: ${error.message}</div>\n\nMake sure the backend server is running on port 4000`;
+
+    // ── Load counts for sidebar badges ──
+    async function loadAllCounts() {
+      for (const [key, cfg] of Object.entries(TABLE_MAP)) {
+        const tagId = TAG_MAP[key];
+        if (!tagId) continue;
+        try {
+          const { count, error } = await sb.from(cfg.table).select('*', { count: 'exact', head: true });
+          const el = document.getElementById(tagId);
+          if (el) el.textContent = error ? 'RLS' : (count ?? '0');
+          // Update stat cards
+          if (key === 'stores') {
+            const v = document.getElementById('storesCountVal');
+            if (v) v.innerHTML = `<div class="pulse-dot"></div> ${count ?? '—'} Stores`;
+          }
+          if (key === 'products') {
+            const v = document.getElementById('productsCountVal');
+            if (v) v.innerHTML = `${count ?? '—'} Products`;
+          }
+        } catch (_) {}
       }
     }
-    
-    // Initialize
-    checkApiStatus();
+
+    // ── Load table data from Supabase ──
+    async function loadTableData(tableKey, btnEl) {
+      currentTableKey = tableKey;
+      if (btnEl) {
+        document.querySelectorAll('.table-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+      }
+
+      const cardsEl = document.getElementById('cardsContainer');
+      const jsonEl  = document.getElementById('jsonContainer');
+      cardsEl.innerHTML = `<div style="color:var(--accent-gold); font-size:13px; padding:20px;">⏳ Fetching from Supabase...</div>`;
+      jsonEl.innerText  = 'Loading...';
+
+      // Schema overview is static
+      if (tableKey === 'schema') {
+        const schemaInfo = [
+          { table: 'stores',          rls: '✅ Public Read', write: 'Admin only',  description: 'Store metadata, QR tokens, bank payout' },
+          { table: 'products',        rls: '✅ Public Read', write: 'Admin only',  description: 'Catalog items, pricing, active flag' },
+          { table: 'orders',          rls: '🔒 Own User',   write: 'Own User',    description: 'Customer POS transaction records' },
+          { table: 'malls',           rls: '✅ Public Read', write: 'Admin only',  description: 'Mall locations, floors, stores count' },
+          { table: 'inventory',       rls: '✅ Public Read', write: 'Admin only',  description: 'Stock levels per product per store' },
+          { table: 'profiles',        rls: '🔒 Own User',   write: 'Own User',    description: 'Customer & merchant user profiles' },
+          { table: 'user_roles',      rls: '🔒 Own User',   write: 'System',      description: 'Role assignments (admin, store_manager)' },
+          { table: 'scan_sessions',   rls: '🔒 Own User',   write: 'Own User',    description: 'In-store barcode scan sessions' },
+          { table: 'scan_receipts',   rls: '🔒 Own/Staff',  write: 'Staff',       description: 'Verified checkout receipts' },
+          { table: 'support_tickets', rls: '🔒 Own/Admin',  write: 'Own/Admin',   description: 'Customer support cases' },
+          { table: 'deliveries',      rls: '🔒 Own User',   write: 'System',      description: 'Shiprocket delivery tracking' },
+          { table: 'order_events',    rls: '🔒 Own User',   write: 'System',      description: 'Order status timeline events' },
+        ];
+        loadedDataCache[tableKey] = schemaInfo;
+        renderCurrentData(schemaInfo, tableKey);
+        return;
+      }
+
+      const cfg = TABLE_MAP[tableKey];
+      if (!cfg) {
+        cardsEl.innerHTML = `<div style="color:#ef4444;">Unknown table: ${tableKey}</div>`;
+        return;
+      }
+
+      try {
+        const { data, error } = await sb.from(cfg.table).select('*').limit(50).order('id', { ascending: false });
+        if (error) throw new Error(error.message);
+
+        loadedDataCache[tableKey] = data || [];
+        renderCurrentData(data || [], tableKey);
+
+        // Update sidebar count tag
+        const tagEl = document.getElementById(TAG_MAP[tableKey]);
+        if (tagEl) tagEl.textContent = (data || []).length;
+
+      } catch (err) {
+        const isRls = err.message.includes('policy') || err.message.includes('42501');
+        const helpMsg = isRls
+          ? `RLS policy blocks anon reads on <strong>${cfg.table}</strong>. Add: <br><code>CREATE POLICY "public_read" ON public.${cfg.table} FOR SELECT USING (true);</code>`
+          : err.message;
+        cardsEl.innerHTML = `
+          <div style="color:#ef4444; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:20px; font-size:13px;">
+            <strong>⚠️ Error loading ${cfg.table}:</strong><br>${helpMsg}
+          </div>`;
+        jsonEl.innerText = `Error: ${err.message}`;
+      }
+    }
+
+    // ── Render records into cards or JSON ──
+    function renderCurrentData(records, tableKey) {
+      const cardsEl = document.getElementById('cardsContainer');
+      const jsonEl  = document.getElementById('jsonContainer');
+      const titleEl = document.getElementById('activeTableHeading');
+      const badgeEl = document.getElementById('activeSchemaBadge');
+      const descEl  = document.getElementById('activeTableDesc');
+      const cfg = TABLE_MAP[tableKey];
+
+      const icon      = cfg ? cfg.icon : '📑';
+      const label     = cfg ? cfg.label : tableKey.toUpperCase();
+      const tableName = cfg ? cfg.table : tableKey;
+
+      titleEl.innerHTML = `${icon} ${label} <span class="table-schema-badge" id="activeSchemaBadge">public.${tableName}</span>`;
+      descEl.innerText = `${records.length} record(s) loaded from public.${tableName}`;
+      jsonEl.innerText = JSON.stringify(records, null, 2);
+
+      if (!records || records.length === 0) {
+        cardsEl.innerHTML = `
+          <div style="color:var(--text-muted); font-size:13px; padding:20px; text-align:center;">
+            <div style="font-size:32px; margin-bottom:8px;">📭</div>
+            No records found in <strong style="color:#fff;">public.${tableName}</strong>.<br>
+            <span style="font-size:12px;">Insert rows via Supabase Dashboard → Table Editor, or run a seed SQL.</span>
+          </div>`;
+        return;
+      }
+
+      const nameField = cfg ? cfg.nameField : 'id';
+      cardsEl.innerHTML = records.map(r => {
+        const id   = r.id || '—';
+        const name = r[nameField] || r.name || r.subject || r.id || 'Record';
+        const skipKeys = new Set(['id', 'raw_data', 'created_at', 'updated_at']);
+        const details = Object.entries(r)
+          .filter(([k]) => !skipKeys.has(k) && k !== nameField)
+          .slice(0, 5)
+          .map(([k, v]) => {
+            let display = v;
+            if (typeof v === 'object' && v !== null) display = JSON.stringify(v).substring(0, 60) + (JSON.stringify(v).length > 60 ? '…' : '');
+            if (typeof v === 'boolean') display = v ? '✅ Yes' : '❌ No';
+            if (v === null || v === undefined) display = '—';
+            return `<div class="record-field"><span>${k}:</span><strong>${display}</strong></div>`;
+          }).join('');
+
+        const statusVal = r.verification_status || r.status || '';
+        const statusColor = statusVal === 'verified' || statusVal === 'active' || statusVal === 'delivered' ? 'var(--accent-green)'
+          : statusVal === 'pending' ? 'var(--accent-gold)'
+          : statusVal === 'rejected' || statusVal === 'failed' ? 'var(--accent-red)'
+          : '#60a5fa';
+
+        return `
+          <div class="record-card">
+            <div class="record-head">
+              <span class="record-id">${String(id).substring(0, 24)}</span>
+              ${statusVal ? `<span style="font-size:10px; font-weight:800; color:${statusColor};">${statusVal.toUpperCase()}</span>` : '<span style="font-size:10px; color:#3b82f6; font-weight:800;">RECORD</span>'}
+            </div>
+            <div class="record-title">${name}</div>
+            ${details}
+          </div>`;
+      }).join('');
+    }
+
+    function switchDisplayMode(mode) {
+      currentDisplayMode = mode;
+      document.getElementById('btnCardsView').classList.toggle('active', mode === 'cards');
+      document.getElementById('btnJsonView').classList.toggle('active', mode === 'json');
+      document.getElementById('cardsContainer').style.display = mode === 'cards' ? 'grid' : 'none';
+      document.getElementById('jsonContainer').style.display  = mode === 'json'  ? 'block' : 'none';
+    }
+
+    function refreshCurrentTable() { loadTableData(currentTableKey); }
+
+    // ── Init ──
+    checkHealth();
+    loadAllCounts();
+    loadTableData('stores');
   </script>
-  <script src="assets/js/api-client.js"></script>
 </body>
 </html>

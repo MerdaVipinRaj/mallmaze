@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -451,12 +451,8 @@
     }
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    @media (max-width: 0px) /* disabled mobile collapse */ { .detail-panel { display: none; } }
-    @media (max-width: 0px) /* disabled mobile collapse */ {
-      .sidebar { width: 64px; min-width: 64px; padding: 16px 8px; }
-      .brand span, .nav-item span, .user-info { display: none; }
-      .nav-item { justify-content: center; padding: 10px; }
-    }
+    @media (max-width: 900px) { .detail-panel { display: none; } }
+    /* Mobile overrides handled by pos-mobile.css */
   </style>
 
   <meta name="description" content="MallMaze - Customers CRM - MallMaze unified local commerce." />
@@ -478,8 +474,8 @@
   }
 </style>
 
-  <link rel="stylesheet" href="assets/css/pos-mobile.css">
-  <script src="assets/js/pos-mobile.js"></script>
+  <link rel="stylesheet" href="assets/css/pos-mobile.css?v=20261014-v4">
+  <script src="assets/js/pos-mobile.js?v=20261014-v4"></script>
 </head>
 <body>
 
@@ -521,8 +517,8 @@
 
       <!-- Home Redirect Link in Sidebar -->
       <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;" title="Go to MallMaze Customer Storefront">
-        <span>🌐 Storefront / Home</span>
-        <span>→</span>
+        <span>ðŸŒ Storefront / Home</span>
+        <span>â†’</span>
       </a>
 
       <div class="nav-group">
@@ -616,7 +612,7 @@
           <div class="kpi-card">
             <div>
               <div class="kpi-title">Avg. Customer Lifetime Spend</div>
-              <div class="kpi-value">₹2,84,500</div>
+              <div class="kpi-value">â‚¹2,84,500</div>
             </div>
             <span class="kpi-badge">High Value</span>
           </div>
@@ -639,7 +635,7 @@
             </button>
           </div>
           <button class="dropdown-pill" onclick="sortCustomers()">
-            <span id="custSortLabel">Sort by Spend ↓</span>
+            <span id="custSortLabel">Sort by Spend â†“</span>
           </button>
         </div>
 
@@ -651,7 +647,7 @@
                 <th>Location</th>
                 <th>Phone</th>
                 <th>Tier</th>
-                <th>Total Spent (₹)</th>
+                <th>Total Spent (â‚¹)</th>
                 <th>Orders</th>
               </tr>
             </thead>
@@ -689,7 +685,7 @@
         <div class="metric-box-grid">
           <div class="metric-small-card">
             <div class="label">Lifetime Spent</div>
-            <div class="value" id="cLifetimeSpend" style="color:#15803d;">₹5,42,000</div>
+            <div class="value" id="cLifetimeSpend" style="color:#15803d;">â‚¹5,42,000</div>
           </div>
           <div class="metric-small-card">
             <div class="label">Total Orders</div>
@@ -719,12 +715,12 @@
 
   <script>
     const customersData = [
-      { id: "CUST-101", name: "Rajesh Verma", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80", city: "Mumbai, MH", phone: "+91 98201 44920", tier: "VIP Client", spend: "₹5,42,000", numSpend: 542000, orders: 14, email: "rajesh.verma@mumbaitech.in", gstin: "27AAAPL1234M1Z5" },
-      { id: "CUST-102", name: "Neha Kulkarni", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=80&auto=format&fit=crop&q=80", city: "Pune, MH", phone: "+91 94220 18290", tier: "VIP Client", spend: "₹4,18,000", numSpend: 418000, orders: 9, email: "neha.kulkarni@enggpune.com", gstin: "27BBBPL5678M1Z8" },
-      { id: "CUST-103", name: "Vikram Malhotra", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80", city: "New Delhi, DL", phone: "+91 98110 39201", tier: "VIP Client", spend: "₹3,95,000", numSpend: 395000, orders: 8, email: "vikram@malhotratools.in", gstin: "07AAACM8910M1Z2" },
-      { id: "CUST-104", name: "Kavita Singhal", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&auto=format&fit=crop&q=80", city: "Bengaluru, KA", phone: "+91 98450 78201", tier: "Regular", spend: "₹2,64,000", numSpend: 264000, orders: 6, email: "kavita.s@blrindustries.com", gstin: "29CCCPL3412M1Z1" },
-      { id: "CUST-105", name: "Aarav Gupta", avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=80&auto=format&fit=crop&q=80", city: "Hyderabad, TS", phone: "+91 98490 28192", tier: "Regular", spend: "₹1,82,500", numSpend: 182500, orders: 5, email: "aarav.gupta@hydinfra.in", gstin: "36DDDPM9921M1Z4" },
-      { id: "CUST-106", name: "Ananya Deshmukh", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&auto=format&fit=crop&q=80", city: "Nagpur, MH", phone: "+91 98901 10294", tier: "Regular", spend: "₹1,44,500", numSpend: 144500, orders: 4, email: "ananya.d@deshmukhind.com", gstin: "27EEEPL8812M1Z9" }
+      { id: "CUST-101", name: "Rajesh Verma", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80", city: "Mumbai, MH", phone: "+91 98201 44920", tier: "VIP Client", spend: "â‚¹5,42,000", numSpend: 542000, orders: 14, email: "rajesh.verma@mumbaitech.in", gstin: "27AAAPL1234M1Z5" },
+      { id: "CUST-102", name: "Neha Kulkarni", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=80&auto=format&fit=crop&q=80", city: "Pune, MH", phone: "+91 94220 18290", tier: "VIP Client", spend: "â‚¹4,18,000", numSpend: 418000, orders: 9, email: "neha.kulkarni@enggpune.com", gstin: "27BBBPL5678M1Z8" },
+      { id: "CUST-103", name: "Vikram Malhotra", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80", city: "New Delhi, DL", phone: "+91 98110 39201", tier: "VIP Client", spend: "â‚¹3,95,000", numSpend: 395000, orders: 8, email: "vikram@malhotratools.in", gstin: "07AAACM8910M1Z2" },
+      { id: "CUST-104", name: "Kavita Singhal", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&auto=format&fit=crop&q=80", city: "Bengaluru, KA", phone: "+91 98450 78201", tier: "Regular", spend: "â‚¹2,64,000", numSpend: 264000, orders: 6, email: "kavita.s@blrindustries.com", gstin: "29CCCPL3412M1Z1" },
+      { id: "CUST-105", name: "Aarav Gupta", avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=80&auto=format&fit=crop&q=80", city: "Hyderabad, TS", phone: "+91 98490 28192", tier: "Regular", spend: "â‚¹1,82,500", numSpend: 182500, orders: 5, email: "aarav.gupta@hydinfra.in", gstin: "36DDDPM9921M1Z4" },
+      { id: "CUST-106", name: "Ananya Deshmukh", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&auto=format&fit=crop&q=80", city: "Nagpur, MH", phone: "+91 98901 10294", tier: "Regular", spend: "â‚¹1,44,500", numSpend: 144500, orders: 4, email: "ananya.d@deshmukhind.com", gstin: "27EEEPL8812M1Z9" }
     ];
 
     let selectedCust = customersData[0];
@@ -775,7 +771,7 @@
     function sortCustomers() {
       sortDesc = !sortDesc;
       customersData.sort((a, b) => sortDesc ? b.numSpend - a.numSpend : a.numSpend - b.numSpend);
-      document.getElementById("custSortLabel").innerText = sortDesc ? "Sort by Spend ↓" : "Sort by Spend ↑";
+      document.getElementById("custSortLabel").innerText = sortDesc ? "Sort by Spend â†“" : "Sort by Spend â†‘";
       renderCustomers();
       showToast(`Sorted by customer lifetime spend`);
     }

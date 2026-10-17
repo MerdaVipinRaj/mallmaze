@@ -100,40 +100,35 @@
     });
   }
 
-  // --- SETUP FLOATING EDGE TABS (HOVER / CLICK AT LEFT & RIGHT) ---
-  function setupEdgeTabs() {
-    if (window.innerWidth > 900) return;
-
-    // 1. Left Edge Tab ("⚡ FEATURES & MENU")
-    if (!document.getElementById("posEdgePillLeft")) {
-      var leftTab = document.createElement("button");
-      leftTab.id = "posEdgePillLeft";
-      leftTab.className = "pos-edge-pill-left";
-      leftTab.setAttribute("aria-label", "Open Features & Tools Menu");
-      leftTab.title = "Click to open left navigation buttons";
-      leftTab.innerHTML = '<span class="pos-pulse-dot"></span><span>⚡</span><span>MENU & TOOLS</span>';
-      leftTab.addEventListener("click", function (e) {
-        e.stopPropagation();
-        window.toggleMobileSidebar();
+  // --- REMOVE ANY FLOATING EDGE TABS (PREVIOUSLY AT SIDES / MIDDLE OF SCREEN) ---
+  function removeEdgeTabs() {
+    var selectors = [
+      "#posEdgePillLeft",
+      "#posEdgePillRight",
+      ".pos-edge-pill-left",
+      ".pos-edge-pill-right",
+      "[id*='posEdgePill']",
+      "[class*='pos-edge-pill']",
+      "button[title*='navigation buttons']",
+      "button[title*='order details']"
+    ];
+    try {
+      selectors.forEach(function (sel) {
+        var elements = document.querySelectorAll(sel);
+        for (var i = 0; i < elements.length; i++) {
+          var el = elements[i];
+          if (el && el.parentNode) {
+            el.parentNode.removeChild(el);
+          }
+        }
       });
-      document.body.appendChild(leftTab);
-    }
-
-    // 2. Right Edge Tab ("📋 ORDER DETAILS")
-    if (!document.getElementById("posEdgePillRight")) {
-      var rightTab = document.createElement("button");
-      rightTab.id = "posEdgePillRight";
-      rightTab.className = "pos-edge-pill-right";
-      rightTab.setAttribute("aria-label", "Open Order Details Panel");
-      rightTab.title = "Click to open right order details";
-      rightTab.innerHTML = '<span>📋</span><span>ORDER DETAILS</span>';
-      rightTab.addEventListener("click", function (e) {
-        e.stopPropagation();
-        window.toggleMobileDetailPanel();
-      });
-      document.body.appendChild(rightTab);
-    }
+    } catch (e) {}
   }
+
+  // Run immediately and periodically
+  removeEdgeTabs();
+  var edgeTabsPurgeInterval = setInterval(removeEdgeTabs, 250);
+  setTimeout(function () { clearInterval(edgeTabsPurgeInterval); }, 5000);
 
   // --- SETUP CLOSE BUTTONS IN SIDEBAR & DETAIL PANELS ---
   function setupCloseButtons() {
@@ -167,58 +162,103 @@
     });
   }
 
-  // --- SETUP MOBILE TOP QUICK ACTION BAR ---
-  function setupMobileTopbar() {
-    if (window.innerWidth > 900) return;
-    var topHeader = document.querySelector(".top-header, .page-header");
-    if (topHeader && !topHeader.querySelector(".pos-mobile-topbar")) {
-      var topbar = document.createElement("div");
-      topbar.className = "pos-mobile-topbar";
-      topbar.innerHTML = [
-        '<button type="button" class="pos-btn-top-menu" onclick="window.toggleMobileSidebar()">',
-        '  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>',
-        '  <span>Features Menu</span>',
-        '</button>',
-        '<div class="pos-top-brand-text">',
-        '  <span>MallMaze POS</span>',
-        '</div>',
-        '<button type="button" class="pos-btn-top-details" onclick="window.toggleMobileDetailPanel()">',
-        '  <span>Details</span>',
-        '  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>',
-        '</button>'
-      ].join("");
-      topHeader.insertBefore(topbar, topHeader.firstChild);
-    }
+  // --- REMOVE ANY ARTIFICIAL INJECTED TOPBAR ---
+  function removeArtificialTopbar() {
+    var topbars = document.querySelectorAll(".pos-mobile-topbar");
+    topbars.forEach(function (tb) {
+      if (tb && tb.parentNode) tb.parentNode.removeChild(tb);
+    });
   }
 
-  // --- AUTOMATIC ORDER ROW CLICK LISTENER ---
-  function setupOrderRowInteractions() {
-    document.addEventListener("click", function (e) {
-      if (window.innerWidth > 900) return;
-      var row = e.target.closest(".order-row, tr[onclick], tr[data-order-id], .orders-table tbody tr");
-      if (row && !e.target.closest("button, a, input, select")) {
-        setTimeout(function () {
-          window.openMobileDetailPanel();
-        }, 120);
+  // --- ENSURE MODERN BOTTOM NAVIGATION DOCK IS ALWAYS VISIBLE ---
+  function ensureMobileBottomNav() {
+    if (window.innerWidth > 900) {
+      var dock = document.querySelector(".mobile-bottom-nav");
+      if (dock) dock.style.display = "none";
+      return;
+    }
+
+    var existingDock = document.getElementById("mobileBottomNav") || document.querySelector(".mobile-bottom-nav");
+    if (!existingDock) {
+      existingDock = document.createElement("nav");
+      existingDock.id = "mobileBottomNav";
+      existingDock.className = "mobile-bottom-nav";
+      document.body.appendChild(existingDock);
+    }
+
+    existingDock.style.display = "flex";
+
+    var currentPath = (window.location.pathname || "").split("/").pop() || "store-dashboard.html";
+    if (currentPath === "" || currentPath === "/") currentPath = "store-dashboard.html";
+
+    var navItems = [
+      {
+        id: "mbn-dash",
+        href: "store-dashboard.html",
+        label: "Dashboard",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>',
+        matches: ["store-dashboard.html", "dashboard.html"]
+      },
+      {
+        id: "mbn-orders",
+        href: "orders.html",
+        label: "Orders",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
+        matches: ["orders.html", "pos-orders.html", "order.html"]
+      },
+      {
+        id: "mbn-stock",
+        href: "inventory.html",
+        label: "Stock",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>',
+        matches: ["inventory.html"]
+      },
+      {
+        id: "mbn-pay",
+        href: "payments.html",
+        label: "Payments",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>',
+        matches: ["payments.html"]
+      },
+      {
+        id: "mbn-menu",
+        href: "javascript:void(0)",
+        label: "More",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>',
+        action: true,
+        matches: ["profit-loss.html", "reports.html", "statistics.html", "customers.html", "expenses.html"]
       }
-    });
+    ];
+
+    existingDock.innerHTML = navItems.map(function (item) {
+      var isActive = item.matches.indexOf(currentPath) !== -1;
+      var activeClass = isActive ? " active" : "";
+      var onclickAttr = item.action ? 'onclick="window.toggleMobileSidebar(); return false;"' : '';
+      return '<a href="' + item.href + '" class="mob-nav-btn' + activeClass + '" id="' + item.id + '" ' + onclickAttr + '>' +
+        item.icon +
+        '<span>' + item.label + '</span>' +
+      '</a>';
+    }).join("");
   }
 
   function init() {
     setupBackdrop();
     setupCloseButtons();
-    setupEdgeTabs();
-    setupMobileTopbar();
-    setupOrderRowInteractions();
+    removeEdgeTabs();
+    removeArtificialTopbar();
+    ensureMobileBottomNav();
   }
 
   window.addEventListener("resize", function () {
     if (window.innerWidth > 900) {
       window.closeMobileSidebar();
       window.closeMobileDetailPanel();
+      var dock = document.querySelector(".mobile-bottom-nav");
+      if (dock) dock.style.display = "none";
     } else {
-      setupEdgeTabs();
-      setupMobileTopbar();
+      removeEdgeTabs();
+      removeArtificialTopbar();
+      ensureMobileBottomNav();
     }
   });
 

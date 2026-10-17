@@ -12,8 +12,8 @@ window.MM_CONFIG = {
   RAZORPAY_KEY_ID: "",
 
   // Supabase Authentication & PostgreSQL Configuration
-  SUPABASE_URL: window.SUPABASE_URL || "https://noczhsyfkfctjpbgnlcp.supabase.co",
-  SUPABASE_ANON_KEY: window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vY3poc3lma2ZjdGpwYmdubGNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNzU5ODksImV4cCI6MjA4NjY1MTk4OX0.qmJovC4AOk6sRGI6nngsYZHCVAN3n_N6svyPFF9BflM",
+  SUPABASE_URL: window.SUPABASE_URL || "https://tyorlxcsbkgewmjjensa.supabase.co",
+  SUPABASE_ANON_KEY: window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5b3JseGNzYmtnZXdtamplbnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTg0MDAsImV4cCI6MjA5MTgzNDQwMH0.b2yUGXzkpLlgaXm6wkJHCOGZpix0ooX9NYEOkb4fxwo",
 
   // Dev fallback keeps static previews usable while the backend is starting.
   ENABLE_LOCAL_FALLBACKS: true

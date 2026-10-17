@@ -1,4 +1,4 @@
-const CACHE = 'mallmaze-static-v16';
+const CACHE = 'mallmaze-static-v18';
 
 const ASSETS = [
   '/',
