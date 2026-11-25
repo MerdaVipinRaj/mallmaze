@@ -779,6 +779,7 @@
     </nav>
 
     <!-- SIDEBAR -->
+        <!-- UNIFIED MERCHANT SIDEBAR -->
     <aside class="sidebar">
       <a href="dashboard.html" class="brand">
         <div class="brand-icon">
@@ -786,73 +787,85 @@
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
           </svg>
         </div>
-        <span>MallMaze</span>
+        <div class="brand-text-block">
+          <span class="brand-title">MallMaze</span>
+          <span class="brand-tag">Store Partner</span>
+        </div>
       </a>
 
-      <!-- Home Redirect Link in Sidebar -->
-      <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;" title="Go to MallMaze Customer Storefront">
-        <span>ðŸŒ Storefront / Home</span>
-        <span>â†’</span>
+      <!-- Quick Store Status Pill -->
+      <div class="sidebar-store-status">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="dot-live"></div>
+          <div>
+            <span>ONLINE</span><br>
+            <small>Accepting Orders</small>
+          </div>
+        </div>
+        <button type="button" onclick="if(typeof toggleStoreOnlineStatus==='function'){toggleStoreOnlineStatus();}else if(typeof showToast==='function'){showToast('Store status: Online');}" title="Toggle Online / Offline">Toggle</button>
+      </div>
+
+      <!-- Customer Storefront Link -->
+      <a href="index.html" class="sidebar-storefront-link" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:14px;" title="Go to Customer Storefront">
+        <span style="display:flex; align-items:center; gap:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Customer Store
+        </span>
+        <span style="background:rgba(234,179,8,0.25); color:#fef08a; padding:1px 6px; border-radius:6px; font-size:10px;">Live --></span>
       </a>
 
+      <div class="nav-label">Store Operations</div>
       <div class="nav-group">
         <a class="nav-item" href="dashboard.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           <span>Dashboard</span>
         </a>
         <a class="nav-item" href="orders.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           <span>Orders</span>
         </a>
         <a class="nav-item" href="inventory.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-          <span>Stock & Products</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          <span>Stock & Inventory</span>
         </a>
         <a class="nav-item active" href="payments.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-          <span>Payments</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span>Payments & Billing</span>
         </a>
         <a class="nav-item" href="customers.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>Customers</span>
         </a>
-        <a class="nav-item" href="profit-loss.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          <span>Profit & Loss</span>
-        </a>
-        <a class="nav-item" href="reports.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-          <span>Reports</span>
-        </a>
-        <a class="nav-item" href="statistics.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-          <span>Statistics</span>
+        <a class="nav-item" href="store-dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect></svg>
+          <span>Store QR Code</span>
         </a>
       </div>
 
       <div class="nav-divider"></div>
 
+      <div class="nav-label">Analytics & Reports</div>
       <div class="nav-group">
-        <a class="nav-item" href="notifications.html" onclick="if(typeof showToast==='function'){showToast('You have 4 new store alerts');}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span>Notifications</span>
+        <a class="nav-item" href="statistics.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Sales Analytics</span>
         </a>
-        <a class="nav-item" href="#help" onclick="event.preventDefault(); if(typeof showToast==='function'){showToast('Help Center & Documentation');}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          <span>Help</span>
+        <a class="nav-item" href="profit-loss.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>Profit & Loss</span>
         </a>
-        <a class="nav-item" href="#settings" onclick="event.preventDefault(); if(typeof showToast==='function'){showToast('Store & System Settings');}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          <span>Settings</span>
+        <a class="nav-item" href="reports.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>Reports</span>
         </a>
       </div>
 
       <div class="nav-spacer"></div>
 
       <div class="sidebar-footer">
-        <a class="nav-item" href="index.html" onclick="if(typeof showToast==='function'){showToast('Logged out successfully');}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          <span>Log out</span>
+        <a class="nav-item" href="index.html" onclick="if(typeof showToast==='function')showToast('Logged out of POS terminal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Exit POS</span>
         </a>
       </div>
     </aside>
@@ -867,12 +880,12 @@
               <span class="route-pill"><span class="pulse-dot"></span> Razorpay Auto-Route &lt; 1s</span>
             </h1>
             <p style="font-size: 12.5px; color: #64748b; margin-top: 3px;">
-              Automated Marketplace Splits: Customer pays MallMaze &rarr; Platform fee deducted &rarr; Store Bank account credited instantly.
+              Automated Marketplace Splits: Customer pays MallMaze --> Platform fee deducted &rarr; Store Bank account credited instantly.
             </p>
           </div>
           <div class="top-actions">
             <button class="btn-simulate" onclick="openSimulateModal()">
-              <span>âš¡</span>
+              <span></span>
               <span>Test Instant Split Flow</span>
             </button>
             <button class="icon-btn" title="Export Payments" onclick="exportLedgerCsv()">
@@ -893,21 +906,21 @@
           <div class="kpi-card">
             <div>
               <div class="kpi-title">Total Customer Paid (GMV)</div>
-              <div class="kpi-value" id="kpiGross">â‚¹13,449</div>
+              <div class="kpi-value" id="kpiGross">₹13,449</div>
             </div>
             <span class="kpi-badge">Captured</span>
           </div>
           <div class="kpi-card">
             <div>
               <div class="kpi-title">MallMaze Platform Fee (10%)</div>
-              <div class="kpi-value" id="kpiPlatformFee" style="color:#2563eb;">â‚¹1,345</div>
+              <div class="kpi-value" id="kpiPlatformFee" style="color:#2563eb;">₹1,345</div>
             </div>
             <span class="kpi-badge blue">Retained</span>
           </div>
           <div class="kpi-card">
             <div>
               <div class="kpi-title">Disbursed to Shop Owners</div>
-              <div class="kpi-value" id="kpiStorePayouts" style="color:#059669;">â‚¹12,104</div>
+              <div class="kpi-value" id="kpiStorePayouts" style="color:#059669;">₹12,104</div>
             </div>
             <span class="kpi-badge">Transferred</span>
           </div>
@@ -927,7 +940,7 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
           <input type="text" id="paymentsSearchInput" class="mobile-search-input" placeholder="Search settlements by Txn ID, Order ID, Store, Customer, or Payment Mode..." oninput="handlePaymentsSearch(this.value)" autocomplete="off" />
-          <button id="paymentsSearchClear" class="mobile-search-clear" onclick="clearPaymentsSearch()" title="Clear search">âœ•</button>
+          <button id="paymentsSearchClear" class="mobile-search-clear" onclick="clearPaymentsSearch()" title="Clear search">✓•</button>
         </div>
 
         <!-- FILTERS -->
@@ -941,7 +954,7 @@
           </div>
           <div class="filter-group">
             <button class="dropdown-pill" onclick="toggleSort()">
-              <span id="sortLabel">Sort by Amount â†“</span>
+              <span id="sortLabel">Sort by Amount &larr;“</span>
             </button>
           </div>
         </div>
@@ -955,7 +968,7 @@
                 <th>Store Partner</th>
                 <th>Customer & Mode</th>
                 <th>Status</th>
-                <th>Customer Paid (â‚¹)</th>
+                <th>Customer Paid (₹)</th>
                 <th>Platform Fee (10%)</th>
                 <th>Store Payout (90%)</th>
                 <th>Timestamp</th>
@@ -971,33 +984,33 @@
         <div class="detail-header">
           <div>
             <h2 class="detail-title" id="pTxnId">payout-101-s1</h2>
-            <span class="status-badge badge-success" id="pStatusBadge" style="margin-top:4px; display:inline-block;">âš¡ Settled (&lt; 1s)</span>
+            <span class="status-badge badge-success" id="pStatusBadge" style="margin-top:4px; display:inline-block;"> Settled (&lt; 1s)</span>
           </div>
-          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close details">âœ•</button>
+          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close details">✓•</button>
         </div>
         <p style="font-size: 11.5px; color: #94a3b8; margin-bottom: 12px;" id="pTimestamp">Just now</p>
 
         <!-- AUTOMATED SPLIT VISUALIZER -->
         <div class="split-route-box">
           <div class="split-title">
-            <span>âš¡ Automated 3-Way Route Split</span>
+            <span> Automated 3-Way Route Split</span>
             <span style="color:#059669; font-weight:800;">1-Sec Auto-Execution</span>
           </div>
           <div class="split-item">
             <span>Customer Payment (Gross)</span>
-            <strong id="pGrossVal" style="color:#0f172a;">â‚¹2,999</strong>
+            <strong id="pGrossVal" style="color:#0f172a;">₹2,999</strong>
           </div>
           <div class="split-item">
             <span>MallMaze Platform Fee (10%)</span>
-            <span id="pFeeVal" class="split-val-neg">- â‚¹300</span>
+            <span id="pFeeVal" class="split-val-neg">- ₹300</span>
           </div>
           <div class="split-item">
             <span>Direct to Shop Owner A/c (90%)</span>
-            <span id="pNetVal" class="split-val-pos">+ â‚¹2,699</span>
+            <span id="pNetVal" class="split-val-pos">+ ₹2,699</span>
           </div>
           <div class="split-item" id="rowDelFee" style="border-top:1px dashed #cbd5e1; padding-top:6px;">
             <span>Delivery Charge to Partner A/c</span>
-            <span id="pDelFeeVal" style="color:#7c3aed; font-weight:800;">+ â‚¹49</span>
+            <span id="pDelFeeVal" style="color:#7c3aed; font-weight:800;">+ ₹49</span>
           </div>
         </div>
 
@@ -1008,7 +1021,7 @@
           <div class="sum-row"><span>Order ID</span><span id="pOrderId">ORD-LIVE-1024</span></div>
           <div class="sum-row"><span>Razorpay Transfer ID</span><span id="pRzpTransfer" style="font-family:monospace; font-size:11px;">trf_rzp_9841201</span></div>
           <div class="sum-row"><span>Store Linked Account</span><span id="pLinkedAcc" style="font-family:monospace; font-size:11px;">acc_route_s1_techzone</span></div>
-          <div class="sum-row strong"><span>Total Paid by Customer</span><span id="pTotalPaid" style="color:#15803d; font-size:16px;">â‚¹2,999</span></div>
+          <div class="sum-row strong"><span>Total Paid by Customer</span><span id="pTotalPaid" style="color:#15803d; font-size:16px;">₹2,999</span></div>
         </div>
 
         <h4 style="font-size: 12.5px; font-weight: 700; margin-bottom: 8px;">Shop Owner Bank Account (Linked)</h4>
@@ -1038,7 +1051,7 @@
   <div class="modal-overlay" id="simModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>âš¡ Test 1-Second Instant Split Automation</h3>
+        <h3> Test 1-Second Instant Split Automation</h3>
         <button onclick="closeSimulateModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
       </div>
       <div class="modal-body">
@@ -1062,7 +1075,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Customer Payment Amount (â‚¹)</label>
+          <label class="form-label">Customer Payment Amount (₹)</label>
           <input type="number" id="simAmount" class="form-input" value="3500" min="10" oninput="updateSimPreview()" />
         </div>
 
@@ -1080,7 +1093,7 @@
         <div class="form-group" style="display:flex; align-items:center; gap:8px; background:#faf5ff; border:1px solid #e9d5ff; border-radius:10px; padding:10px 12px;">
           <input type="checkbox" id="simIncludeDelivery" checked onchange="updateSimPreview()" style="width:16px; height:16px; cursor:pointer;" />
           <label for="simIncludeDelivery" style="font-size:12px; font-weight:700; color:#6b21a8; cursor:pointer; margin:0;">
-            Allot Hyperlocal Delivery Charge (â‚¹49 direct to Delivery Partner)
+            Allot Hyperlocal Delivery Charge (₹49 direct to Delivery Partner)
           </label>
         </div>
 
@@ -1089,26 +1102,26 @@
           <div style="font-size:11.5px; font-weight:700; color:#334155; margin-bottom:8px;">Instant 3-Way Split Breakdown (Live Preview):</div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
             <span style="color:#64748b;">Total Customer Pays:</span>
-            <strong id="prevCustPays">â‚¹3,549</strong>
+            <strong id="prevCustPays">₹3,549</strong>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; color:#2563eb;">
             <span>MallMaze Platform Fee (10%):</span>
-            <strong id="prevPlatformFee">- â‚¹350</strong>
+            <strong id="prevPlatformFee">- ₹350</strong>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; color:#059669; font-weight:700;">
             <span>Shop Owner Instant Payout (90%):</span>
-            <span id="prevStoreNet">+ â‚¹3,150</span>
+            <span id="prevStoreNet">+ ₹3,150</span>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:12px; color:#7c3aed; font-weight:800; border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:4px;">
             <span>Delivery Partner Payout (Rapid Fleet):</span>
-            <span id="prevDeliveryFee">+ â‚¹49</span>
+            <span id="prevDeliveryFee">+ ₹49</span>
           </div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn-action" onclick="closeSimulateModal()" style="background:#f1f5f9; color:#475569;">Cancel</button>
         <button class="btn-action" onclick="executeInstantSplitSimulation()" id="btnRunSim" style="background:#059669; color:#ffffff; font-weight:800;">
-          <span>âš¡ Execute 1-Second Auto-Split</span>
+          <span> Execute 1-Second Auto-Split</span>
         </button>
       </div>
     </div>
@@ -1130,9 +1143,9 @@
           if (Array.isArray(data.payouts) && data.payouts.length > 0) {
             rawPayoutsData = data.payouts;
             if (data.summary) {
-              document.getElementById("kpiGross").innerText = "â‚¹" + Number(data.summary.total_gross_inr || 0).toLocaleString('en-IN');
-              document.getElementById("kpiPlatformFee").innerText = "â‚¹" + Number(data.summary.platform_fee_inr || 0).toLocaleString('en-IN');
-              document.getElementById("kpiStorePayouts").innerText = "â‚¹" + Number(data.summary.store_payouts_inr || 0).toLocaleString('en-IN');
+              document.getElementById("kpiGross").innerText = "₹" + Number(data.summary.total_gross_inr || 0).toLocaleString('en-IN');
+              document.getElementById("kpiPlatformFee").innerText = "₹" + Number(data.summary.platform_fee_inr || 0).toLocaleString('en-IN');
+              document.getElementById("kpiStorePayouts").innerText = "₹" + Number(data.summary.store_payouts_inr || 0).toLocaleString('en-IN');
             }
             renderTable();
             if (!selectedPayoutId || !rawPayoutsData.some(p => p.id === selectedPayoutId)) {
@@ -1246,9 +1259,9 @@
       const gross = rawPayoutsData.reduce((sum, p) => sum + (Number(p.gross_inr) || 0), 0);
       const fee = rawPayoutsData.reduce((sum, p) => sum + (Number(p.commission_inr) || 0), 0);
       const net = rawPayoutsData.reduce((sum, p) => sum + (Number(p.net_inr) || 0), 0);
-      document.getElementById("kpiGross").innerText = "â‚¹" + gross.toLocaleString('en-IN');
-      document.getElementById("kpiPlatformFee").innerText = "â‚¹" + fee.toLocaleString('en-IN');
-      document.getElementById("kpiStorePayouts").innerText = "â‚¹" + net.toLocaleString('en-IN');
+      document.getElementById("kpiGross").innerText = "₹" + gross.toLocaleString('en-IN');
+      document.getElementById("kpiPlatformFee").innerText = "₹" + fee.toLocaleString('en-IN');
+      document.getElementById("kpiStorePayouts").innerText = "₹" + net.toLocaleString('en-IN');
     }
 
     let paymentsSearchTerm = "";
@@ -1303,7 +1316,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="8" style="text-align:center; padding:32px 16px; color:#64748b; background:#ffffff; border-radius:16px;">
-              <div style="font-size:24px; margin-bottom:6px;">ðŸ’³</div>
+              <div style="font-size:24px; margin-bottom:6px;"></div>
               <strong style="display:block; font-size:14px; color:#0f172a;">No settlement records found</strong>
               <span style="font-size:12px;">Try adjusting your search keywords or store filter</span>
             </td>
@@ -1332,7 +1345,7 @@
                   <span style="font-size:10.5px; font-weight:800; color:#121620; background:#f1f5f9; padding:2px 8px; border-radius:6px; font-family:monospace;">${p.id}</span>
                   <span style="font-size:11px; color:#64748b;">${dateStr}</span>
                 </div>
-                <span class="status-badge badge-success" style="font-size:10px; padding:3px 8px;">âš¡ Settled (&lt; 1s)</span>
+                <span class="status-badge badge-success" style="font-size:10px; padding:3px 8px;"> Settled (&lt; 1s)</span>
               </div>
               <div class="mob-card-body" style="margin: 8px 0 6px;">
                 <div style="flex:1; min-width:0;">
@@ -1340,29 +1353,29 @@
                     ${p.store_name || p.store_id}
                   </strong>
                   <div style="font-size:11.5px; color:#64748b; margin-top:2px;">
-                    ${p.customer_name || 'Customer'} â€¢ <span class="mode-tag" style="font-size:10px; padding:1px 6px;">${p.payment_mode || 'Razorpay UPI'}</span>
+                    ${p.customer_name || 'Customer'} • <span class="mode-tag" style="font-size:10px; padding:1px 6px;">${p.payment_mode || 'Razorpay UPI'}</span>
                   </div>
                 </div>
               </div>
               <div class="mob-pay-breakdown">
                 <div>
                   <span class="val-label">Gross Paid</span>
-                  <span class="val-amount" style="color:#0f172a;">â‚¹${gross.toLocaleString('en-IN')}</span>
+                  <span class="val-amount" style="color:#0f172a;">₹${gross.toLocaleString('en-IN')}</span>
                 </div>
                 <div>
                   <span class="val-label">MallMaze (10%)</span>
-                  <span class="val-amount" style="color:#2563eb;">â‚¹${fee.toLocaleString('en-IN')}</span>
+                  <span class="val-amount" style="color:#2563eb;">₹${fee.toLocaleString('en-IN')}</span>
                 </div>
                 <div>
                   <span class="val-label">Store Net (90%)</span>
-                  <span class="val-amount" style="color:#059669;">â‚¹${net.toLocaleString('en-IN')}</span>
+                  <span class="val-amount" style="color:#059669;">₹${net.toLocaleString('en-IN')}</span>
                 </div>
               </div>
               <div class="mob-card-footer" style="margin-top:6px;">
                 <span style="font-size:11px; color:#64748b; font-family:monospace;">${p.razorpay_transfer_id || 'Auto-Route'}</span>
                 <div style="display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; color:#121620;">
                   <span>Receipt & Payout</span>
-                  <span style="color:#94a3b8;">â¯</span>
+                  <span style="color:#94a3b8;">â¯</span>
                 </div>
               </div>
             </td>
@@ -1383,11 +1396,11 @@
               <span class="mode-tag">${p.payment_mode || 'Razorpay UPI'}</span>
             </td>
             <td>
-              <span class="status-badge badge-success">âš¡ Settled (&lt; 1s)</span>
+              <span class="status-badge badge-success"> Settled (&lt; 1s)</span>
             </td>
-            <td><strong style="color:#0f172a;">â‚¹${gross.toLocaleString('en-IN')}</strong></td>
-            <td style="color:#2563eb; font-weight:700;">â‚¹${fee.toLocaleString('en-IN')}</td>
-            <td style="color:#059669; font-weight:800;">â‚¹${net.toLocaleString('en-IN')}</td>
+            <td><strong style="color:#0f172a;">₹${gross.toLocaleString('en-IN')}</strong></td>
+            <td style="color:#2563eb; font-weight:700;">₹${fee.toLocaleString('en-IN')}</td>
+            <td style="color:#059669; font-weight:800;">₹${net.toLocaleString('en-IN')}</td>
             <td style="color:#64748b; font-size:11.5px;">${dateStr}</td>
           `;
         }
@@ -1431,9 +1444,9 @@
       const fee = Number(p.commission_inr || Math.round(gross * 0.1));
       const net = Number(p.net_inr || (gross - fee));
 
-      document.getElementById("pGrossVal").innerText = "â‚¹" + gross.toLocaleString('en-IN');
-      document.getElementById("pFeeVal").innerText = "- â‚¹" + fee.toLocaleString('en-IN');
-      document.getElementById("pNetVal").innerText = "+ â‚¹" + net.toLocaleString('en-IN');
+      document.getElementById("pGrossVal").innerText = "₹" + gross.toLocaleString('en-IN');
+      document.getElementById("pFeeVal").innerText = "- ₹" + fee.toLocaleString('en-IN');
+      document.getElementById("pNetVal").innerText = "+ ₹" + net.toLocaleString('en-IN');
 
       document.getElementById("pStoreName").innerText = p.store_name || p.store_id;
       document.getElementById("pCustomerName").innerText = p.customer_name || "Customer";
@@ -1441,7 +1454,7 @@
       document.getElementById("pOrderId").innerText = p.order_id || "#ORD-MALL";
       document.getElementById("pRzpTransfer").innerText = p.razorpay_transfer_id || "trf_rzp_" + Date.now();
       document.getElementById("pLinkedAcc").innerText = p.razorpay_account_id || ("acc_route_" + p.store_id);
-      document.getElementById("pTotalPaid").innerText = "â‚¹" + gross.toLocaleString('en-IN');
+      document.getElementById("pTotalPaid").innerText = "₹" + gross.toLocaleString('en-IN');
 
       document.getElementById("pBankName").innerText = p.bank_name || "HDFC Bank Ltd";
       document.getElementById("pAccountMasked").innerText = p.account_number_masked || "XXXX-XXXX-4921";
@@ -1463,7 +1476,7 @@
 
     function toggleSort() {
       sortDesc = !sortDesc;
-      document.getElementById("sortLabel").innerText = sortDesc ? "Sort by Amount â†“" : "Sort by Amount â†‘";
+      document.getElementById("sortLabel").innerText = sortDesc ? "Sort by Amount &larr;“" : "Sort by Amount &larr;‘";
       renderTable();
       showToast(sortDesc ? "Sorted highest amount first" : "Sorted lowest amount first");
     }
@@ -1484,11 +1497,11 @@
       const totalPaid = amt + delFee;
       const fee = Math.round(amt * 0.1);
       const net = amt - fee;
-      document.getElementById("prevCustPays").innerText = "â‚¹" + totalPaid.toLocaleString('en-IN');
-      document.getElementById("prevPlatformFee").innerText = "- â‚¹" + fee.toLocaleString('en-IN');
-      document.getElementById("prevStoreNet").innerText = "+ â‚¹" + net.toLocaleString('en-IN');
+      document.getElementById("prevCustPays").innerText = "₹" + totalPaid.toLocaleString('en-IN');
+      document.getElementById("prevPlatformFee").innerText = "- ₹" + fee.toLocaleString('en-IN');
+      document.getElementById("prevStoreNet").innerText = "+ ₹" + net.toLocaleString('en-IN');
       const prevDel = document.getElementById("prevDeliveryFee");
-      if (prevDel) prevDel.innerText = "+ â‚¹" + delFee.toLocaleString('en-IN');
+      if (prevDel) prevDel.innerText = "+ ₹" + delFee.toLocaleString('en-IN');
     }
 
     async function executeInstantSplitSimulation() {
@@ -1500,7 +1513,7 @@
 
       const btn = document.getElementById("btnRunSim");
       btn.disabled = true;
-      btn.innerHTML = '<span>â³ Processing 1-Second 3-Way Split...</span>';
+      btn.innerHTML = '<span>â³ Processing 1-Second 3-Way Split...</span>';
 
       try {
         const res = await fetch('/api/payments/simulate-instant-split', {
@@ -1518,13 +1531,13 @@
         if (res.ok) {
           const data = await res.json();
           closeSimulateModal();
-          showToast("âš¡ INSTANT SPLIT COMPLETE: â‚¹" + data.split.platform_fee_inr + " to MallMaze, â‚¹" + data.split.store_payout_inr + " dispatched to " + data.split.store_name + " in < 1 second!");
+          showToast(" INSTANT SPLIT COMPLETE: ₹" + data.split.platform_fee_inr + " to MallMaze, ₹" + data.split.store_payout_inr + " dispatched to " + data.split.store_name + " in < 1 second!");
           await fetchPayouts();
           if (data.payout && data.payout.id) {
             selectPayout(data.payout.id);
           }
           btn.disabled = false;
-          btn.innerHTML = '<span>âš¡ Execute 1-Second Auto-Split</span>';
+          btn.innerHTML = '<span> Execute 1-Second Auto-Split</span>';
           return;
         }
       } catch (err) {
@@ -1569,9 +1582,9 @@
         closeSimulateModal();
         renderTable();
         selectPayout(newTxn.id);
-        showToast("âš¡ INSTANT SPLIT COMPLETE: â‚¹" + fee + " to MallMaze, â‚¹" + net + " dispatched to " + sMeta.name + " in < 1 second!");
+        showToast(" INSTANT SPLIT COMPLETE: ₹" + fee + " to MallMaze, ₹" + net + " dispatched to " + sMeta.name + " in < 1 second!");
         btn.disabled = false;
-        btn.innerHTML = '<span>âš¡ Execute 1-Second Auto-Split</span>';
+        btn.innerHTML = '<span> Execute 1-Second Auto-Split</span>';
       }, 750);
     }
 
@@ -1599,8 +1612,8 @@
     function issueUPIRefund() {
       const p = rawPayoutsData.find(x => x.id === selectedPayoutId);
       if (!p) return;
-      if (confirm("Issue instant reverse Route UPI refund for order " + p.order_id + " (â‚¹" + p.gross_inr + ")?")) {
-        showToast("UPI Reverse Transfer of â‚¹" + p.gross_inr + " dispatched to customer via Razorpay Auto-Route!");
+      if (confirm("Issue instant reverse Route UPI refund for order " + p.order_id + " (₹" + p.gross_inr + ")?")) {
+        showToast("UPI Reverse Transfer of ₹" + p.gross_inr + " dispatched to customer via Razorpay Auto-Route!");
       }
     }
 

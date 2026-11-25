@@ -1,14 +1,8 @@
 // Simple API client used by dashboard.html and data-viewer.html
-// It expects a global variable `API_BASE_URL` (set in the HTML via a <script> tag)
-// If not present, it defaults to the same origin.
+// Exposes functions on window for non‑module usage.
 
 const API_BASE = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '';
 
-/**
- * Helper to perform a GET request and return parsed JSON.
- * @param {string} endpoint e.g. '/stores' or '/products'
- * @returns {Promise<any>}
- */
 async function apiGet(endpoint) {
   const url = API_BASE + endpoint;
   const response = await fetch(url, { credentials: 'include' });
@@ -18,25 +12,28 @@ async function apiGet(endpoint) {
   return response.json();
 }
 
-// Exported convenience functions (used in the HTML pages)
-export async function fetchStores() {
+// Functions
+async function fetchStores() {
   return apiGet('/stores');
 }
+window.fetchStores = fetchStores;
 
-export async function fetchProducts() {
+async function fetchProducts() {
   return apiGet('/products');
 }
+window.fetchProducts = fetchProducts;
 
-export async function fetchOrders() {
+async function fetchOrders() {
   return apiGet('/orders');
 }
+window.fetchOrders = fetchOrders;
 
-export async function fetchStockEvents() {
+async function fetchStockEvents() {
   return apiGet('/stock_events');
 }
+window.fetchStockEvents = fetchStockEvents;
 
-// Example usage in a page script (you can import this module)
-// <script type="module">
-//   import { fetchStores } from '/assets/js/api-client.js';
-//   fetchStores().then(data => console.log(data)).catch(err => console.error(err));
+// Example usage (commented):
+// <script>
+//   fetchStores().then(...);
 // </script>

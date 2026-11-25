@@ -802,7 +802,7 @@ function decode(matrix) {
     if (result) {
         return result;
     }
-    // Decoding didn't work, try mirroring the QR across the topLeft -> bottomRight line.
+    // Decoding didn't work, try mirroring the QR across the topLeft &rarr; bottomRight line.
     for (var x = 0; x < matrix.width; x++) {
         for (var y = x + 1; y < matrix.height; y++) {
             if (matrix.get(x, y) !== matrix.get(y, x)) {

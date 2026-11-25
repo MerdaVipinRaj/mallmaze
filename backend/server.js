@@ -1,4 +1,6 @@
 const shiprocket = require("./shiprocket");
+const express = require('express');
+const app = express();
 const crypto = require("crypto");
 const fs = require("fs");
 const http = require("http");
@@ -22,6 +24,58 @@ const { saveUpload, uploadStaticTarget, parseDataUrl } = require("./uploads");
 const { defaultImageService } = require("./image-service");
 
 const PORT = Number(process.env.PORT || 4000);
+
+// Simple health‑check endpoint
+app.get('/health', (req, res) => send(res, 200, { status: 'ok' }));
+
+// GET /stores endpoint – returns list of stores from PostgreSQL
+app.get('/stores', async (req, res) => {
+  try {
+    const pool = await getPgPool();
+    const { rows } = await pool.query(`SELECT id, name, category, owner_name, phone, address, verification_status, created_at, updated_at FROM mm_stores ORDER BY name`);
+    send(res, 200, rows);
+  } catch (e) {
+    console.error(e);
+    send(res, 500, { error: 'Failed to fetch stores' });
+  }
+});
+
+// GET /products endpoint – returns all products
+app.get('/products', async (req, res) => {
+  try {
+    const pool = await getPgPool();
+    const { rows } = await pool.query(`SELECT id, store_id, name, category, price_paise, stock_qty, is_active, created_at, updated_at FROM mm_products ORDER BY name`);
+    send(res, 200, rows);
+  } catch (e) {
+    console.error(e);
+    send(res, 500, { error: 'Failed to fetch products' });
+  }
+});
+
+// GET /orders endpoint – returns all orders
+app.get('/orders', async (req, res) => {
+  try {
+    const pool = await getPgPool();
+    const { rows } = await pool.query(`SELECT id, customer_id, status, payment_status, subtotal_paise, platform_fee_paise, delivery_fee_paise, tax_paise, total_paise, created_at, paid_at FROM mm_orders ORDER BY created_at DESC`);
+    send(res, 200, rows);
+  } catch (e) {
+    console.error(e);
+    send(res, 500, { error: 'Failed to fetch orders' });
+  }
+});
+
+// GET /stock_events endpoint – returns all stock events
+app.get('/stock_events', async (req, res) => {
+  try {
+    const pool = await getPgPool();
+    const { rows } = await pool.query(`SELECT id, store_id, product_id, event_type, qty_delta, stock_after, reason, created_at FROM mm_stock_events ORDER BY created_at DESC`);
+    send(res, 200, rows);
+  } catch (e) {
+    console.error(e);
+    send(res, 500, { error: 'Failed to fetch stock events' });
+  }
+});
+
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(__dirname, "data");
 const DB_FILE = process.env.MM_DB_FILE || path.join(DATA_DIR, "app-db.json");
@@ -102,6 +156,12 @@ function readJson(file, fallback) {
   }
 }
 
+// -------------------------------------------------
+// PostgreSQL mode – the app will use the DATABASE_URL
+// environment variable (set in .env) to connect to
+// the external PostgreSQL container. All route handlers
+// query via getPgPool() and return rows as JSON.
+// -------------------------------------------------
 function usePostgres() {
   return Boolean(String(process.env.DATABASE_URL || "").trim());
 }
@@ -1296,8 +1356,8 @@ function calcHaversineDistance(lat1, lon1, lat2, lon2) {
   const dLat = (nLat2 - nLat1) * (Math.PI / 180);
   const dLon = (nLon2 - nLon1) * (Math.PI / 180);
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(nLat1 * (Math.PI / 180)) * Math.cos(nLat2 * (Math.PI / 180)) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(nLat1 * (Math.PI / 180)) * Math.cos(nLat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -1621,7 +1681,7 @@ const routes = {
     const db = await readDb();
     send(res, 200, { stores: storesWithProducts(db) });
   },
-  
+
   // COMPLETE STORE ONBOARDING WITH INSTANT SHIPROCKET PICKUP REGISTRATION
   // Called directly from register-store.html with address, bank details, and GSTIN
   "POST /api/stores/onboard": async (req, res) => {
@@ -2124,7 +2184,7 @@ const routes = {
           }
         }
       }
-    } catch {}
+    } catch (e) { /* intentionally empty */ }
 
     const lowerQ = query.toLowerCase();
     const tokens = lowerQ.split(/\s+/).filter((t) => t.length > 1);
@@ -2224,7 +2284,7 @@ const routes = {
           if (!allProducts.some((x) => String(x.id) === String(p.id))) allProducts.push(p);
         }
       }
-    } catch {}
+    } catch (e) { /* intentionally empty */ }
 
     const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
     const budgetMatch = query.match(/(?:under|below|less than|within|\bmax\b|rs\.?|₹)?\s*(\d{3,6})/i);
@@ -2283,7 +2343,7 @@ const routes = {
     send(res, 200, {
       ok: true,
       database_mode: mode,
-      db_file: DATA_FILE,
+      db_file: DB_FILE,
       stats: {
         users: (db.users || []).length,
         stores: (db.stores || []).length,
@@ -2763,7 +2823,7 @@ const routes = {
       reservation
     });
   },
-  
+
   "GET /api/reservations": async (req, res, parsed) => {
     const db = await readDb();
     const gate = requireAuth(req, db);
@@ -3206,7 +3266,7 @@ const routes = {
     send(res, 200, { orders });
   },
 
-// =========================================================================
+  // =========================================================================
   // SHIPROCKET LOGISTICS & DELIVERY INTEGRATION
   // =========================================================================
   "GET /api/shiprocket/status": async (_req, res) => {
@@ -3268,11 +3328,11 @@ const routes = {
       const shopRecord = storeId ? (db.stores || []).find(s => String(s.id) === storeId) : null;
       const storeInfo = {
         pickup_location: shopRecord?.shiprocket_pickup_name || process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
-        store_name:    shopRecord?.name || "MallMaze Store",
+        store_name: shopRecord?.name || "MallMaze Store",
         store_address: shopRecord?.address || shopRecord?.location || "",
-        store_city:    shopRecord?.city || "",
+        store_city: shopRecord?.city || "",
         store_pincode: shopRecord?.pincode || "",
-        store_phone:   shopRecord?.phone || ""
+        store_phone: shopRecord?.phone || ""
       };
       // IMPORTANT: order.delivery = customer delivery address (where courier DELIVERS TO)
       // storeInfo.pickup_location = where courier PICKS UP FROM (the shop)
@@ -3534,16 +3594,16 @@ const routes = {
         const token = await shiprocket.getAuthToken();
         const regRes = await new Promise((resolve) => {
           const payload = JSON.stringify({
-            pickup_location:  pickupName,
-            name:             store.owner_name || store.name || "Store Owner",
-            email:            store.email || "store@mallmaze.in",
-            phone:            String(store.phone || "9000000000").replace(/\D/g,"").slice(-10),
-            address:          store.address || store.location || body.address || "",
-            address_2:        store.address2 || "",
-            city:             store.city || body.city || "",
-            state:            store.state || body.state || "Telangana",
-            country:          "India",
-            pin_code:         String(store.pincode || body.pincode || "500001")
+            pickup_location: pickupName,
+            name: store.owner_name || store.name || "Store Owner",
+            email: store.email || "store@mallmaze.in",
+            phone: String(store.phone || "9000000000").replace(/\D/g, "").slice(-10),
+            address: store.address || store.location || body.address || "",
+            address_2: store.address2 || "",
+            city: store.city || body.city || "",
+            state: store.state || body.state || "Telangana",
+            country: "India",
+            pin_code: String(store.pincode || body.pincode || "500001")
           });
           const options = {
             hostname: "apiv2.shiprocket.in",
@@ -3558,7 +3618,7 @@ const routes = {
           const https = require("https");
           const r = https.request(options, (resp) => {
             let d = ""; resp.on("data", c => d += c);
-            resp.on("end", () => { try { resolve({ status: resp.statusCode, body: JSON.parse(d) }); } catch(e) { resolve({ status: resp.statusCode, body: d }); }});
+            resp.on("end", () => { try { resolve({ status: resp.statusCode, body: JSON.parse(d) }); } catch (e) { resolve({ status: resp.statusCode, body: d }); } });
           });
           r.on("error", (e) => resolve({ status: 500, body: { error: e.message } }));
           r.write(payload); r.end();
@@ -3646,6 +3706,17 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`MallMaze app listening on http://localhost:${PORT}`);
-});
+// if (process.env.NODE_ENV !== 'test') {
+//   server.listen(PORT, () => console.log(`MallMaze app listening on http://localhost:${PORT}`));
+// }
+
+// -----------------------------------------------------------------
+// Export the Express app for testing and conditionally start the server
+// -----------------------------------------------------------------
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`MallMaze API listening on ${env.appOrigin || "http://localhost"}:${PORT}`));
+}
+module.exports = app;
+
+
+

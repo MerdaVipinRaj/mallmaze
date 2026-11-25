@@ -83,7 +83,7 @@
         modalBackdrop.className = 'pcs-modal-backdrop';
         modalBackdrop.innerHTML = `
           <div class="pcs-viewfinder-modal" id="pcsViewfinderModal">
-            <!-- Top Bar -->
+            <!-- Top Bar -&rarr;
             <div class="pcs-top-bar">
               <button type="button" class="pcs-icon-btn" id="pcsBtnClose" aria-label="Close camera">
                 ${ICONS.close}
@@ -102,11 +102,11 @@
               </div>
             </div>
 
-            <!-- Viewfinder Area -->
+            <!-- Viewfinder Area -&rarr;
             <div class="pcs-camera-viewport" id="pcsCameraViewport">
               <video id="pcsVideoStream" class="pcs-video-stream" autoplay playsinline muted></video>
               
-              <!-- Framing Overlay -->
+              <!-- Framing Overlay -&rarr;
               <div class="pcs-guide-overlay" id="pcsGuideOverlay">
                 <div class="pcs-product-frame">
                   <div class="pcs-frame-corner-tr"></div>
@@ -117,11 +117,11 @@
                 </div>
               </div>
 
-              <!-- Shutter Flash Effect -->
+              <!-- Shutter Flash Effect -&rarr;
               <div class="pcs-flash-effect" id="pcsFlashEffect"></div>
             </div>
 
-            <!-- Bottom Dock Controls -->
+            <!-- Bottom Dock Controls -&rarr;
             <div class="pcs-bottom-dock">
               <div class="pcs-dock-slot" style="justify-content:flex-start;">
                 <button type="button" class="pcs-dock-label-btn" id="pcsBtnDockGallery">
@@ -143,7 +143,7 @@
               </div>
             </div>
 
-            <!-- Post-Capture Photo Review Stage -->
+            <!-- Post-Capture Photo Review Stage -&rarr;
             <div class="pcs-review-stage" id="pcsReviewStage">
               <div class="pcs-top-bar" style="position:relative; background:none;">
                 <button type="button" class="pcs-icon-btn" id="pcsBtnReviewBack" aria-label="Retake photo">
@@ -164,7 +164,7 @@
               <div class="pcs-review-toolbar">
                 <div id="pcsQualityWarning" class="pcs-quality-warning" style="display:none;"></div>
 
-                <!-- AI Quick Enhancement Row -->
+                <!-- AI Quick Enhancement Row -&rarr;
                 <div class="pcs-tool-row">
                   <button type="button" class="pcs-tool-pill-btn" id="pcsBtnToolEnhance">
                     ${ICONS.sparkles} Natural Enhance
@@ -177,7 +177,7 @@
                   </button>
                 </div>
 
-                <!-- Studio Backdrop Theme Selection -->
+                <!-- Studio Backdrop Theme Selection -&rarr;
                 <div class="pcs-backdrop-palette" id="pcsPaletteContainer">
                   <span style="font-size:11.5px; color:#94a3b8; font-weight:600; margin-right:4px;">Backdrop:</span>
                   <div class="pcs-palette-chip pcs-selected" data-theme="white" style="background:#ffffff;" title="Pure Studio White"></div>
@@ -187,7 +187,7 @@
                   <div class="pcs-palette-chip" data-theme="transparent" style="background:repeating-conic-gradient(#cbd5e1 0% 25%, #ffffff 0% 50%) 50%/10px 10px;" title="Transparent Cutout"></div>
                 </div>
 
-                <!-- Final Action Buttons -->
+                <!-- Final Action Buttons -&rarr;
                 <div class="pcs-action-row">
                   <button type="button" class="pcs-btn-retake" id="pcsBtnRetake">
                     ${ICONS.refresh} Retake
@@ -828,14 +828,14 @@
             </div>
           </div>
 
-          <!-- Desktop Drag & Drop Area -->
+          <!-- Desktop Drag & Drop Area -&rarr;
           <div class="pcs-dropzone" id="${containerId}-dropzone">
             <div class="pcs-dropzone-icon">${ICONS.upload}</div>
             <div class="pcs-dropzone-text">Drag product images here, or browse files</div>
             <div class="pcs-dropzone-hint">Supports high-res JPG, PNG, WebP (up to 10MB each)</div>
           </div>
 
-          <!-- Thumbnail Grid -->
+          <!-- Thumbnail Grid -&rarr;
           <div class="pcs-thumbnail-grid" id="${containerId}-grid">
       `;
 

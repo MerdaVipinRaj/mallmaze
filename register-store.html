@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.25, maximum-scale=3.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MallMaze - Create Store & Verification Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -208,6 +208,8 @@
   <link rel="icon" type="image/x-icon" href="assets/media/favicon.ico">
 
   <script src="assets/js/api-client.js" defer></script>
+  <link rel="stylesheet" href="assets/css/pos-mobile.css">
+  <script src="assets/js/pos-mobile.js"></script>
 </head>
 <body>
 
@@ -225,7 +227,7 @@
 
   <div class="auth-container">
     
-    <!-- Flow Stepper: Phase 1 (Create Store) -> Phase 2 (Verification Portal) -> Phase 3 (POS Active) -->
+    <!-- Flow Stepper: Phase 1 (Create Store) --> Phase 2 (Verification Portal) &rarr; Phase 3 (POS Active) -->
     <div class="flow-stepper">
       <div class="stepper-node active" id="stNode1">
         <div class="stepper-badge" id="stBadge1">1</div>
@@ -456,7 +458,7 @@
 
       document.getElementById("dispCreatedStoreName").innerText = storeName;
 
-      // Transition Stepper: Step 1 Done -> Step 2 Active
+      // Transition Stepper: Step 1 Done --> Step 2 Active
       document.getElementById("stNode1").classList.remove("active");
       document.getElementById("stNode1").classList.add("completed");
       document.getElementById("stBadge1").innerHTML = "✓";
@@ -539,7 +541,7 @@
 
           localStorage.setItem("mallmaze_merchant_profile", JSON.stringify(currentStore));
 
-          // Transition Stepper: Step 2 Done -> Step 3 Completed
+          // Transition Stepper: Step 2 Done &rarr; Step 3 Completed
           document.getElementById("stNode2").classList.remove("active");
           document.getElementById("stNode2").classList.add("completed");
           document.getElementById("stBadge2").innerHTML = "✓";

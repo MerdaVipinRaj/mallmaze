@@ -1,0 +1,42 @@
+[
+  {
+    "id": "stock-pur-1788185807653-e59327",
+    "store_id": null,
+    "product_id": null,
+    "event_type": null,
+    "qty_delta": 0,
+    "stock_after": 0,
+    "reason": null,
+    "created_at": null,
+    "raw_data": {
+      "id": "stock-pur-1788185807653-e59327",
+      "reason": "Tally Purchase Inward: Metro Wholesale Ltd (PUR-2026-908)",
+      "store_id": "s1",
+      "qty_delta": 10,
+      "created_at": "2026-08-31T14:16:47.652Z",
+      "event_type": "purchase_inward",
+      "product_id": "p1",
+      "stock_after": 23
+    }
+  },
+  {
+    "id": "stock-pos-1788185807614-05fa95",
+    "store_id": null,
+    "product_id": null,
+    "event_type": null,
+    "qty_delta": 0,
+    "stock_after": 0,
+    "reason": null,
+    "created_at": null,
+    "raw_data": {
+      "id": "stock-pos-1788185807614-05fa95",
+      "reason": "POS Counter Sale INV-202608-9874",
+      "store_id": "s1",
+      "qty_delta": -1,
+      "created_at": "2026-08-31T14:16:47.565Z",
+      "event_type": "pos_sale",
+      "product_id": "p1",
+      "stock_after": 13
+    }
+  }
+]
