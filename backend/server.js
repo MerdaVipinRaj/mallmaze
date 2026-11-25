@@ -25,57 +25,6 @@ const { defaultImageService } = require("./image-service");
 
 const PORT = Number(process.env.PORT || 4000);
 
-// Simple health‑check endpoint
-app.get('/health', (req, res) => send(res, 200, { status: 'ok' }));
-
-// GET /stores endpoint – returns list of stores from PostgreSQL
-app.get('/stores', async (req, res) => {
-  try {
-    const pool = await getPgPool();
-    const { rows } = await pool.query(`SELECT id, name, category, owner_name, phone, address, verification_status, created_at, updated_at FROM mm_stores ORDER BY name`);
-    send(res, 200, rows);
-  } catch (e) {
-    console.error(e);
-    send(res, 500, { error: 'Failed to fetch stores' });
-  }
-});
-
-// GET /products endpoint – returns all products
-app.get('/products', async (req, res) => {
-  try {
-    const pool = await getPgPool();
-    const { rows } = await pool.query(`SELECT id, store_id, name, category, price_paise, stock_qty, is_active, created_at, updated_at FROM mm_products ORDER BY name`);
-    send(res, 200, rows);
-  } catch (e) {
-    console.error(e);
-    send(res, 500, { error: 'Failed to fetch products' });
-  }
-});
-
-// GET /orders endpoint – returns all orders
-app.get('/orders', async (req, res) => {
-  try {
-    const pool = await getPgPool();
-    const { rows } = await pool.query(`SELECT id, customer_id, status, payment_status, subtotal_paise, platform_fee_paise, delivery_fee_paise, tax_paise, total_paise, created_at, paid_at FROM mm_orders ORDER BY created_at DESC`);
-    send(res, 200, rows);
-  } catch (e) {
-    console.error(e);
-    send(res, 500, { error: 'Failed to fetch orders' });
-  }
-});
-
-// GET /stock_events endpoint – returns all stock events
-app.get('/stock_events', async (req, res) => {
-  try {
-    const pool = await getPgPool();
-    const { rows } = await pool.query(`SELECT id, store_id, product_id, event_type, qty_delta, stock_after, reason, created_at FROM mm_stock_events ORDER BY created_at DESC`);
-    send(res, 200, rows);
-  } catch (e) {
-    console.error(e);
-    send(res, 500, { error: 'Failed to fetch stock events' });
-  }
-});
-
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(__dirname, "data");
 const DB_FILE = process.env.MM_DB_FILE || path.join(DATA_DIR, "app-db.json");
@@ -3693,6 +3642,9 @@ const server = http.createServer(async (req, res) => {
   try {
     if (req.method === "OPTIONS") return send(res, 204, {});
     const parsed = new URL(req.url, `http://${req.headers.host}`);
+    if (req.method === "GET" && parsed.pathname === "/health") {
+      return send(res, 200, { status: "ok" });
+    }
     if (!parsed.pathname.startsWith("/api/")) {
       if (serveStatic(req, res, parsed)) return;
       return sendText(res, 404, "Not found");
@@ -3706,17 +3658,10 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-// if (process.env.NODE_ENV !== 'test') {
-//   server.listen(PORT, () => console.log(`MallMaze app listening on http://localhost:${PORT}`));
-// }
-
-// -----------------------------------------------------------------
-// Export the Express app for testing and conditionally start the server
-// -----------------------------------------------------------------
 if (require.main === module) {
-  app.listen(PORT, () => console.log(`MallMaze API listening on ${env.appOrigin || "http://localhost"}:${PORT}`));
+  server.listen(PORT, () => console.log(`MallMaze app listening on http://localhost:${PORT}`));
 }
-module.exports = app;
+module.exports = server;
 
 
 
