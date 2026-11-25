@@ -1,6 +1,4 @@
 const shiprocket = require("./shiprocket");
-const express = require('express');
-const app = express();
 const crypto = require("crypto");
 const fs = require("fs");
 const http = require("http");
