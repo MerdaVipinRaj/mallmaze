@@ -1,0 +1,46 @@
+/* Simple MallMaze UI styling */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb;
+  color: #333;
+}
+header {
+  background-color: #1e293b;
+  color: #fff;
+  padding: 1rem;
+  text-align: center;
+}
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+section h2 {
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 0.5rem;
+}
+ul {
+  list-style: none;
+  padding: 0;
+}
+li {
+  background: #fff;
+  margin: 0.5rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.product-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.product-card .price {
+  font-weight: bold;
+  color: #0f766e;
+}

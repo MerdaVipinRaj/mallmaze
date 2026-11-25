@@ -13,7 +13,6 @@ const STORAGE_KEYS = {
   stock: 'mm_stock',
   autoshelf: 'mm_autoshelf_ops'
 };
-
 var read = window.read || ((k, f) => {
   try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; }
   catch { return f; }
@@ -168,7 +167,7 @@ function prefetchPages(pages) {
       link.href = url;
       document.head.appendChild(link);
     });
-  } catch {}
+  } catch { }
 }
 
 function toast(message, opts) {
@@ -341,56 +340,56 @@ async function loadAppData() {
     const mallById = new Map((malls || []).map((m) => [m.id, m]));
     const storeById = new Map((stores || []).map((s) => [s.id, s]));
 
-  const mappedMalls = (malls || []).map((m) => ({
-    id: m.id,
-    name: m.name,
-    location: `${m.address || ''}${m.address ? ', ' : ''}${m.city}`,
-    image: m.image_url || 'https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=800',
-    rating: 4.4,
-    storeCount: 0,
-    openHours: m.open_hours || '',
-    description: m.description || '',
-    floors: m.floors || 0,
-    deliveryTime: '35 min'
-  }));
+    const mappedMalls = (malls || []).map((m) => ({
+      id: m.id,
+      name: m.name,
+      location: `${m.address || ''}${m.address ? ', ' : ''}${m.city}`,
+      image: m.image_url || 'https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=800',
+      rating: 4.4,
+      storeCount: 0,
+      openHours: m.open_hours || '',
+      description: m.description || '',
+      floors: m.floors || 0,
+      deliveryTime: '35 min'
+    }));
 
-  const mappedStores = (stores || []).map((s) => ({
-    id: s.id,
-    mallId: s.mall_id,
-    name: s.name,
-    category: s.category || '',
-    image: s.image_url || 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=600',
-    rating: 4.3,
-    floor: s.floor || '',
-    isOpen: Boolean(s.is_open),
-    productCount: 0
-  }));
+    const mappedStores = (stores || []).map((s) => ({
+      id: s.id,
+      mallId: s.mall_id,
+      name: s.name,
+      category: s.category || '',
+      image: s.image_url || 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=600',
+      rating: 4.3,
+      floor: s.floor || '',
+      isOpen: Boolean(s.is_open),
+      productCount: 0
+    }));
 
-  const mappedProducts = (products || []).map((p) => {
-    const invRow = invByProduct.get(p.id);
-    const stockCount = invRow ? Number(invRow.available_qty || 0) : 0;
-    const store = storeById.get(p.store_id);
-    const mall = p.mall_id ? mallById.get(p.mall_id) : null;
-    return {
-      id: p.id,
-      storeId: p.store_id,
-      mallId: p.mall_id,
-      name: p.name,
-      price: Number(p.price_inr || 0),
-      originalPrice: Number(p.original_price_inr || 0),
-      image: p.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
-      category: p.category || '',
-      rating: 4.5,
-      reviews: 0,
-      inStock: stockCount > 0,
-      stockCount,
-      variants: [],
-      storeName: store?.name || 'Store',
-      mallName: mall?.name || 'Mall',
-      deliveryTime: '35 min',
-      badge: ''
-    };
-  });
+    const mappedProducts = (products || []).map((p) => {
+      const invRow = invByProduct.get(p.id);
+      const stockCount = invRow ? Number(invRow.available_qty || 0) : 0;
+      const store = storeById.get(p.store_id);
+      const mall = p.mall_id ? mallById.get(p.mall_id) : null;
+      return {
+        id: p.id,
+        storeId: p.store_id,
+        mallId: p.mall_id,
+        name: p.name,
+        price: Number(p.price_inr || 0),
+        originalPrice: Number(p.original_price_inr || 0),
+        image: p.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
+        category: p.category || '',
+        rating: 4.5,
+        reviews: 0,
+        inStock: stockCount > 0,
+        stockCount,
+        variants: [],
+        storeName: store?.name || 'Store',
+        mallName: mall?.name || 'Mall',
+        deliveryTime: '35 min',
+        badge: ''
+      };
+    });
 
     const catCounts = new Map();
     mappedProducts.forEach((p) => {
@@ -443,7 +442,7 @@ function downloadTextFile(filename, content) {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1200);
-  } catch {}
+  } catch { }
 }
 
 function absoluteAppUrl(path) {
@@ -548,7 +547,7 @@ function renderNavbar() {
   nav.className = 'sm-header';
   nav.innerHTML = `
     <div class="sm-header-shell">
-      <!-- ROW 1: Brand Logo, Location, Badged Actions -->
+      <!-- ROW 1: Brand Logo, Location, Badged Actions -&rarr;
       <div class="sm-top-row">
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
           <a href="index.html" class="sm-brand-link" aria-label="MallMaze Home">
@@ -558,7 +557,7 @@ function renderNavbar() {
             </div>
           </a>
 
-          <!-- Location Selector -->
+          <!-- Location Selector -&rarr;
           <div class="sm-location-wrap relative">
             <button type="button" id="sm-location-btn" class="sm-location-btn-v2" aria-haspopup="true" aria-expanded="false" title="Select City">
               ${icon('pin')}
@@ -577,7 +576,7 @@ function renderNavbar() {
           </div>
         </div>
 
-        <!-- Action Icons: Wishlist, Cart, Account -->
+        <!-- Action Icons: Wishlist, Cart, Account -&rarr;
         <div class="sm-actions-group">
           <a href="wishlist.html" class="sm-action-icon-link" aria-label="Wishlist" title="Wishlist">
             ${icon('heart')}
@@ -601,7 +600,7 @@ function renderNavbar() {
 
 
 
-      <!-- ROW 3: Secondary Desktop Navigation Strip -->
+      <!-- ROW 3: Secondary Desktop Navigation Strip -&rarr;
       <div class="sm-subnav-desktop">
         ${navItem('index.html', 'Home', file === 'index.html')}
         ${navItem('products.html', 'Shop', file === 'products.html' || file === 'product.html')}
@@ -711,27 +710,27 @@ function renderNavbar() {
   document.addEventListener('keydown', window.__smLocEscapeKey);
 
   el('sm-choose-area-btn')?.addEventListener('click', () => {
-       closePanel();
-       if (window.MM_GEO?.openLocationModal) window.MM_GEO.openLocationModal();
-     });
+    closePanel();
+    if (window.MM_GEO?.openLocationModal) window.MM_GEO.openLocationModal();
+  });
 
-     el('sm-detect-city')?.addEventListener('click', async () => {
-       if (window.MM_GEO?.getCurrentPosition) {
-         try {
-           toast('Detecting device location...', { type: 'ok', title: 'Location', ms: 1200 });
-           const loc = await window.MM_GEO.getCurrentPosition();
-           state.location = normalizeNavCity(loc.city || loc.label);
-           if (cityLabel) cityLabel.textContent = loc.label || state.location;
-           persist();
-           closePanel();
-           toast(`Location set: ${loc.label}`, { type: 'ok', title: 'Location', ms: 2000 });
-           setTimeout(() => window.location.reload(), 400);
-           return;
-         } catch (err) {
-           toast(err.message || 'Could not detect location.', { type: 'bad', title: 'Location' });
-           return;
-         }
-       }
+  el('sm-detect-city')?.addEventListener('click', async () => {
+    if (window.MM_GEO?.getCurrentPosition) {
+      try {
+        toast('Detecting device location...', { type: 'ok', title: 'Location', ms: 1200 });
+        const loc = await window.MM_GEO.getCurrentPosition();
+        state.location = normalizeNavCity(loc.city || loc.label);
+        if (cityLabel) cityLabel.textContent = loc.label || state.location;
+        persist();
+        closePanel();
+        toast(`Location set: ${loc.label}`, { type: 'ok', title: 'Location', ms: 2000 });
+        setTimeout(() => window.location.reload(), 400);
+        return;
+      } catch (err) {
+        toast(err.message || 'Could not detect location.', { type: 'bad', title: 'Location' });
+        return;
+      }
+    }
     if (!navigator.geolocation) {
       toast('Location not supported on this device.', { type: 'bad', title: 'Location' });
       return;
@@ -784,7 +783,7 @@ async function trySyncAuthFromLegacyRemote() {
       state.user = { name: user.user_metadata?.name || user.email || 'User', email: user.email, role: state.user?.role || 'user', legacyRemoteUserId: user.id };
       persist();
     }
-  } catch {}
+  } catch { }
 }
 function showLocationRibbon() { const nodes = document.querySelectorAll("#location-ribbon"); nodes.forEach((x) => x.remove()); }
 
@@ -939,7 +938,7 @@ function productCard(p) {
   const wishActive = state.wishlist.some((w) => w.id === p.id);
   const ratingVal = (p.rating || 4.5).toFixed(1);
   const storeLabel = `${escapeHtml(p.storeName || 'Store')}${p.mallName ? ' · ' + escapeHtml(p.mallName) : ''}`;
-  
+
   return `
     <a href="product.html?id=${encodeURIComponent(String(p.id))}" class="mm-card-product product-card-link group" data-id="${escapeHtml(p.id)}">
       <div class="mm-card-media">
@@ -1005,8 +1004,8 @@ function flashDealCard(deal, idx) {
   const totalSeconds = parseHmsToSeconds(deal.endsIn);
   const timer = renderTimerParts(totalSeconds);
   const subtitle = String(deal.subtitle || '')
-    .replaceAll('â‚¹', 'Rs')
-    .replaceAll('â€”', '-')
+    .replaceAll('₹', 'Rs')
+    .replaceAll('-', '-')
     .trim();
 
   return `
@@ -1462,7 +1461,7 @@ function trackRecentlyViewed(product) {
     const prev = (() => { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; } })();
     const next = [{ id: String(product.id), at: Date.now() }, ...prev.filter((x) => String(x.id) !== String(product.id))].slice(0, 18);
     localStorage.setItem(key, JSON.stringify(next));
-  } catch {}
+  } catch { }
 }
 
 function renderRecentlyViewedRail(allProducts) {
@@ -1641,7 +1640,7 @@ function renderProducts(data) {
       </div>
     `;
     list.innerHTML = new Array(10).fill(0).map(skel).join('');
-  } catch {}
+  } catch { }
   const params = new URLSearchParams(location.search);
   const categoryInput = el('category-filter');
   const searchInput = el('search-input');
@@ -1710,7 +1709,7 @@ function renderProducts(data) {
   // Search UX: clear button + recent searches (local)
   const RECENT_KEY = 'mm_recent_searches';
   const readRecent = () => { try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch { return []; } };
-  const writeRecent = (v) => { try { localStorage.setItem(RECENT_KEY, JSON.stringify(v.slice(0, 10))); } catch {} };
+  const writeRecent = (v) => { try { localStorage.setItem(RECENT_KEY, JSON.stringify(v.slice(0, 10))); } catch { } };
   const ensureSearchUx = () => {
     if (!searchInput) return;
     const wrap = searchInput.parentElement;
@@ -2055,17 +2054,17 @@ function renderMallDetail(data) {
       </div>
 
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        ${['Fashion','Electronics','Beauty','Sports','Home & Living','Books','Kids','Food & Dining']
-          .slice(0, 8)
-          .map((cat) => {
-            const count = stores.filter((st) => String(st.category || '').toLowerCase() === String(cat).toLowerCase()).length;
-            return `
+        ${['Fashion', 'Electronics', 'Beauty', 'Sports', 'Home & Living', 'Books', 'Kids', 'Food & Dining']
+      .slice(0, 8)
+      .map((cat) => {
+        const count = stores.filter((st) => String(st.category || '').toLowerCase() === String(cat).toLowerCase()).length;
+        return `
               <a class="mm-card mm-card-pad hover:shadow-card-hover" href="malls.html">
                 <p class="font-extrabold">${escapeHtml(cat)}</p>
                 <p class="text-sm text-muted-foreground mt-1">${count} stores</p>
               </a>
             `;
-          }).join('')}
+      }).join('')}
       </div>
 
       <div>
@@ -2207,7 +2206,7 @@ function renderStorePage(data) {
         }
       }
     }
-  } catch {}
+  } catch { }
 
   const base = (data.products || s.products || []).filter((p) => String(p.storeId || '') === String(storeId));
   if (!base.length) {
@@ -2287,7 +2286,7 @@ function renderComparePage(data) {
       if (activeId) u.searchParams.set('active', String(activeId));
       else u.searchParams.delete('active');
       history.replaceState({}, '', u.toString());
-    } catch {}
+    } catch { }
   };
 
   const renderPinned = (activeId) => {
@@ -2386,7 +2385,7 @@ function renderComparePage(data) {
         const u = new URL(location.href);
         u.searchParams.set('sort', String(el('cmp-sort')?.value || 'price'));
         history.replaceState({}, '', u.toString());
-      } catch {}
+      } catch { }
       renderResults(p);
     });
     el('cmp-share')?.addEventListener('click', async () => {
@@ -2556,7 +2555,7 @@ function renderCart() {
           <div class="mb-3 ${addrBook.length ? '' : 'hidden'}">
             <label class="text-xs font-semibold text-muted-foreground" for="addr-pick">Saved addresses</label>
             <select id="addr-pick" class="mt-1 w-full rounded-xl border px-3.5 py-2.5">
-              ${addrBook.map((a) => `<option value="${a.id}" ${String(a.id)===String(selected?.id||'')?'selected':''}>${escapeHtml(a.name || 'Address')} · ${escapeHtml(String(a.address || '').slice(0, 28))}${a.is_default ? ' (default)' : ''}</option>`).join('')}
+              ${addrBook.map((a) => `<option value="${a.id}" ${String(a.id) === String(selected?.id || '') ? 'selected' : ''}>${escapeHtml(a.name || 'Address')} · ${escapeHtml(String(a.address || '').slice(0, 28))}${a.is_default ? ' (default)' : ''}</option>`).join('')}
             </select>
             <div class="mt-2 flex gap-2">
               <button type="button" id="addr-default" class="rounded-lg border px-3 py-2 text-xs font-semibold hover:bg-muted">Make default</button>
@@ -2564,8 +2563,8 @@ function renderCart() {
             </div>
           </div>
           <form id="delivery-form" class="space-y-3">
-            <input id="del-name" placeholder="Full name" value="${escapeHtml(addr.name || '').replaceAll('&quot;','\"')}" required />
-            <input id="del-phone" placeholder="Phone" value="${escapeHtml(addr.phone || '').replaceAll('&quot;','\"')}" required />
+            <input id="del-name" placeholder="Full name" value="${escapeHtml(addr.name || '').replaceAll('&quot;', '\"')}" required />
+            <input id="del-phone" placeholder="Phone" value="${escapeHtml(addr.phone || '').replaceAll('&quot;', '\"')}" required />
             <textarea id="del-address" placeholder="Address (House, Street, Area, City, Pincode)" rows="3" required>${escapeHtml(addr.address || '')}</textarea>
             <div class="flex gap-2">
               <button type="submit" class="rounded-lg border px-4 py-2 text-sm font-semibold">Save</button>
@@ -2577,9 +2576,9 @@ function renderCart() {
               <span>⚡</span> Choose Delivery Speed:
             </p>
             <div class="grid grid-cols-1 gap-2" id="cart-speed-picker">
-              <label class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer ${currentSpeed==='zepto_flash'?'border-emerald-500 bg-emerald-50/70 shadow-sm ring-1 ring-emerald-400':'border-border bg-card hover:bg-muted/40'}">
+              <label class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer ${currentSpeed === 'zepto_flash' ? 'border-emerald-500 bg-emerald-50/70 shadow-sm ring-1 ring-emerald-400' : 'border-border bg-card hover:bg-muted/40'}">
                 <div class="flex items-center gap-2.5">
-                  <input type="radio" name="delivery_speed" value="zepto_flash" ${currentSpeed==='zepto_flash'?'checked':''} onchange="localStorage.setItem('mm_delivery_speed', 'zepto_flash'); renderCart();" class="accent-emerald-600">
+                  <input type="radio" name="delivery_speed" value="zepto_flash" ${currentSpeed === 'zepto_flash' ? 'checked' : ''} onchange="localStorage.setItem('mm_delivery_speed', 'zepto_flash'); renderCart();" class="accent-emerald-600">
                   <div>
                     <div class="text-xs font-bold text-slate-900 flex items-center gap-1">⚡ Zepto Flash (5–15 Mins) <span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Fastest</span></div>
                     <div class="text-[11px] text-slate-500">Dedicated local shelf EV runner direct to doorstep</div>
@@ -2588,9 +2587,9 @@ function renderCart() {
                 <div class="text-xs font-extrabold text-emerald-700">₹29</div>
               </label>
 
-              <label class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer ${currentSpeed==='rapid_hyperlocal'?'border-sky-500 bg-sky-50/70 shadow-sm ring-1 ring-sky-400':'border-border bg-card hover:bg-muted/40'}">
+              <label class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer ${currentSpeed === 'rapid_hyperlocal' ? 'border-sky-500 bg-sky-50/70 shadow-sm ring-1 ring-sky-400' : 'border-border bg-card hover:bg-muted/40'}">
                 <div class="flex items-center gap-2.5">
-                  <input type="radio" name="delivery_speed" value="rapid_hyperlocal" ${currentSpeed==='rapid_hyperlocal'?'checked':''} onchange="localStorage.setItem('mm_delivery_speed', 'rapid_hyperlocal'); renderCart();" class="accent-sky-600">
+                  <input type="radio" name="delivery_speed" value="rapid_hyperlocal" ${currentSpeed === 'rapid_hyperlocal' ? 'checked' : ''} onchange="localStorage.setItem('mm_delivery_speed', 'rapid_hyperlocal'); renderCart();" class="accent-sky-600">
                   <div>
                     <div class="text-xs font-bold text-slate-900">🚀 Rapid Local (30–45 Mins)</div>
                     <div class="text-[11px] text-slate-500">Shadowfax / Dunzo Express Local Fleet</div>
@@ -2599,9 +2598,9 @@ function renderCart() {
                 <div class="text-xs font-extrabold text-sky-700">₹39</div>
               </label>
 
-              <label class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer ${currentSpeed==='standard_surface'?'border-indigo-500 bg-indigo-50/70 shadow-sm ring-1 ring-indigo-400':'border-border bg-card hover:bg-muted/40'}">
+              <label class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer ${currentSpeed === 'standard_surface' ? 'border-indigo-500 bg-indigo-50/70 shadow-sm ring-1 ring-indigo-400' : 'border-border bg-card hover:bg-muted/40'}">
                 <div class="flex items-center gap-2.5">
-                  <input type="radio" name="delivery_speed" value="standard_surface" ${currentSpeed==='standard_surface'?'checked':''} onchange="localStorage.setItem('mm_delivery_speed', 'standard_surface'); renderCart();" class="accent-indigo-600">
+                  <input type="radio" name="delivery_speed" value="standard_surface" ${currentSpeed === 'standard_surface' ? 'checked' : ''} onchange="localStorage.setItem('mm_delivery_speed', 'standard_surface'); renderCart();" class="accent-indigo-600">
                   <div>
                     <div class="text-xs font-bold text-slate-900">🚚 Standard Domestic (2–3 Days)</div>
                     <div class="text-[11px] text-slate-500">Delhivery Surface / DTDC (Amazon Speed)</div>
@@ -2666,11 +2665,11 @@ function renderCart() {
   `;
   container.querySelectorAll('input[name="mm-pay"]').forEach((r) => r.addEventListener('change', () => {
     const v = String(container.querySelector('input[name="mm-pay"]:checked')?.value || 'upi');
-    try { localStorage.setItem(payKey, v); } catch {}
+    try { localStorage.setItem(payKey, v); } catch { }
   }));
   const savedKey = 'mm_saved_for_later';
   const readSaved = () => { try { return JSON.parse(localStorage.getItem(savedKey) || '[]'); } catch { return []; } };
-  const writeSaved = (v) => { try { localStorage.setItem(savedKey, JSON.stringify(v.slice(0, 40))); } catch {} };
+  const writeSaved = (v) => { try { localStorage.setItem(savedKey, JSON.stringify(v.slice(0, 40))); } catch { } };
 
   document.querySelectorAll('.cart-inc').forEach((b) => b.addEventListener('click', () => {
     const idx = Number(b.getAttribute('data-idx'));
@@ -2809,7 +2808,7 @@ function renderCheckoutSuccess() {
         localStorage.removeItem('mm_auth_token');
       }
     }
-  } catch {}
+  } catch { }
 })();
 
 function renderLogin() {
@@ -2866,7 +2865,7 @@ function renderLogin() {
         <p class="text-sm text-slate-600 mt-1.5">Enter your Mobile Phone Number (+91) or Gmail address to receive your 6-digit OTP verification code.</p>
       </div>
 
-      <!-- Verification Channel Selector -->
+      <!-- Verification Channel Selector -&rarr;
       <div class="mb-4 flex rounded-2xl bg-slate-100 p-1">
         <button type="button" id="channel-phone" class="flex-1 rounded-xl py-2.5 text-xs font-bold transition flex items-center justify-center gap-1.5 ${authChannel === 'phone' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
           <span>📱 Mobile Phone (+91)</span>
@@ -2876,14 +2875,14 @@ function renderLogin() {
         </button>
       </div>
 
-      <!-- Account Role Tabs -->
+      <!-- Account Role Tabs -&rarr;
       <div class="mb-5 flex gap-2 text-xs">
         <button type="button" id="role-customer" class="flex-1 rounded-xl border px-3 py-2 font-bold transition ${loginRole === 'customer' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">Shopper / Customer</button>
         <button type="button" id="role-shop" class="flex-1 rounded-xl border px-3 py-2 font-bold transition ${loginRole === 'shop' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">Store Manager</button>
         <button type="button" id="role-admin" class="flex-1 rounded-xl border px-3 py-2 font-bold transition ${loginRole === 'admin' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">Platform Admin</button>
       </div>
 
-      <!-- OTP Request Form -->
+      <!-- OTP Request Form -&rarr;
       <form id="otp-request-form" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1" for="login-name">Your Full Name</label>
@@ -2901,7 +2900,7 @@ function renderLogin() {
         </button>
       </form>
 
-      <!-- OTP Verify Form -->
+      <!-- OTP Verify Form -&rarr;
       <form id="otp-verify-form" class="mt-4 hidden space-y-4">
         <div id="otp-target-info" class="rounded-xl border border-blue-200 bg-blue-50 p-3.5 text-xs font-semibold text-blue-900 flex items-start gap-2.5 leading-relaxed">
           <span class="text-base">📲</span>
@@ -3110,7 +3109,7 @@ function renderWishlist() {
   if (!container) return;
   const watchKey = 'mm_price_watch_v1';
   const readWatch = () => { try { return JSON.parse(localStorage.getItem(watchKey) || '{}'); } catch { return {}; } };
-  const writeWatch = (value) => { try { localStorage.setItem(watchKey, JSON.stringify(value || {})); } catch {} };
+  const writeWatch = (value) => { try { localStorage.setItem(watchKey, JSON.stringify(value || {})); } catch { } };
   const seedFor = (id) => String(id || 'item').split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
   const priceInsight = (id, price) => {
     const base = Math.max(0, Number(price || 0));
@@ -3159,12 +3158,12 @@ function renderWishlist() {
     </div>
     <div class="space-y-2">
       ${state.wishlist.map((w, idx) => {
-        const insight = priceInsight(w.id, w.price);
-        const watchTarget = Number(watch[w.id]?.target || 0);
-        const alertReady = watchTarget > 0 && insight.current <= watchTarget;
-        const barA = Math.max(8, Math.min(100, Math.round((insight.low / Math.max(1, insight.high)) * 100)));
-        const barB = Math.max(8, Math.min(100, Math.round((insight.current / Math.max(1, insight.high)) * 100)));
-        return `
+    const insight = priceInsight(w.id, w.price);
+    const watchTarget = Number(watch[w.id]?.target || 0);
+    const alertReady = watchTarget > 0 && insight.current <= watchTarget;
+    const barA = Math.max(8, Math.min(100, Math.round((insight.low / Math.max(1, insight.high)) * 100)));
+    const barB = Math.max(8, Math.min(100, Math.round((insight.current / Math.max(1, insight.high)) * 100)));
+    return `
           <div class="mm-card mm-card-pad wishlist-watch-card">
             <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div class="min-w-0 wishlist-watch-main">
@@ -3194,7 +3193,7 @@ function renderWishlist() {
             </div>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 
@@ -3338,7 +3337,7 @@ function renderOrdersLocal() {
       ``,
       `Total: ${money(o.total)}`
     ].join('\n');
-    downloadTextFile(`${String(o.id).replace(/[^a-z0-9_-]+/ig,'_')}_invoice.txt`, lines);
+    downloadTextFile(`${String(o.id).replace(/[^a-z0-9_-]+/ig, '_')}_invoice.txt`, lines);
   }));
 
   container.querySelectorAll('.issue-btn').forEach((b) => b.addEventListener('click', () => {
@@ -3398,9 +3397,9 @@ async function renderOrdersLegacyRemote() {
     return;
   }
 
-      const render = (ordersNow) => {
+  const render = (ordersNow) => {
     container.innerHTML = ordersNow.map((o, idx) => {
-    const d = Array.isArray(o.deliveries) ? o.deliveries[0] : null;
+      const d = Array.isArray(o.deliveries) ? o.deliveries[0] : null;
       const statusSteps = ['pending_payment', 'paid', 'preparing', 'out_for_delivery', 'delivered'];
       const currentIdx = Math.max(0, statusSteps.indexOf(o.status));
       const stepPill = (label, i) => `<span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${i <= currentIdx ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-slate-50 text-slate-500 border border-slate-200'}">${label}</span>`;
@@ -3411,8 +3410,8 @@ async function renderOrdersLegacyRemote() {
       const dBadge = dStatus === 'failed'
         ? `<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">Delivery failed</span>`
         : dStatus === 'cancelled'
-        ? `<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">Delivery cancelled</span>`
-        : '';
+          ? `<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">Delivery cancelled</span>`
+          : '';
       return `
       <div class="mm-card mm-card-pad mb-3">
         <div class="flex items-start justify-between gap-3">
@@ -3508,29 +3507,29 @@ async function renderOrdersLegacyRemote() {
         ``,
         `Total: ${money(order.total_inr || 0)}`
       ].join('\n');
-      downloadTextFile(`${String(order.id).replace(/[^a-z0-9_-]+/ig,'_')}_invoice.txt`, lines);
+      downloadTextFile(`${String(order.id).replace(/[^a-z0-9_-]+/ig, '_')}_invoice.txt`, lines);
     }));
 
     container.querySelectorAll('.issue-btn').forEach((b) => b.addEventListener('click', () => {
-    const i = Number(b.getAttribute('data-idx'));
-    const panel = el(`issue-${i}`);
-    panel?.classList.toggle('hidden');
-    const range = el(`refund-range-${i}`);
-    const val = el(`refund-val-${i}`);
-    range?.addEventListener('input', () => { if (val) val.textContent = `${range.value}%`; });
+      const i = Number(b.getAttribute('data-idx'));
+      const panel = el(`issue-${i}`);
+      panel?.classList.toggle('hidden');
+      const range = el(`refund-range-${i}`);
+      const val = el(`refund-val-${i}`);
+      range?.addEventListener('input', () => { if (val) val.textContent = `${range.value}%`; });
     }));
 
     container.querySelectorAll('.claim-refund').forEach((b) => b.addEventListener('click', async () => {
-    const orderId = String(b.getAttribute('data-order') || '');
-    const i = Number(b.getAttribute('data-idx'));
-    const pct = Number(el(`refund-range-${i}`)?.value || 0);
-    const msg = String(el(`refund-msg-${i}`)?.value || '').trim();
-    const client = supa();
-    if (!client) return;
-    const { error } = await client.from('support_tickets').insert({ user_id: (await supaSessionUser())?.id, order_id: orderId, type: 'refund', refund_percent: pct, message: msg });
-    if (error) return toast(error.message, { type: 'bad', title: 'Support' });
-    toast('Support ticket created. Our team will review your refund request.', { type: 'ok', title: 'Support' });
-    el(`issue-${i}`)?.classList.add('hidden');
+      const orderId = String(b.getAttribute('data-order') || '');
+      const i = Number(b.getAttribute('data-idx'));
+      const pct = Number(el(`refund-range-${i}`)?.value || 0);
+      const msg = String(el(`refund-msg-${i}`)?.value || '').trim();
+      const client = supa();
+      if (!client) return;
+      const { error } = await client.from('support_tickets').insert({ user_id: (await supaSessionUser())?.id, order_id: orderId, type: 'refund', refund_percent: pct, message: msg });
+      if (error) return toast(error.message, { type: 'bad', title: 'Support' });
+      toast('Support ticket created. Our team will review your refund request.', { type: 'ok', title: 'Support' });
+      el(`issue-${i}`)?.classList.add('hidden');
     }));
   };
 
@@ -3556,7 +3555,7 @@ async function renderOrdersLegacyRemote() {
         render(refreshed || []);
       })
       .subscribe();
-  } catch {}
+  } catch { }
 
   // Polling fallback (covers cases where Realtime is unavailable)
   try {
@@ -3568,9 +3567,9 @@ async function renderOrdersLegacyRemote() {
           .select('id, created_at, status, total_inr, stripe_checkout_session_id, deliveries(id,tracking_id,status,eta_minutes,updated_at)')
           .order('created_at', { ascending: false });
         render(refreshed || []);
-      } catch {}
+      } catch { }
     }, 20000);
-  } catch {}
+  } catch { }
 }
 
 function renderReservations() {
@@ -3737,9 +3736,9 @@ function renderAutoshelfOs(data) {
             </div>
             <div class="sm-product-queue">
               ${products.slice().sort((a, b) => scoreProduct(b) - scoreProduct(a)).slice(0, 8).map((p) => {
-                const trust = trustForProduct(p);
-                const selected = Boolean(ops.selectedProducts?.[p.id]);
-                return `
+    const trust = trustForProduct(p);
+    const selected = Boolean(ops.selectedProducts?.[p.id]);
+    return `
                   <article class="sm-product-row">
                     <img src="${p.image || ''}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async" />
                     <div>
@@ -3753,7 +3752,7 @@ function renderAutoshelfOs(data) {
                     </div>
                   </article>
                 `;
-              }).join('')}
+  }).join('')}
             </div>
           </section>
 
@@ -3790,10 +3789,10 @@ function renderAutoshelfOs(data) {
             <h2>Trust labels</h2>
             <div class="sm-label-stack mt-3">
               ${['rapid', 'pos', 'mini', 'low', 'stale', 'out'].map((key) => {
-                const sample = { rapid: 'Controlled bin stock', pos: 'Recent POS feed', mini: 'Staff confirmed today', low: 'Manual confirmation needed', stale: 'Feed is old', out: 'Unavailable' }[key];
-                const label = { rapid: 'Rapid Shelf', pos: 'POS synced', mini: 'Mini-POS managed', low: 'Low stock', stale: 'Stock stale', out: 'Out of stock' }[key];
-                return `<div>${trustBadge({ tone: key, label })}<span>${sample}</span></div>`;
-              }).join('')}
+    const sample = { rapid: 'Controlled bin stock', pos: 'Recent POS feed', mini: 'Staff confirmed today', low: 'Manual confirmation needed', stale: 'Feed is old', out: 'Unavailable' }[key];
+    const label = { rapid: 'Rapid Shelf', pos: 'POS synced', mini: 'Mini-POS managed', low: 'Low stock', stale: 'Stock stale', out: 'Out of stock' }[key];
+    return `<div>${trustBadge({ tone: key, label })}<span>${sample}</span></div>`;
+  }).join('')}
             </div>
           </section>
 
@@ -4158,9 +4157,9 @@ function renderConnectOs(data) {
               </div>
               <div class="connect-label-grid">
                 ${['rapid', 'pos', 'mini', 'low', 'stale', 'out'].map((key) => {
-                  const label = { rapid: 'Rapid Shelf', pos: 'POS synced', mini: 'Mini-POS', low: 'Confirm', stale: 'Stale', out: 'Out' }[key];
-                  return trustBadge({ tone: key, label });
-                }).join('')}
+    const label = { rapid: 'Rapid Shelf', pos: 'POS synced', mini: 'Mini-POS', low: 'Confirm', stale: 'Stale', out: 'Out' }[key];
+    return trustBadge({ tone: key, label });
+  }).join('')}
               </div>
             </article>
             <article>
@@ -4189,9 +4188,9 @@ function renderConnectOs(data) {
               </div>
               <div class="connect-product-list">
                 ${sortedProducts.slice(0, 7).map((p) => {
-                  const trust = trustForProduct(p);
-                  const selected = Boolean(ops.selectedProducts?.[p.id]);
-                  return `
+    const trust = trustForProduct(p);
+    const selected = Boolean(ops.selectedProducts?.[p.id]);
+    return `
                     <article class="connect-product-row">
                       <img src="${localSafeImage(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async" />
                       <div class="connect-product-main">
@@ -4205,7 +4204,7 @@ function renderConnectOs(data) {
                       </div>
                     </article>
                   `;
-                }).join('')}
+  }).join('')}
               </div>
             </section>
             <aside class="connect-board connect-intake">
@@ -4577,7 +4576,7 @@ function exportTallyXml(storeName, vList) {
           <VOUCHER VCHTYPE="${v.type === 'purchase' ? 'Purchase' : 'Sales'}" ACTION="Create">
             <DATE>${v.date || '20260831'}</DATE>
             <VOUCHERTYPENAME>${v.type === 'purchase' ? 'Purchase' : 'Sales'}</VOUCHERTYPENAME>
-            <VOUCHERNUMBER>${escapeHtml(v.invoice_no || `VCH-${idx+1}`)}</VOUCHERNUMBER>
+            <VOUCHERNUMBER>${escapeHtml(v.invoice_no || `VCH-${idx + 1}`)}</VOUCHERNUMBER>
             <PARTYLEDGERNAME>${escapeHtml(v.party || (v.type === 'purchase' ? 'Sundry Creditors' : 'Cash/Walk-in'))}</PARTYLEDGERNAME>
             <AMOUNT>-${v.amount}</AMOUNT>
           </VOUCHER>
@@ -4621,8 +4620,8 @@ async function renderStoreDashboardApi(data) {
   }
   const selectedStore = stores.find((st) => String(st.id) === String(urlStoreId)) || stores[0] || null;
   if (selectedStore?.id) {
-    try { analytics = await window.MM_API.storeAnalytics(selectedStore.id); } catch {}
-    try { payoutData = await window.MM_API.storePayouts(selectedStore.id); } catch {}
+    try { analytics = await window.MM_API.storeAnalytics(selectedStore.id); } catch { }
+    try { payoutData = await window.MM_API.storePayouts(selectedStore.id); } catch { }
   }
   const products = selectedStore?.products || (data.products || []).filter((p) => String(p.storeId || p.store_id) === String(selectedStore?.id));
   const storeOptions = stores.map((st) => `<option value="${escapeHtml(st.id)}" ${String(st.id) === String(selectedStore?.id) ? 'selected' : ''}>${escapeHtml(st.name)} (${escapeHtml(st.verification_status || 'pending')})</option>`).join('');
@@ -4681,9 +4680,9 @@ async function renderStoreDashboardApi(data) {
         <button type="button" class="mm-dash-tab-btn" data-view="stock-pnl">📊 Stock &amp; P&amp;L Analysis</button>
       </nav>
 
-      <!-- Panel 1: Mini-POS Counter Terminal -->
+      <!-- Panel 1: Mini-POS Counter Terminal -&rarr;
       <section class="mm-dash-card pos-panel-view" data-panel="pos">
-        <!-- Enterprise Dark POS Header Bar -->
+        <!-- Enterprise Dark POS Header Bar -&rarr;
         <div class="pos-top-bar">
           <div class="pos-status-indicator">
             <span class="scanner-dot"></span>
@@ -4701,7 +4700,7 @@ async function renderStoreDashboardApi(data) {
         </div>
 
         <div class="mm-dash-card-body">
-          <!-- Category Filter Bar -->
+          <!-- Category Filter Bar -&rarr;
           <div class="pos-cat-pill-bar">
             <button type="button" class="pos-cat-btn active" data-pos-cat="all">⚡ All Items</button>
             <button type="button" class="pos-cat-btn" data-pos-cat="Apparel">👕 Apparel &amp; Fashion</button>
@@ -4711,20 +4710,20 @@ async function renderStoreDashboardApi(data) {
           </div>
 
           <div class="mini-pos-shell">
-            <!-- Left Panel: Product Catalog Grid -->
+            <!-- Left Panel: Product Catalog Grid -&rarr;
             <div>
               <div class="mb-3">
                 <input type="text" id="pos-search-input" class="pnl-search-input" placeholder="🔍 Search product name, barcode (EAN-13), or SKU (Ctrl + K)…" style="max-width:100%" />
               </div>
               <div class="mini-pos-catalog-grid" id="pos-catalog-grid">
                 ${products.map((p, idx) => {
-                  const pid = p.id;
-                  const name = p.name;
-                  const price = p.price_inr ?? p.price ?? 0;
-                  const stock = p.stock_qty ?? p.stockCount ?? 0;
-                  const sku = p.sku || `SKU-ITEM-${100 + idx}`;
-                  const img = p.image || p.image_url || 'assets/media/hero-mall.jpg';
-                  return `
+    const pid = p.id;
+    const name = p.name;
+    const price = p.price_inr ?? p.price ?? 0;
+    const stock = p.stock_qty ?? p.stockCount ?? 0;
+    const sku = p.sku || `SKU-ITEM-${100 + idx}`;
+    const img = p.image || p.image_url || 'assets/media/hero-mall.jpg';
+    return `
                     <div class="pos-item-card" data-pid="${escapeHtml(pid)}" data-name="${escapeHtml(name)}" data-price="${price}" data-stock="${stock}" data-category="${escapeHtml(p.category || 'General')}">
                       <div class="pos-item-img-wrap">
                         <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />
@@ -4740,11 +4739,11 @@ async function renderStoreDashboardApi(data) {
                       </div>
                     </div>
                   `;
-                }).join('') || '<p class="text-xs text-muted-foreground p-4">No products available for POS billing.</p>'}
+  }).join('') || '<p class="text-xs text-muted-foreground p-4">No products available for POS billing.</p>'}
               </div>
             </div>
 
-            <!-- Right Panel: Active Billing Cart & Register -->
+            <!-- Right Panel: Active Billing Cart & Register -&rarr;
             <div class="pos-cart-panel">
               <div class="pos-terminal-session-header">
                 <div>
@@ -4754,13 +4753,13 @@ async function renderStoreDashboardApi(data) {
                 <button type="button" id="pos-clear-cart" class="text-xs text-rose-600 font-bold hover:underline">🧹 Clear</button>
               </div>
 
-              <!-- Customer Khata / Phone Selector -->
+              <!-- Customer Khata / Phone Selector -&rarr;
               <div class="grid grid-cols-2 gap-2 mb-3">
                 <input id="pos-cust-name" class="mm-input text-xs" placeholder="👤 Customer Name (Walk-in)" />
                 <input id="pos-cust-phone" class="mm-input text-xs" placeholder="📞 Phone (+91)" />
               </div>
 
-              <!-- Cart Line Items Table -->
+              <!-- Cart Line Items Table -&rarr;
               <div style="max-height:220px;overflow-y:auto" class="mb-3">
                 <table class="pos-cart-table">
                   <thead>
@@ -4778,7 +4777,7 @@ async function renderStoreDashboardApi(data) {
                 </table>
               </div>
 
-              <!-- On-Screen Touch Numpad Drawer Toggle -->
+              <!-- On-Screen Touch Numpad Drawer Toggle -&rarr;
               <details class="mb-2 text-xs">
                 <summary class="cursor-pointer font-bold text-slate-700 hover:text-blue-600 flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
                   <span>🔢 Quick Touch Numpad Keypad</span>
@@ -4804,7 +4803,7 @@ async function renderStoreDashboardApi(data) {
                 </div>
               </details>
 
-              <!-- Bill Calculations Breakdown -->
+              <!-- Bill Calculations Breakdown -&rarr;
               <div class="pos-bill-summary">
                 <div class="pos-bill-line"><span>Subtotal:</span><strong id="pos-subtotal">₹0.00</strong></div>
                 <div class="pos-bill-line"><span>Tax (CGST 9% + SGST 9%):</span><strong id="pos-tax">₹0.00</strong></div>
@@ -4817,7 +4816,7 @@ async function renderStoreDashboardApi(data) {
                   <strong id="pos-grand-total" class="text-emerald-700 text-xl font-extrabold">₹0.00</strong>
                 </div>
 
-                <!-- Cash Tendered & Change Due Box -->
+                <!-- Cash Tendered & Change Due Box -&rarr;
                 <div class="pos-tendered-box" id="pos-cash-tendered-row">
                   <div>
                     <span class="text-xs font-bold text-slate-700 block">Cash Tendered (₹):</span>
@@ -4847,7 +4846,7 @@ async function renderStoreDashboardApi(data) {
         </div>
       </section>
 
-      <!-- Panel 2: Tally Purchase Inward -->
+      <!-- Panel 2: Tally Purchase Inward -&rarr;
       <section class="mm-dash-card pos-panel-view hidden" data-panel="tally-inward">
         <div class="mm-dash-card-head">
           <div>
@@ -4874,7 +4873,7 @@ async function renderStoreDashboardApi(data) {
         </div>
       </section>
 
-      <!-- Panel 3: Tally Daybook & XML -->
+      <!-- Panel 3: Tally Daybook & XML -&rarr;
       <section class="mm-dash-card pos-panel-view hidden" data-panel="daybook">
         <div class="mm-dash-card-head">
           <div>
@@ -4903,7 +4902,7 @@ async function renderStoreDashboardApi(data) {
                     <td><span class="stock-pill stock-pill-in">Sales Voucher</span></td>
                     <td><strong>${escapeHtml(o.invoice_no || o.id)}</strong></td>
                     <td>${escapeHtml(o.customer_name || 'Cash Sales')}</td>
-                    <td><strong>${money(o.total_inr || Math.round((o.total_paise || 0)/100))}</strong></td>
+                    <td><strong>${money(o.total_inr || Math.round((o.total_paise || 0) / 100))}</strong></td>
                     <td><span class="margin-badge margin-badge-high">Verified</span></td>
                   </tr>
                 `).join('') || '<tr><td colspan="6" class="text-center text-muted-foreground p-4">No daybook vouchers recorded today.</td></tr>'}
@@ -4913,7 +4912,7 @@ async function renderStoreDashboardApi(data) {
         </div>
       </section>
 
-      <!-- Panel 4: Stock & P&L Analysis -->
+      <!-- Panel 4: Stock & P&L Analysis -&rarr;
       <div class="pos-panel-view hidden" data-panel="stock-pnl">
         <div class="mm-dash-layout">
           <div class="space-y-4">
@@ -4955,17 +4954,17 @@ async function renderStoreDashboardApi(data) {
                     </thead>
                     <tbody>
                       ${(analytics?.product_pnl_list || products.map(p => ({
-                        id: p.id,
-                        name: p.name,
-                        selling_price_inr: p.price_inr ?? p.price ?? 0,
-                        stock_qty: p.stock_qty ?? p.stockCount ?? 0
-                      }))).map((p) => {
-                        const pid = p.id;
-                        const name = p.name;
-                        const price = p.selling_price_inr;
-                        const stock = p.stock_qty;
-                        const statusPill = stock <= 0 ? '<span class="stock-pill stock-pill-out">Out of stock</span>' : stock <= 3 ? '<span class="stock-pill stock-pill-low">Low stock</span>' : '<span class="stock-pill stock-pill-in">In stock</span>';
-                        return `
+    id: p.id,
+    name: p.name,
+    selling_price_inr: p.price_inr ?? p.price ?? 0,
+    stock_qty: p.stock_qty ?? p.stockCount ?? 0
+  }))).map((p) => {
+    const pid = p.id;
+    const name = p.name;
+    const price = p.selling_price_inr;
+    const stock = p.stock_qty;
+    const statusPill = stock <= 0 ? '<span class="stock-pill stock-pill-out">Out of stock</span>' : stock <= 3 ? '<span class="stock-pill stock-pill-low">Low stock</span>' : '<span class="stock-pill stock-pill-in">In stock</span>';
+    return `
                           <tr>
                             <td><strong>${escapeHtml(name)}</strong></td>
                             <td>${money(price)}</td>
@@ -4991,7 +4990,7 @@ async function renderStoreDashboardApi(data) {
                             </td>
                           </tr>
                         `;
-                      }).join('') || '<tr><td colspan="6" class="text-center text-muted-foreground p-4">No products in inventory yet.</td></tr>'}
+  }).join('') || '<tr><td colspan="6" class="text-center text-muted-foreground p-4">No products in inventory yet.</td></tr>'}
                     </tbody>
                   </table>
                 </div>
@@ -5032,9 +5031,9 @@ async function renderStoreDashboardApi(data) {
                     </thead>
                     <tbody>
                       ${(analytics?.product_pnl_list || []).map((p) => {
-                        const marginBadgeClass = p.is_loss ? 'margin-badge-loss' : p.margin_pct >= 40 ? 'margin-badge-high' : p.margin_pct >= 15 ? 'margin-badge-normal' : 'margin-badge-low';
-                        const marginBadgeLabel = p.is_loss ? `${p.margin_pct}% Loss` : `${p.margin_pct}%`;
-                        return `
+    const marginBadgeClass = p.is_loss ? 'margin-badge-loss' : p.margin_pct >= 40 ? 'margin-badge-high' : p.margin_pct >= 15 ? 'margin-badge-normal' : 'margin-badge-low';
+    const marginBadgeLabel = p.is_loss ? `${p.margin_pct}% Loss` : `${p.margin_pct}%`;
+    return `
                           <tr ${p.is_loss ? 'style="background:#fff1f2"' : ''}>
                             <td><strong>${escapeHtml(p.name)}</strong></td>
                             <td>${p.stock_qty}</td>
@@ -5051,7 +5050,7 @@ async function renderStoreDashboardApi(data) {
                             <td><strong class="${p.total_profit_inr < 0 ? 'text-rose-600' : 'text-emerald-700'}">${money(p.total_profit_inr)}</strong></td>
                           </tr>
                         `;
-                      }).join('') || '<tr><td colspan="8" class="text-center text-muted-foreground p-4">No product P&amp;L records yet.</td></tr>'}
+  }).join('') || '<tr><td colspan="8" class="text-center text-muted-foreground p-4">No product P&amp;L records yet.</td></tr>'}
                     </tbody>
                   </table>
                 </div>
@@ -5642,9 +5641,9 @@ function renderStoreDashboardLocal(data) {
             </thead>
             <tbody>
               ${productPnlList.map((p) => {
-                const marginBadgeClass = p.is_loss ? 'margin-badge-loss' : p.margin_pct >= 40 ? 'margin-badge-high' : p.margin_pct >= 15 ? 'margin-badge-normal' : 'margin-badge-low';
-                const marginBadgeLabel = p.is_loss ? `${p.margin_pct}% Loss` : `${p.margin_pct}%`;
-                return `
+    const marginBadgeClass = p.is_loss ? 'margin-badge-loss' : p.margin_pct >= 40 ? 'margin-badge-high' : p.margin_pct >= 15 ? 'margin-badge-normal' : 'margin-badge-low';
+    const marginBadgeLabel = p.is_loss ? `${p.margin_pct}% Loss` : `${p.margin_pct}%`;
+    return `
                   <tr ${p.is_loss ? 'style="background:#fff1f2"' : ''}>
                     <td><strong>${escapeHtml(p.name)}</strong></td>
                     <td>${p.stock_qty}</td>
@@ -5661,7 +5660,7 @@ function renderStoreDashboardLocal(data) {
                     <td><strong class="${p.total_profit_inr < 0 ? 'text-rose-600' : 'text-emerald-700'}">${money(p.total_profit_inr)}</strong></td>
                   </tr>
                 `;
-              }).join('') || '<tr><td colspan="8" class="text-center text-muted-foreground p-4">No product records.</td></tr>'}
+  }).join('') || '<tr><td colspan="8" class="text-center text-muted-foreground p-4">No product records.</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -5787,9 +5786,9 @@ async function renderAdminDashboardApi(data) {
         <div><h1 class="text-3xl font-bold">MallMaze Admin Console</h1><p class="text-sm text-muted-foreground mt-1">Full visibility: users, stores, products, orders, payments.</p></div>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
           ${[
-            ['Users', overview.users], ['Stores', overview.stores], ['Products', overview.products], ['Orders', overview.orders],
-            ['Reservations', overview.reservations], ['Pending stores', overview.pending_stores], ['Revenue', money(overview.revenue_inr || 0)]
-          ].map(([label, val]) => `<div class="border rounded-lg p-3 bg-card"><p class="text-xs text-muted-foreground">${label}</p><p class="text-xl font-bold">${typeof val === 'number' ? val.toLocaleString('en-IN') : val}</p></div>`).join('')}
+        ['Users', overview.users], ['Stores', overview.stores], ['Products', overview.products], ['Orders', overview.orders],
+        ['Reservations', overview.reservations], ['Pending stores', overview.pending_stores], ['Revenue', money(overview.revenue_inr || 0)]
+      ].map(([label, val]) => `<div class="border rounded-lg p-3 bg-card"><p class="text-xs text-muted-foreground">${label}</p><p class="text-xl font-bold">${typeof val === 'number' ? val.toLocaleString('en-IN') : val}</p></div>`).join('')}
         </div>
         <section class="border rounded-xl p-4 bg-card overflow-x-auto">
           <h2 class="text-xl font-bold mb-3">Users (${users.length})</h2>
@@ -6153,7 +6152,7 @@ async function renderAdminDashboardLegacyRemote() {
                   <div class="flex items-center gap-2 justify-end">
                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border ${t.status === 'open' ? 'bg-amber-50 text-amber-700 border-amber-200' : t.status === 'approved' ? 'bg-amber-50 text-amber-700 border-amber-200' : t.status === 'resolved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : t.status === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-slate-50 text-slate-600 border-slate-200'}">${t.status}</span>
                     <select class="rounded-lg border px-2 py-1 text-xs" data-ticket-status="${t.id}" data-ticket-type="${t.type || ''}" data-ticket-order="${t.order_id || ''}">
-                      ${['open','triaging','approved','rejected','resolved'].map((s) => `<option value="${s}" ${String(t.status)===s?'selected':''}>${s}</option>`).join('')}
+                      ${['open', 'triaging', 'approved', 'rejected', 'resolved'].map((s) => `<option value="${s}" ${String(t.status) === s ? 'selected' : ''}>${s}</option>`).join('')}
                     </select>
                   </div>
                   ${t.type === 'refund' ? `
@@ -6310,10 +6309,10 @@ async function renderStoreDashboardLegacyRemote() {
         <form id="sb-stock-form" class="space-y-3">
           <select id="sb-stock-product" required>
             ${(products || []).map((p) => {
-              const inv = Array.isArray(p.inventory) ? p.inventory[0] : p.inventory;
-              const qty = inv?.available_qty ?? 0;
-              return `<option value="${p.id}">${p.name} (stock: ${qty})</option>`;
-            }).join('')}
+    const inv = Array.isArray(p.inventory) ? p.inventory[0] : p.inventory;
+    const qty = inv?.available_qty ?? 0;
+    return `<option value="${p.id}">${p.name} (stock: ${qty})</option>`;
+  }).join('')}
           </select>
           <input id="sb-stock-count" type="number" min="0" placeholder="Set available stock" required />
           <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-white">Update Inventory</button>
@@ -6427,7 +6426,7 @@ async function renderScanReceiptPage() {
   try {
     const c = document.getElementById('mm-receipt-qr');
     if (c && window.MM_QR?.draw) window.MM_QR.draw(c, verifyUrl, 240);
-  } catch {}
+  } catch { }
 }
 
 async function renderVerifyReceiptPage() {
@@ -6508,7 +6507,7 @@ async function renderVerifyReceiptPage() {
             status.textContent = 'Verified. You can scan the next receipt.';
             await new Promise((r) => setTimeout(r, 900));
           }
-        } catch {}
+        } catch { }
         requestAnimationFrame(loop);
       };
       requestAnimationFrame(loop);
@@ -6813,12 +6812,12 @@ async function renderSupportCenter() {
     const cls = st === 'resolved'
       ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
       : st === 'approved'
-      ? 'bg-amber-50 text-amber-700 border-amber-200'
-      : st === 'rejected'
-      ? 'bg-rose-50 text-rose-700 border-rose-200'
-      : st === 'triaging'
-      ? 'bg-slate-100 text-slate-700 border-slate-200'
-      : 'bg-slate-50 text-slate-700 border-slate-200';
+        ? 'bg-amber-50 text-amber-700 border-amber-200'
+        : st === 'rejected'
+          ? 'bg-rose-50 text-rose-700 border-rose-200'
+          : st === 'triaging'
+            ? 'bg-slate-100 text-slate-700 border-slate-200'
+            : 'bg-slate-50 text-slate-700 border-slate-200';
     return `<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border ${cls}">${st}</span>`;
   };
 
@@ -6977,7 +6976,7 @@ async function renderSupportCenter() {
         u.searchParams.delete('type');
         u.searchParams.delete('msg');
         history.replaceState({}, '', u.toString());
-      } catch {}
+      } catch { }
       await renderSupportCenter();
     } catch (error) {
       toast(error.message || String(error), { type: 'bad', title: 'Support' });
@@ -7015,7 +7014,7 @@ async function renderNotificationsPage() {
   const readState = () => {
     try { return JSON.parse(localStorage.getItem(READ_KEY) || '{}'); } catch { return {}; }
   };
-  const writeState = (v) => { try { localStorage.setItem(READ_KEY, JSON.stringify(v || {})); } catch {} };
+  const writeState = (v) => { try { localStorage.setItem(READ_KEY, JSON.stringify(v || {})); } catch { } };
   const s0 = readState();
   const isRead = (type, id) => Boolean(s0?.[type]?.[String(id)]);
   const markRead = (type, id) => {
@@ -7128,7 +7127,7 @@ async function renderNotificationsPage() {
   el('notif-mark-all')?.addEventListener('click', () => {
     markAllRead();
     toast('Marked all as read.', { type: 'ok', title: 'Updates', ms: 1200 });
-    renderNotificationsPage().catch(() => {});
+    renderNotificationsPage().catch(() => { });
   });
 
   container.querySelectorAll('[data-mm-type][data-mm-id]').forEach((a) => {
@@ -7161,12 +7160,12 @@ function showConfigBanner(msg, actionHref, actionText) {
       try {
         document.documentElement.style.scrollPaddingTop = '';
         document.body.style.paddingTop = '';
-      } catch {}
+      } catch { }
     });
     // Avoid covering the header
     document.documentElement.style.scrollPaddingTop = '56px';
     document.body.style.paddingTop = '56px';
-  } catch {}
+  } catch { }
 }
 
 function initPwaUx() {
@@ -7174,7 +7173,7 @@ function initPwaUx() {
     // Offline/online toasts
     window.addEventListener('offline', () => toast('You are offline. Some pages will work from cache.', { type: 'info', title: 'Offline', ms: 2600 }));
     window.addEventListener('online', () => toast('Back online.', { type: 'ok', title: 'Network', ms: 1400 }));
-  } catch {}
+  } catch { }
 
   // Install prompt (best-effort)
   try {
@@ -7204,7 +7203,7 @@ function initPwaUx() {
       `;
       document.body.appendChild(n);
       document.getElementById('mm-install-x')?.addEventListener('click', () => {
-        try { localStorage.setItem(key, '1'); } catch {}
+        try { localStorage.setItem(key, '1'); } catch { }
         n.remove();
       });
       document.getElementById('mm-install-btn')?.addEventListener('click', async () => {
@@ -7212,13 +7211,13 @@ function initPwaUx() {
           if (!deferred) return;
           deferred.prompt();
           await deferred.userChoice;
-        } catch {}
-        try { localStorage.setItem(key, '1'); } catch {}
+        } catch { }
+        try { localStorage.setItem(key, '1'); } catch { }
         n.remove();
         deferred = null;
       });
     });
-  } catch {}
+  } catch { }
 }
 
 function initRagCopilot() {
@@ -7257,7 +7256,7 @@ function initRagCopilot() {
         </div>
       </div>
 
-      <!-- Scrollable Chat Feed -->
+      <!-- Scrollable Chat Feed -&rarr;
       <div id="copilot-feed" class="mm-copilot-feed">
         <div class="chat-bubble chat-bubble-ai">
           <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1 text-[11px]">
@@ -7269,7 +7268,7 @@ function initRagCopilot() {
         </div>
       </div>
 
-      <!-- Quick Prompt Suggestion Bar -->
+      <!-- Quick Prompt Suggestion Bar -&rarr;
       <div class="px-3 py-2 border-t border-slate-200 bg-white">
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar" id="copilot-chips">
           <button type="button" class="copilot-chip rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition shrink-0" data-q="blue blazer under 5000">👔 Blue blazer &lt; ₹5k</button>
@@ -7279,7 +7278,7 @@ function initRagCopilot() {
         </div>
       </div>
 
-      <!-- Input Box -->
+      <!-- Input Box -&rarr;
       <div class="p-3 border-t border-slate-200 bg-white">
         <form id="copilot-form" class="flex gap-2">
           <input id="copilot-input" type="text" placeholder="Ask Gemini AI (e.g. blue blazer under 5000)..." class="flex-1 rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-semibold focus:border-indigo-600 focus:outline-none bg-slate-50" required />
@@ -7444,7 +7443,7 @@ function initRagCopilot() {
         sendQuery(q);
       });
     });
-  } catch {}
+  } catch { }
 }
 
 async function init() {
@@ -7454,16 +7453,16 @@ async function init() {
   }
   renderNavbar();
   initRagCopilot();
-  
+
 
   window.appData = await loadAppData();
 
   // PWA: register service worker for offline caching
   try {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+      navigator.serviceWorker.register('service-worker.js').catch(() => { });
     }
-  } catch {}
+  } catch { }
   initPwaUx();
 
   // Legacy external DB auth has been removed from the active app path. OTP/session state comes from MM_API.
@@ -7473,18 +7472,18 @@ async function init() {
   const file = location.pathname.split('/').pop() || 'index.html';
   // Light prefetching of key pages
   try {
-      if (file === 'index.html') prefetchPages(['products.html', 'scan.html', 'compare.html', 'autoshelf.html']);
+    if (file === 'index.html') prefetchPages(['products.html', 'scan.html', 'compare.html', 'autoshelf.html']);
     if (file === 'products.html') prefetchPages(['product.html', 'cart.html', 'compare.html']);
     if (file === 'product.html') prefetchPages(['cart.html', 'compare.html']);
     if (file === 'orders.html') prefetchPages(['order.html', 'support.html', 'notifications.html']);
     if (file === 'autoshelf.html') prefetchPages(['products.html', 'store-dashboard.html', 'admin-dashboard.html']);
-  } catch {}
+  } catch { }
   // Friendly config guardrails
   try {
     const apiOk = Boolean(window.MM_API?.hasApi?.());
     const needsApi = ['login.html', 'cart.html', 'orders.html', 'order.html', 'support.html', 'notifications.html', 'scan-receipt.html', 'verify-receipt.html', 'admin-dashboard.html', 'store-dashboard.html'].includes(file);
     if (needsApi && !apiOk) showConfigBanner('Backend API is not configured. Start backend/server.js or set API_BASE_URL.', 'backend/README.md', 'Backend notes');
-  } catch {}
+  } catch { }
   if (file === 'index.html' || file === 'dashboard.html') renderIndex(window.appData);
   else if (file === 'malls.html') renderMalls(window.appData);
   else if (file === 'products.html') renderProducts(window.appData);
@@ -7534,7 +7533,6 @@ async function init() {
     }, 1200);
     toast('Added to cart', { type: 'ok', title: 'Cart' });
   });
-
   document.addEventListener('click', (e) => {
     const w = e.target.closest('.wishlist-toggle');
     if (!w) return;
@@ -7550,17 +7548,12 @@ async function init() {
     if (file === 'index.html' || file === 'dashboard.html') renderIndex(window.appData);
     else if (file === 'products.html') renderProducts(window.appData);
   });
-
   // Basic keyboard accessibility: allow Escape to close location panel is already implemented.
 }
-
 init();
-
-
 function initHomeLocationDiscovery() {
   const wrap = document.getElementById('mm-home-location-discovery');
   if (!wrap) return;
-
   const locLabel = document.getElementById('mm-home-loc-label');
   const useBtn = document.getElementById('mm-home-use-loc-btn');
   const chooseBtn = document.getElementById('mm-home-choose-loc-btn');
@@ -7573,12 +7566,10 @@ function initHomeLocationDiscovery() {
     }
   };
   updateLabel();
-
   window.addEventListener('mm:location-changed', () => {
     updateLabel();
     renderNearbyStores();
   });
-
   useBtn?.addEventListener('click', async () => {
     if (!window.MM_GEO?.getCurrentPosition) return;
     useBtn.disabled = true;
@@ -7594,18 +7585,15 @@ function initHomeLocationDiscovery() {
       useBtn.disabled = false;
     }
   });
-
   chooseBtn?.addEventListener('click', () => {
     if (window.MM_GEO?.openLocationModal) {
       window.MM_GEO.openLocationModal();
     }
   });
-
   const renderNearbyStores = () => {
     if (!container) return;
     const allStores = window.appData?.stores || [];
     const savedLoc = window.MM_GEO ? window.MM_GEO.getSavedLocation() : null;
-
     // Filter verified stores and compute real Haversine distance
     const list = allStores.map((st) => {
       const dist = window.MM_GEO ? window.MM_GEO.calculateStoreDistance(st) : null;
@@ -7619,13 +7607,11 @@ function initHomeLocationDiscovery() {
       if (b.dist == null) return -1;
       return a.dist - b.dist;
     });
-
     const top4 = list.slice(0, 4);
     if (!top4.length) {
       container.innerHTML = `<p class="col-span-full text-xs text-slate-500">No local stores registered in this area yet.</p>`;
       return;
     }
-
     container.innerHTML = top4.map((st) => `
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
         <div>
@@ -7640,11 +7626,10 @@ function initHomeLocationDiscovery() {
         </div>
         <div class="mt-4 flex items-center gap-2">
           <a href="store.html?id=${encodeURIComponent(st.id)}" class="flex-1 text-center rounded-lg bg-slate-900 hover:bg-slate-800 py-1.5 text-xs font-bold text-white transition">View</a>
-          <button type="button" class="flex-1 rounded-lg bg-amber-400 hover:bg-amber-500 py-1.5 text-xs font-bold text-slate-950 transition" onclick="if(window.MM_FAST_SHOPPING) MM_FAST_SHOPPING.startSession(${JSON.stringify({id: st.id, name: st.name, category: st.category, city: st.city}).replace(/"/g, '&quot;')}); window.location.href='store.html?id=${encodeURIComponent(st.id)}&mode=fast';">Fast Shop</button>
+          <button type="button" class="flex-1 rounded-lg bg-amber-400 hover:bg-amber-500 py-1.5 text-xs font-bold text-slate-950 transition" onclick="if(window.MM_FAST_SHOPPING) MM_FAST_SHOPPING.startSession(${JSON.stringify({ id: st.id, name: st.name, category: st.category, city: st.city }).replace(/"/g, '&quot;')}); window.location.href='store.html?id=${encodeURIComponent(st.id)}&mode=fast';">Fast Shop</button>
         </div>
       </div>
     `).join('');
   };
-
   renderNearbyStores();
 }

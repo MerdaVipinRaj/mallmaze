@@ -130,7 +130,7 @@
         <section class="rounded-2xl border border-border bg-card p-4 shadow-card">
           <div class="flex items-center justify-between mb-3">
             <div class="text-sm font-semibold">In-store Cart</div>
-            <a href="cart.html" class="text-sm font-semibold text-blue-600">Go to delivery cart â†’</a>
+            <a href="cart.html" class="text-sm font-semibold text-blue-600">Go to delivery cart &rarr;</a>
           </div>
           <div id="scan-cart" class="space-y-3"></div>
           <div class="mt-4 rounded-xl border border-border bg-muted p-4">
@@ -306,7 +306,7 @@
           try {
             const data = window.MM_API?.hasApi?.() ? await window.MM_API.autoshelfStores() : { stores: [] };
             const stores = Array.isArray(data?.stores) ? data.stores : [];
-            pick.innerHTML = `<option value="">All stores (global catalog)</option>` + stores.map((st) => `<option value="${st.id}">${String(st.name || 'Store')} ${st.city ? `Â· ${String(st.city)}` : ''}</option>`).join('');
+            pick.innerHTML = `<option value="">All stores (global catalog)</option>` + stores.map((st) => `<option value="${st.id}">${String(st.name || 'Store')} ${st.city ? `• ${String(st.city)}` : ''}</option>`).join('');
             pick.value = storeId || '';
             badge.textContent = storeId ? (stores.find((x) => String(x.id) === String(storeId))?.name || 'Selected store') : 'All stores';
             pick.addEventListener('change', () => {
@@ -364,7 +364,7 @@
             hint.textContent = !hasItems
               ? 'Add items to pay.'
               : hasUnpriced
-              ? 'Some items have Rs 0. Use â€œQuick add productâ€.'
+              ? 'Some items have Rs 0. Use "Quick add product".'
               : 'Pay securely and get your QR receipt.';
           }
         };
@@ -394,7 +394,7 @@
               status(`Added: ${p.name}`);
             } else {
               items.unshift({ code: clean, name: `Unknown item`, price: 0, qty: 1, product_id: null });
-              status('Unknown code. Use â€œQuick add productâ€ to add a priced item.');
+              status('Unknown code. Use "Quick add product" to add a priced item.');
             }
           }
           write(items);

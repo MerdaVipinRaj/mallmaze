@@ -505,7 +505,7 @@
           </div>
 
           <div class="p-5 space-y-4">
-            <!-- Current Location Badge -->
+            <!-- Current Location Badge -&rarr;
             <div class="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-200">
               <div>
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Current Selected Location</p>
@@ -514,7 +514,7 @@
               ${activeLoc ? `<button id="mm-loc-clear-btn" class="text-xs font-bold text-rose-600 hover:underline">Clear</button>` : ''}
             </div>
 
-            <!-- Device Location Button -->
+            <!-- Device Location Button -&rarr;
             <button id="mm-loc-detect-btn" class="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-500 px-4 py-3 text-slate-950 font-bold transition shadow-sm">
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
               <span>Use My Device Location</span>
@@ -526,7 +526,7 @@
               <span class="absolute bg-white px-3 text-xs font-semibold text-slate-400 uppercase">Or Choose Manually</span>
             </div>
 
-            <!-- City Selector -->
+            <!-- City Selector -&rarr;
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1" for="mm-loc-city-select">Select City</label>
               <select id="mm-loc-city-select" class="w-full rounded-xl border border-slate-300 p-2.5 text-sm font-medium focus:border-amber-500 focus:outline-none">
@@ -534,7 +534,7 @@
               </select>
             </div>
 
-            <!-- Area Search -->
+            <!-- Area Search -&rarr;
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5" for="mm-loc-area-search">Search Retail Area / Locality</label>
               <div class="flex gap-2">

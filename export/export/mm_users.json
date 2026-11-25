@@ -1,0 +1,106 @@
+[
+  {
+    "id": "usr-1789983152302",
+    "name": null,
+    "email": null,
+    "phone": null,
+    "role": null,
+    "created_at": null,
+    "raw_data": {
+      "id": "usr-1789983152302",
+      "name": "Test Shopper",
+      "role": "user",
+      "email": "test.shopper@gmail.com",
+      "phone": "",
+      "created_at": "2026-09-21T09:32:32.302Z"
+    },
+    "wallet_balance_paise": null
+  },
+  {
+    "id": "usr-admin-master",
+    "name": null,
+    "email": null,
+    "phone": null,
+    "role": null,
+    "created_at": null,
+    "raw_data": {
+      "id": "usr-admin-master",
+      "name": "Platform Admin",
+      "role": "admin",
+      "email": "admin@mallmaze.in",
+      "phone": "+91 99000 11111",
+      "addresses": [
+        {
+          "id": "addr-1",
+          "city": "Bangalore",
+          "state": "Karnataka",
+          "title": "Headquarters",
+          "street": "100 Feet Road, Indiranagar",
+          "pincode": "560038",
+          "is_default": true
+        }
+      ],
+      "created_at": "2026-01-01T00:00:00.000Z",
+      "wallet_balance_paise": 500000
+    },
+    "wallet_balance_paise": null
+  },
+  {
+    "id": "usr-store-luxe",
+    "name": null,
+    "email": null,
+    "phone": null,
+    "role": null,
+    "created_at": null,
+    "raw_data": {
+      "id": "usr-store-luxe",
+      "name": "Luxe Store Partner",
+      "role": "shop",
+      "email": "store.luxe@mallmaze.in",
+      "phone": "+91 98888 22222",
+      "addresses": [
+        {
+          "id": "addr-2",
+          "city": "Bangalore",
+          "state": "Karnataka",
+          "title": "Store Location",
+          "street": "Phoenix Marketcity, Level 1",
+          "pincode": "560048",
+          "is_default": true
+        }
+      ],
+      "created_at": "2026-01-02T00:00:00.000Z",
+      "wallet_balance_paise": 1500000
+    },
+    "wallet_balance_paise": null
+  },
+  {
+    "id": "usr-customer-shopper",
+    "name": null,
+    "email": null,
+    "phone": null,
+    "role": null,
+    "created_at": null,
+    "raw_data": {
+      "id": "usr-customer-shopper",
+      "name": "Rahul Sharma",
+      "role": "user",
+      "email": "shopper@mallmaze.in",
+      "phone": "+91 97777 33333",
+      "addresses": [
+        {
+          "id": "addr-3",
+          "city": "Bangalore",
+          "state": "Karnataka",
+          "title": "Home",
+          "street": "Flat 402, Green Glen Layout, Bellandur",
+          "pincode": "560103",
+          "is_default": true
+        }
+      ],
+      "created_at": "2026-01-03T00:00:00.000Z",
+      "wallet_balance_paise": 250000
+    },
+    "wallet_balance_paise": null
+  }
+]

@@ -593,6 +593,7 @@
 
     <!-- Sidebar -->
     <!-- SIDEBAR -->
+        <!-- UNIFIED MERCHANT SIDEBAR -->
     <aside class="sidebar">
       <a href="dashboard.html" class="brand">
         <div class="brand-icon">
@@ -600,73 +601,85 @@
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
           </svg>
         </div>
-        <span>MallMaze</span>
+        <div class="brand-text-block">
+          <span class="brand-title">MallMaze</span>
+          <span class="brand-tag">Store Partner</span>
+        </div>
       </a>
 
-      <!-- Home Redirect Link in Sidebar -->
-      <a href="index.html" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:18px;" title="Go to MallMaze Customer Storefront">
-        <span>ðŸŒ Storefront / Home</span>
-        <span>â†’</span>
+      <!-- Quick Store Status Pill -->
+      <div class="sidebar-store-status">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="dot-live"></div>
+          <div>
+            <span>ONLINE</span><br>
+            <small>Accepting Orders</small>
+          </div>
+        </div>
+        <button type="button" onclick="if(typeof toggleStoreOnlineStatus==='function'){toggleStoreOnlineStatus();}else if(typeof showToast==='function'){showToast('Store status: Online');}" title="Toggle Online / Offline">Toggle</button>
+      </div>
+
+      <!-- Customer Storefront Link -->
+      <a href="index.html" class="sidebar-storefront-link" style="display:flex; align-items:center; justify-content:space-between; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); color:#facc15; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; margin-bottom:14px;" title="Go to Customer Storefront">
+        <span style="display:flex; align-items:center; gap:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Customer Store
+        </span>
+        <span style="background:rgba(234,179,8,0.25); color:#fef08a; padding:1px 6px; border-radius:6px; font-size:10px;">Live --></span>
       </a>
 
+      <div class="nav-label">Store Operations</div>
       <div class="nav-group">
         <a class="nav-item" href="dashboard.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           <span>Dashboard</span>
         </a>
         <a class="nav-item" href="orders.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           <span>Orders</span>
         </a>
         <a class="nav-item active" href="inventory.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-          <span>Stock & Products</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          <span>Stock & Inventory</span>
         </a>
         <a class="nav-item" href="payments.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-          <span>Payments</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span>Payments & Billing</span>
         </a>
         <a class="nav-item" href="customers.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>Customers</span>
         </a>
-        <a class="nav-item" href="profit-loss.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          <span>Profit & Loss</span>
-        </a>
-        <a class="nav-item" href="reports.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-          <span>Reports</span>
-        </a>
-        <a class="nav-item" href="statistics.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-          <span>Statistics</span>
+        <a class="nav-item" href="store-dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect></svg>
+          <span>Store QR Code</span>
         </a>
       </div>
 
       <div class="nav-divider"></div>
 
+      <div class="nav-label">Analytics & Reports</div>
       <div class="nav-group">
-        <a class="nav-item" href="notifications.html" onclick="if(typeof showToast==='function'){showToast('You have 4 new store alerts');}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span>Notifications</span>
+        <a class="nav-item" href="statistics.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Sales Analytics</span>
         </a>
-        <a class="nav-item" href="#help" onclick="event.preventDefault(); if(typeof showToast==='function'){showToast('Help Center & Documentation');}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          <span>Help</span>
+        <a class="nav-item" href="profit-loss.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>Profit & Loss</span>
         </a>
-        <a class="nav-item" href="#settings" onclick="event.preventDefault(); if(typeof showToast==='function'){showToast('Store & System Settings');}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          <span>Settings</span>
+        <a class="nav-item" href="reports.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>Reports</span>
         </a>
       </div>
 
       <div class="nav-spacer"></div>
 
       <div class="sidebar-footer">
-        <a class="nav-item" href="index.html" onclick="if(typeof showToast==='function'){showToast('Logged out successfully');}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          <span>Log out</span>
+        <a class="nav-item" href="index.html" onclick="if(typeof showToast==='function')showToast('Logged out of POS terminal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Exit POS</span>
         </a>
       </div>
     </aside>
@@ -683,7 +696,7 @@
           </div>
           <div class="top-actions">
             <button class="btn-action-primary" onclick="openAddProductModal()">
-              ðŸ“¸ Add Stock & AI Studio Enhance
+               Add Stock & AI Studio Enhance
             </button>
             <div class="user-profile">
               <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80" alt="Priya Sharma" class="user-avatar" />
@@ -704,7 +717,7 @@
           </div>
           <div class="kpi-box">
             <div class="kpi-label">Total Inventory Stock Value</div>
-            <div class="kpi-value" style="color:#15803d;" id="dispStockVal">â‚¹32,28,000</div>
+            <div class="kpi-value" style="color:#15803d;" id="dispStockVal">₹32,28,000</div>
             <div class="kpi-sub">At wholesale procurement cost</div>
           </div>
           <div class="kpi-box">
@@ -724,14 +737,14 @@
         <div class="mobile-search-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input type="text" id="inventorySearchInput" class="mobile-search-input" placeholder="Search stock by product name, SKU, or category..." oninput="handleInventorySearch(this.value)" />
-          <button id="inventorySearchClear" class="mobile-search-clear" onclick="clearInventorySearch()">âœ•</button>
+          <button id="inventorySearchClear" class="mobile-search-clear" onclick="clearInventorySearch()">✓•</button>
         </div>
 
         <div class="filters-bar">
           <div class="filter-group">
             <button class="dropdown-pill active-pill" onclick="filterCatalog('ALL', this)">All Products</button>
-            <button class="dropdown-pill" onclick="filterCatalog('LOW', this)">âš ï¸ Low Stock</button>
-            <button class="dropdown-pill" onclick="filterCatalog('HIGH_MARGIN', this)">ðŸ”¥ High Margin (25%+)</button>
+            <button class="dropdown-pill" onclick="filterCatalog('LOW', this)">⚠ Low Stock</button>
+            <button class="dropdown-pill" onclick="filterCatalog('HIGH_MARGIN', this)">★ High Margin (25%+)</button>
           </div>
           <div class="filter-group">
             <button class="dropdown-pill" onclick="showToast('Sorted by sales speed')">Sort by Sales Velocity</button>
@@ -745,8 +758,8 @@
               <tr>
                 <th>Product & SKU</th>
                 <th>Category</th>
-                <th>Cost (â‚¹)</th>
-                <th>Retail (â‚¹)</th>
+                <th>Cost (₹)</th>
+                <th>Retail (₹)</th>
                 <th>Margin %</th>
                 <th>Stock</th>
                 <th>AI Studio</th>
@@ -761,13 +774,13 @@
       <aside class="detail-panel">
         <div class="detail-header">
           <h2 class="detail-title" id="pDetailName">TIG-200 Inverter Welder</h2>
-          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close details">âœ•</button>
+          <button class="sheet-close-btn" onclick="window.closeMobileDetailPanel()" title="Close details">✓•</button>
         </div>
 
         <!-- Studio Preview Box -->
         <div class="studio-preview-card">
           <div class="studio-img-wrap" id="studioWrap">
-            <div class="ai-badge-chip" id="studioBadgeText">âœ¨ Auto Contrast Cleaned</div>
+            <div class="ai-badge-chip" id="studioBadgeText">✓¨ Auto Contrast Cleaned</div>
             <img id="pDetailImg" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=80" alt="Product" />
           </div>
 
@@ -796,24 +809,24 @@
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:11px 13px; margin-bottom:14px; font-size:12px;">
           <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
             <span style="color:#64748b;">Wholesale Cost:</span>
-            <strong id="pDetailCost">â‚¹38,000</strong>
+            <strong id="pDetailCost">₹38,000</strong>
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
             <span style="color:#64748b;">Retail Selling Price:</span>
-            <strong id="pDetailSell" style="color:#15803d;">â‚¹54,000</strong>
+            <strong id="pDetailSell" style="color:#15803d;">₹54,000</strong>
           </div>
           <div style="display:flex; justify-content:space-between; border-top:1px solid #cbd5e1; padding-top:5px; margin-top:4px; font-weight:800;">
             <span>Gross Unit Margin:</span>
-            <span style="color:#15803d;" id="pDetailMargin">â‚¹16,000 (32.0%)</span>
+            <span style="color:#15803d;" id="pDetailMargin">₹16,000 (32.0%)</span>
           </div>
         </div>
 
         <div style="display:flex; gap:8px; margin-top:auto;">
           <button class="btn-action-primary" style="flex:1; padding:10px; font-size:12px;" onclick="showToast('Barcodes printed!')">
-            ðŸ–¨ï¸ Barcode
+             Barcode
           </button>
           <button class="btn-action-primary" style="flex:1; padding:10px; font-size:12px; background:#eab308; color:#121620;" onclick="showToast('Catalog synced to MallMaze marketplace!')">
-            ðŸš€ Sync Online
+             Sync Online
           </button>
         </div>
       </aside>
@@ -825,10 +838,10 @@
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <div>
-          <h3 style="font-size:18px; font-weight:800; color:#0f172a;">ðŸ“¸ Add Product & AI Studio Enhancer</h3>
+          <h3 style="font-size:18px; font-weight:800; color:#0f172a;"> Add Product & AI Studio Enhancer</h3>
           <p style="font-size:12px; color:#64748b;">Take a live camera snap or upload a raw photo to convert it into an Amazon/Flipkart studio-grade listing</p>
         </div>
-        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('addProductModal')">âœ•</button>
+        <button style="border:none; background:#f1f5f9; width:28px; height:28px; border-radius:50%; cursor:pointer;" onclick="closeModal('addProductModal')">✓•</button>
       </div>
 
       <form onsubmit="handleSaveNewProduct(event)">
@@ -857,11 +870,11 @@
 
         <div class="form-grid-2">
           <div class="form-group">
-            <label class="form-label">Wholesale Cost Price (â‚¹)</label>
+            <label class="form-label">Wholesale Cost Price (₹)</label>
             <input type="number" id="npCost" class="form-input" value="18000" min="0" oninput="calculateMarginPreview()" required />
           </div>
           <div class="form-group">
-            <label class="form-label">Retail Selling Price (â‚¹)</label>
+            <label class="form-label">Retail Selling Price (₹)</label>
             <input type="number" id="npPrice" class="form-input" value="26500" min="0" oninput="calculateMarginPreview()" required />
           </div>
         </div>
@@ -879,11 +892,11 @@
 
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; font-size:13px;">
           <span>Live Expected Unit Margin:</span>
-          <strong style="color:#15803d;" id="npMarginPreview">+ â‚¹8,500 (32.1%)</strong>
+          <strong style="color:#15803d;" id="npMarginPreview">+ ₹8,500 (32.1%)</strong>
         </div>
 
         <button type="submit" class="btn-submit-product">
-          âœ¨ Save Custom Product & Publish with AI Background
+          ✓¨ Save Custom Product & Publish with AI Background
         </button>
       </form>
     </div>
@@ -1003,7 +1016,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="7" style="text-align:center; padding:30px 16px; color:#64748b; background:#ffffff; border-radius:16px;">
-              <div style="font-size:24px; margin-bottom:6px;">ðŸ“¦</div>
+              <div style="font-size:24px; margin-bottom:6px;"></div>
               <strong style="display:block; font-size:14px; color:#0f172a;">No stock items match your search</strong>
               <span style="font-size:12px;">Try a different keyword or reset filters</span>
             </td>
@@ -1032,7 +1045,7 @@
                   <span style="font-size:11px; font-weight:700; color:#64748b;">${p.category}</span>
                 </div>
                 <span class="status-badge ${isLow ? 'badge-low' : 'badge-live'}">
-                  ${isLow ? 'âš ï¸ Low (' + p.stock + ')' : 'â— ' + p.stock + ' in stock'}
+                  ${isLow ? '⚠ Low (' + p.stock + ')' : '• ' + p.stock + ' in stock'}
                 </span>
               </div>
               <div class="mob-card-body" style="margin: 8px 0 6px;">
@@ -1042,8 +1055,8 @@
                 <div style="flex:1; min-width:0;">
                   <strong style="font-size:13.5px; color:#0f172a; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</strong>
                   <div style="display:flex; align-items:baseline; gap:8px; margin-top:3px; flex-wrap:wrap;">
-                    <strong style="font-size:14.5px; color:#0f172a;">â‚¹${p.price.toLocaleString('en-IN')}</strong>
-                    <span style="font-size:11.5px; color:#64748b;">Cost: â‚¹${p.cost.toLocaleString('en-IN')}</span>
+                    <strong style="font-size:14.5px; color:#0f172a;">₹${p.price.toLocaleString('en-IN')}</strong>
+                    <span style="font-size:11.5px; color:#64748b;">Cost: ₹${p.cost.toLocaleString('en-IN')}</span>
                     <span style="font-size:11px; color:#15803d; font-weight:700; background:#dcfce7; padding:1px 6px; border-radius:4px;">+${marginPct}%</span>
                   </div>
                 </div>
@@ -1056,8 +1069,8 @@
                   <span style="font-size:10.5px; color:#64748b; font-weight:600; margin-left:4px;">units</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:6px;">
-                  <span class="status-badge badge-ai" style="font-size:10.5px; padding:4px 8px;">âœ¨ AI Studio</span>
-                  <span style="font-size:12px; color:#94a3b8; font-weight:700;">â¯</span>
+                  <span class="status-badge badge-ai" style="font-size:10.5px; padding:4px 8px;">✓¨ AI Studio</span>
+                  <span style="font-size:12px; color:#94a3b8; font-weight:700;">â¯</span>
                 </div>
               </div>
             </td>
@@ -1077,15 +1090,15 @@
               </div>
             </td>
             <td>${p.category}</td>
-            <td>â‚¹${p.cost.toLocaleString('en-IN')}</td>
-            <td><strong>â‚¹${p.price.toLocaleString('en-IN')}</strong></td>
-            <td><span style="color:#15803d; font-weight:700;">+â‚¹${marginAmt.toLocaleString('en-IN')} (${marginPct}%)</span></td>
+            <td>₹${p.cost.toLocaleString('en-IN')}</td>
+            <td><strong>₹${p.price.toLocaleString('en-IN')}</strong></td>
+            <td><span style="color:#15803d; font-weight:700;">+₹${marginAmt.toLocaleString('en-IN')} (${marginPct}%)</span></td>
             <td>
               <span class="status-badge ${isLow ? 'badge-low' : 'badge-live'}">
                 ${p.stock} units ${isLow ? '(Low)' : ''}
               </span>
             </td>
-            <td><span class="status-badge badge-ai">âœ¨ Studio Clean</span></td>
+            <td><span class="status-badge badge-ai">✓¨ Studio Clean</span></td>
           `;
         }
         tbody.appendChild(tr);
@@ -1126,9 +1139,9 @@
       document.getElementById("pDetailName").innerText = p.name;
       document.getElementById("pDetailImg").src = p.img;
       document.getElementById("pDetailStock").innerText = `${p.stock} Units ${p.stock <= p.lowThreshold ? '(Low)' : ''}`;
-      document.getElementById("pDetailCost").innerText = "â‚¹" + p.cost.toLocaleString('en-IN');
-      document.getElementById("pDetailSell").innerText = "â‚¹" + p.price.toLocaleString('en-IN');
-      document.getElementById("pDetailMargin").innerText = `+ â‚¹${marginAmt.toLocaleString('en-IN')} (${marginPct}%)`;
+      document.getElementById("pDetailCost").innerText = "₹" + p.cost.toLocaleString('en-IN');
+      document.getElementById("pDetailSell").innerText = "₹" + p.price.toLocaleString('en-IN');
+      document.getElementById("pDetailMargin").innerText = `+ ₹${marginAmt.toLocaleString('en-IN')} (${marginPct}%)`;
     }
 
     function updateKpis() {
@@ -1139,7 +1152,7 @@
         if (p.stock <= p.lowThreshold) lowCount++;
       });
       document.getElementById("dispTotalCount").innerText = `${inventoryData.length} Products`;
-      document.getElementById("dispStockVal").innerText = "â‚¹" + totalVal.toLocaleString('en-IN');
+      document.getElementById("dispStockVal").innerText = "₹" + totalVal.toLocaleString('en-IN');
       document.getElementById("dispLowStock").innerText = `${lowCount} Items Left`;
     }
 
@@ -1163,19 +1176,19 @@
       if (theme === 'white') {
         wrap.style.background = "#ffffff";
         wrap.style.boxShadow = "0 4px 14px rgba(0,0,0,0.06)";
-        badge.innerText = "âœ¨ Amazon Pure White";
+        badge.innerText = "✓¨ Amazon Pure White";
       } else if (theme === 'onyx') {
         wrap.style.background = "linear-gradient(145deg, #1e293b, #0f172a)";
         wrap.style.boxShadow = "0 10px 25px rgba(0,0,0,0.3)";
-        badge.innerText = "âœ¨ Onyx Luxury (Dark)";
+        badge.innerText = "✓¨ Onyx Luxury (Dark)";
       } else if (theme === 'sand') {
         wrap.style.background = "linear-gradient(145deg, #fef3c7, #fde68a)";
         wrap.style.boxShadow = "0 8px 20px rgba(234,179,8,0.15)";
-        badge.innerText = "âœ¨ Warm Sand Studio";
+        badge.innerText = "✓¨ Warm Sand Studio";
       } else if (theme === 'glacier') {
         wrap.style.background = "linear-gradient(145deg, #e0f2fe, #bae6fd)";
         wrap.style.boxShadow = "0 8px 20px rgba(14,165,233,0.15)";
-        badge.innerText = "âœ¨ Glacier Contrast";
+        badge.innerText = "✓¨ Glacier Contrast";
       }
       showToast(`Studio Theme: ${btn.innerText}`);
     }
@@ -1241,7 +1254,7 @@
       const diff = price - cost;
       const pct = price > 0 ? ((diff / price) * 100).toFixed(1) : 0;
       const disp = document.getElementById("npMarginPreview");
-      if (disp) disp.innerText = `+ â‚¹${diff.toLocaleString('en-IN')} (${pct}%)`;
+      if (disp) disp.innerText = `+ ₹${diff.toLocaleString('en-IN')} (${pct}%)`;
     }
 
     function handleSaveNewProduct(e) {
@@ -1272,7 +1285,7 @@
       inventoryData.unshift(newProduct);
       closeModal("addProductModal");
       selectProduct(newId);
-      showToast(`âœ¨ Product "${title}" published with ${allImgs.length} media photos!`);
+      showToast(`✓¨ Product "${title}" published with ${allImgs.length} media photos!`);
     }
 
     function showToast(msg) {
