@@ -1358,7 +1358,9 @@
           return true;
         } catch (error) {
           console.warn(`AutoShelf ${label} saved locally but backend sync failed`, error);
-          showToast(`${label} saved locally. Backend sync needs attention.`);
+          const msg = error?.message || "Backend sync failed";
+          showToast(`${label}: ${msg}`);
+          window.alert(`${label} was saved in your browser only, NOT in PostgreSQL.\n\nReason: ${msg}\n\nIf it says "Login required", please sign in at login.html first.`);
           return false;
         }
       }

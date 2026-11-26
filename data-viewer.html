@@ -236,6 +236,49 @@
       border-color: #3b82f6;
     }
 
+    /* Table View (Rows & Columns) */
+    .table-wrap {
+      background: #060911;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      max-height: 560px;
+      overflow: auto;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      text-align: left;
+    }
+    .data-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #11192c;
+      color: var(--accent-gold);
+      font-weight: 800;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+    .data-table tbody td {
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .data-table tbody tr:hover td {
+      background: rgba(59, 130, 246, 0.08);
+    }
+
     /* Raw JSON view */
     .json-box {
       background: #060911;
@@ -389,42 +432,42 @@
         
         <button class="table-btn active" onclick="loadTableData('stores', this)">
           <span>🏪 Stores (mm_stores)</span>
-          <span class="count-tag" id="tagStores">8</span>
+          <span class="count-tag" id="tagStores">—</span>
         </button>
 
         <button class="table-btn" onclick="loadTableData('products', this)">
           <span>🛍️ Products (mm_products)</span>
-          <span class="count-tag" id="tagProducts">28</span>
+          <span class="count-tag" id="tagProducts">—</span>
         </button>
 
         <button class="table-btn" onclick="loadTableData('orders', this)">
           <span>📦 Orders (mm_orders)</span>
-          <span class="count-tag" id="tagOrders">7</span>
+          <span class="count-tag" id="tagOrders">—</span>
         </button>
 
         <button class="table-btn" onclick="loadTableData('users', this)">
           <span>👤 Users (mm_users)</span>
-          <span class="count-tag" id="tagUsers">4</span>
+          <span class="count-tag" id="tagUsers">—</span>
         </button>
 
-        <button class="table-btn" onclick="loadTableData('malls', this)">
-          <span>🏢 Malls & Kiosks</span>
-          <span class="count-tag" id="tagMalls">4</span>
+        <button class="table-btn" onclick="loadTableData('stock_events', this)">
+          <span>📊 Stock Events</span>
+          <span class="count-tag" id="tagStock">—</span>
         </button>
 
         <button class="table-btn" onclick="loadTableData('reservations', this)">
-          <span>🎟️ Fast Pickups / OTPs</span>
-          <span class="count-tag" id="tagResv">3</span>
+          <span>🎟️ Fast Pickups / Reservations</span>
+          <span class="count-tag" id="tagResv">—</span>
         </button>
 
         <button class="table-btn" onclick="loadTableData('delivery_jobs', this)">
           <span>🛵 Delivery Jobs (Shiprocket)</span>
-          <span class="count-tag" id="tagJobs">6</span>
+          <span class="count-tag" id="tagJobs">—</span>
         </button>
 
-        <button class="table-btn" onclick="loadTableData('schema', this)">
-          <span>📑 Full Schema & Tables</span>
-          <span class="count-tag">26</span>
+        <button class="table-btn" onclick="loadTableData('support_tickets', this)">
+          <span>🎫 Support Tickets</span>
+          <span class="count-tag" id="tagSupport">—</span>
         </button>
       </aside>
 
@@ -434,22 +477,26 @@
           <div>
             <div class="active-table-title" id="activeTableHeading">
               🏪 Stores Table Data
-              <span class="table-schema-badge" id="activeSchemaBadge">public.stores</span>
+              <span class="table-schema-badge" id="activeSchemaBadge">mm_stores</span>
             </div>
             <p style="font-size:12px; color:var(--text-muted); margin-top:2px;" id="activeTableDesc">
-              Showing active store records, addresses, category, and public QR tokens.
+              Loading live rows and columns from Render PostgreSQL...
             </p>
           </div>
 
           <div class="view-toggles">
-            <button class="view-btn active" id="btnCardsView" onclick="switchDisplayMode('cards')">Cards View</button>
+            <button class="view-btn active" id="btnTableView" onclick="switchDisplayMode('table')">Table (Rows &amp; Columns)</button>
+            <button class="view-btn" id="btnCardsView" onclick="switchDisplayMode('cards')">Cards View</button>
             <button class="view-btn" id="btnJsonView" onclick="switchDisplayMode('json')">Raw JSON</button>
             <button class="view-btn" onclick="refreshCurrentTable()">🔄 Refresh</button>
           </div>
         </div>
 
+        <!-- Table (Rows & Columns) View Container -->
+        <div id="tableContainer" class="table-wrap"></div>
+
         <!-- Cards View Container -->
-        <div id="cardsContainer" class="records-grid"></div>
+        <div id="cardsContainer" class="records-grid" style="display:none;"></div>
 
         <!-- Raw JSON Container -->
         <div id="jsonContainer" class="json-box" style="display:none;"></div>
@@ -487,78 +534,82 @@ PGSSLMODE="disable" # or require
 
   </div>
 
-  <!-- Supabase JS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/config.js"></script>
+  <script src="assets/js/api-client.js"></script>
 
   <script>
-    // ── Supabase direct client (uses real table names: stores, products, orders, malls) ──
-    const SUPABASE_URL = (window.MM_CONFIG || {}).SUPABASE_URL || 'https://tyorlxcsbkgewmjjensa.supabase.co';
-    const SUPABASE_KEY = (window.MM_CONFIG || {}).SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5b3JseGNzYmtnZXdtamplbnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTg0MDAsImV4cCI6MjA5MTgzNDQwMH0.b2yUGXzkpLlgaXm6wkJHCOGZpix0ooX9NYEOkb4fxwo';
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const API_BASE = String((window.MM_CONFIG || {}).API_BASE_URL || `${window.location.origin}/api`).replace(/\/+$/, '');
 
-    // Table config: maps UI key → Supabase table name + display info
     const TABLE_MAP = {
-      stores:          { table: 'stores',          icon: '🏪', label: 'Stores',         nameField: 'name' },
-      products:        { table: 'products',         icon: '🛍️', label: 'Products',        nameField: 'name' },
-      orders:          { table: 'orders',           icon: '📦', label: 'Orders',          nameField: 'id' },
-      malls:           { table: 'malls',            icon: '🏢', label: 'Malls',           nameField: 'name' },
-      inventory:       { table: 'inventory',        icon: '📦', label: 'Inventory',       nameField: 'id' },
-      scan_sessions:   { table: 'scan_sessions',    icon: '📱', label: 'Scan Sessions',   nameField: 'id' },
-      support_tickets: { table: 'support_tickets',  icon: '🎫', label: 'Support Tickets', nameField: 'subject' },
+      stores:          { table: 'mm_stores',          icon: '🏪', label: 'Stores',          nameField: 'name' },
+      products:        { table: 'mm_products',        icon: '🛍️', label: 'Products',        nameField: 'name' },
+      orders:          { table: 'mm_orders',          icon: '📦', label: 'Orders',          nameField: 'id' },
+      users:           { table: 'mm_users',           icon: '👤', label: 'Users',           nameField: 'name' },
+      stock_events:    { table: 'mm_stock_events',    icon: '📊', label: 'Stock Events',    nameField: 'id' },
+      reservations:    { table: 'reservations',       icon: '🎟️', label: 'Reservations',    nameField: 'id' },
+      delivery_jobs:   { table: 'mm_delivery_jobs',   icon: '🛵', label: 'Delivery Jobs',   nameField: 'id' },
+      support_tickets: { table: 'mm_support_tickets', icon: '🎫', label: 'Support Tickets', nameField: 'subject' }
     };
 
     const TAG_MAP = {
-      stores: 'tagStores', products: 'tagProducts', orders: 'tagOrders',
-      malls: 'tagMalls', inventory: 'tagInventory', scan_sessions: 'tagScans',
+      stores: 'tagStores',
+      products: 'tagProducts',
+      orders: 'tagOrders',
+      users: 'tagUsers',
+      stock_events: 'tagStock',
+      reservations: 'tagResv',
+      delivery_jobs: 'tagJobs',
       support_tickets: 'tagSupport'
     };
 
     let currentTableKey = 'stores';
-    let currentDisplayMode = 'cards';
-    let loadedDataCache = {};
+    let currentDisplayMode = 'table';
 
-    // ── Check Supabase connectivity ──
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    async function apiFetch(path) {
+      const res = await fetch(`${API_BASE}${path}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
     async function checkHealth() {
       try {
-        const { data, error } = await sb.from('stores').select('id', { count: 'exact', head: true });
-        if (!error) {
-          document.getElementById('apiStatusVal').innerHTML = `<div class="pulse-dot"></div> Supabase Live`;
-          document.getElementById('dbEngineVal').innerHTML = '🐘 PostgreSQL';
-          document.getElementById('dbEngineSub').innerText = SUPABASE_URL.replace('https://', '');
-          document.getElementById('apiEndpointSub').innerText = SUPABASE_URL;
-        } else {
-          throw new Error(error.message);
-        }
+        const health = await apiFetch('/health');
+        document.getElementById('apiStatusVal').innerHTML = `<div class="pulse-dot"></div> Online`;
+        document.getElementById('apiEndpointSub').innerText = API_BASE;
+        document.getElementById('dbEngineVal').innerHTML = `<span>🐘 ${health.database === 'postgresql-connected' ? 'PostgreSQL Connected' : health.database}</span>`;
+        document.getElementById('dbEngineSub').innerText = health.database === 'postgresql-connected' ? 'Render PostgreSQL Live' : health.database;
       } catch (e) {
-        document.getElementById('apiStatusVal').innerHTML = `<span style="color:#ef4444;">Check RLS</span>`;
-        document.getElementById('dbEngineSub').innerText = e.message.substring(0, 60);
+        document.getElementById('apiStatusVal').innerHTML = `<span style="color:#ef4444;">Offline</span>`;
+        document.getElementById('dbEngineSub').innerText = e.message;
       }
     }
 
-    // ── Load counts for sidebar badges ──
     async function loadAllCounts() {
-      for (const [key, cfg] of Object.entries(TABLE_MAP)) {
-        const tagId = TAG_MAP[key];
-        if (!tagId) continue;
-        try {
-          const { count, error } = await sb.from(cfg.table).select('*', { count: 'exact', head: true });
+      try {
+        const overview = await apiFetch('/db/overview');
+        const counts = overview.counts || {};
+        for (const [key, tagId] of Object.entries(TAG_MAP)) {
           const el = document.getElementById(tagId);
-          if (el) el.textContent = error ? 'RLS' : (count ?? '0');
-          // Update stat cards
-          if (key === 'stores') {
-            const v = document.getElementById('storesCountVal');
-            if (v) v.innerHTML = `<div class="pulse-dot"></div> ${count ?? '—'} Stores`;
-          }
-          if (key === 'products') {
-            const v = document.getElementById('productsCountVal');
-            if (v) v.innerHTML = `${count ?? '—'} Products`;
-          }
-        } catch (_) {}
+          if (el) el.textContent = counts[key] ?? 0;
+        }
+        const sv = document.getElementById('storesCountVal');
+        if (sv) sv.innerHTML = `<div class="pulse-dot"></div> ${counts.stores ?? 0} Stores`;
+        const pv = document.getElementById('productsCountVal');
+        if (pv) pv.innerHTML = `${counts.products ?? 0} Products`;
+      } catch (e) {
+        console.warn('Overview load failed:', e);
       }
     }
 
-    // ── Load table data from Supabase ──
     async function loadTableData(tableKey, btnEl) {
       currentTableKey = tableKey;
       if (btnEl) {
@@ -566,103 +617,90 @@ PGSSLMODE="disable" # or require
         btnEl.classList.add('active');
       }
 
+      const tableEl = document.getElementById('tableContainer');
       const cardsEl = document.getElementById('cardsContainer');
       const jsonEl  = document.getElementById('jsonContainer');
-      cardsEl.innerHTML = `<div style="color:var(--accent-gold); font-size:13px; padding:20px;">⏳ Fetching from Supabase...</div>`;
+      tableEl.innerHTML = `<div style="color:var(--accent-gold); font-size:13px; padding:20px;">⏳ Loading rows from Render PostgreSQL...</div>`;
+      cardsEl.innerHTML = '';
       jsonEl.innerText  = 'Loading...';
 
-      // Schema overview is static
-      if (tableKey === 'schema') {
-        const schemaInfo = [
-          { table: 'stores',          rls: '✅ Public Read', write: 'Admin only',  description: 'Store metadata, QR tokens, bank payout' },
-          { table: 'products',        rls: '✅ Public Read', write: 'Admin only',  description: 'Catalog items, pricing, active flag' },
-          { table: 'orders',          rls: '🔒 Own User',   write: 'Own User',    description: 'Customer POS transaction records' },
-          { table: 'malls',           rls: '✅ Public Read', write: 'Admin only',  description: 'Mall locations, floors, stores count' },
-          { table: 'inventory',       rls: '✅ Public Read', write: 'Admin only',  description: 'Stock levels per product per store' },
-          { table: 'profiles',        rls: '🔒 Own User',   write: 'Own User',    description: 'Customer & merchant user profiles' },
-          { table: 'user_roles',      rls: '🔒 Own User',   write: 'System',      description: 'Role assignments (admin, store_manager)' },
-          { table: 'scan_sessions',   rls: '🔒 Own User',   write: 'Own User',    description: 'In-store barcode scan sessions' },
-          { table: 'scan_receipts',   rls: '🔒 Own/Staff',  write: 'Staff',       description: 'Verified checkout receipts' },
-          { table: 'support_tickets', rls: '🔒 Own/Admin',  write: 'Own/Admin',   description: 'Customer support cases' },
-          { table: 'deliveries',      rls: '🔒 Own User',   write: 'System',      description: 'Shiprocket delivery tracking' },
-          { table: 'order_events',    rls: '🔒 Own User',   write: 'System',      description: 'Order status timeline events' },
-        ];
-        loadedDataCache[tableKey] = schemaInfo;
-        renderCurrentData(schemaInfo, tableKey);
-        return;
-      }
-
-      const cfg = TABLE_MAP[tableKey];
-      if (!cfg) {
-        cardsEl.innerHTML = `<div style="color:#ef4444;">Unknown table: ${tableKey}</div>`;
-        return;
-      }
-
       try {
-        const { data, error } = await sb.from(cfg.table).select('*').limit(50).order('id', { ascending: false });
-        if (error) throw new Error(error.message);
-
-        loadedDataCache[tableKey] = data || [];
-        renderCurrentData(data || [], tableKey);
-
-        // Update sidebar count tag
+        const payload = await apiFetch(`/db/table?name=${encodeURIComponent(tableKey)}`);
+        const rows = payload.rows || [];
+        renderCurrentData(rows, tableKey);
         const tagEl = document.getElementById(TAG_MAP[tableKey]);
-        if (tagEl) tagEl.textContent = (data || []).length;
-
+        if (tagEl) tagEl.textContent = payload.count ?? rows.length;
       } catch (err) {
-        const isRls = err.message.includes('policy') || err.message.includes('42501');
-        const helpMsg = isRls
-          ? `RLS policy blocks anon reads on <strong>${cfg.table}</strong>. Add: <br><code>CREATE POLICY "public_read" ON public.${cfg.table} FOR SELECT USING (true);</code>`
-          : err.message;
-        cardsEl.innerHTML = `
-          <div style="color:#ef4444; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:20px; font-size:13px;">
-            <strong>⚠️ Error loading ${cfg.table}:</strong><br>${helpMsg}
-          </div>`;
+        const errHtml = `<div style="color:#ef4444; padding:20px; font-size:13px;"><strong>⚠️ Error loading ${escapeHtml(tableKey)}:</strong> ${escapeHtml(err.message)}</div>`;
+        tableEl.innerHTML = errHtml;
+        cardsEl.innerHTML = errHtml;
         jsonEl.innerText = `Error: ${err.message}`;
       }
     }
 
-    // ── Render records into cards or JSON ──
+    function formatCell(val) {
+      if (val === null || val === undefined || val === '') return '—';
+      if (typeof val === 'boolean') return val ? 'true' : 'false';
+      if (typeof val === 'object') return JSON.stringify(val);
+      return String(val);
+    }
+
     function renderCurrentData(records, tableKey) {
+      const tableEl = document.getElementById('tableContainer');
       const cardsEl = document.getElementById('cardsContainer');
       const jsonEl  = document.getElementById('jsonContainer');
       const titleEl = document.getElementById('activeTableHeading');
-      const badgeEl = document.getElementById('activeSchemaBadge');
       const descEl  = document.getElementById('activeTableDesc');
-      const cfg = TABLE_MAP[tableKey];
+      const cfg = TABLE_MAP[tableKey] || { icon: '📑', label: tableKey, table: tableKey, nameField: 'id' };
 
-      const icon      = cfg ? cfg.icon : '📑';
-      const label     = cfg ? cfg.label : tableKey.toUpperCase();
-      const tableName = cfg ? cfg.table : tableKey;
-
-      titleEl.innerHTML = `${icon} ${label} <span class="table-schema-badge" id="activeSchemaBadge">public.${tableName}</span>`;
-      descEl.innerText = `${records.length} record(s) loaded from public.${tableName}`;
+      titleEl.innerHTML = `${cfg.icon} ${cfg.label} <span class="table-schema-badge" id="activeSchemaBadge">${cfg.table}</span>`;
+      descEl.innerText = `${records.length} row(s) loaded from ${cfg.table}`;
       jsonEl.innerText = JSON.stringify(records, null, 2);
 
       if (!records || records.length === 0) {
-        cardsEl.innerHTML = `
-          <div style="color:var(--text-muted); font-size:13px; padding:20px; text-align:center;">
+        const emptyHtml = `
+          <div style="color:var(--text-muted); font-size:13px; padding:28px; text-align:center;">
             <div style="font-size:32px; margin-bottom:8px;">📭</div>
-            No records found in <strong style="color:#fff;">public.${tableName}</strong>.<br>
-            <span style="font-size:12px;">Insert rows via Supabase Dashboard → Table Editor, or run a seed SQL.</span>
+            No rows found in <strong style="color:#fff;">${cfg.table}</strong>.<br>
+            <span style="font-size:12px;">Add data via <a href="autoshelf.html#stores" style="color:var(--accent-gold);">AutoShelf</a> and click Refresh.</span>
           </div>`;
+        tableEl.innerHTML = emptyHtml;
+        cardsEl.innerHTML = emptyHtml;
         return;
       }
 
-      const nameField = cfg ? cfg.nameField : 'id';
+      // Build dynamic columns from all keys across rows (prioritizing common columns first)
+      const priority = ['id', 'name', 'store_id', 'category', 'owner_name', 'phone', 'email', 'role', 'price_inr', 'price_paise', 'stock_qty', 'verification_status', 'status', 'payment_status', 'total_paise', 'created_at'];
+      const keySet = new Set();
+      for (const k of priority) {
+        if (records.some(r => r && Object.prototype.hasOwnProperty.call(r, k))) keySet.add(k);
+      }
+      for (const r of records) {
+        if (!r || typeof r !== 'object') continue;
+        for (const k of Object.keys(r)) {
+          if (k !== 'products' && k !== 'raw_data') keySet.add(k);
+        }
+      }
+      const cols = Array.from(keySet);
+
+      const thead = `<thead><tr>${cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr></thead>`;
+      const tbody = `<tbody>${records.map(row => `<tr>${cols.map(c => {
+        const text = formatCell(row ? row[c] : '');
+        return `<td title="${escapeHtml(text)}">${escapeHtml(text)}</td>`;
+      }).join('')}</tr>`).join('')}</tbody>`;
+      tableEl.innerHTML = `<table class="data-table">${thead}${tbody}</table>`;
+
+      const nameField = cfg.nameField || 'id';
       cardsEl.innerHTML = records.map(r => {
-        const id   = r.id || '—';
+        const id = r.id || '—';
         const name = r[nameField] || r.name || r.subject || r.id || 'Record';
-        const skipKeys = new Set(['id', 'raw_data', 'created_at', 'updated_at']);
+        const skipKeys = new Set(['id', 'raw_data', 'created_at', 'updated_at', 'products']);
         const details = Object.entries(r)
           .filter(([k]) => !skipKeys.has(k) && k !== nameField)
-          .slice(0, 5)
+          .slice(0, 6)
           .map(([k, v]) => {
-            let display = v;
-            if (typeof v === 'object' && v !== null) display = JSON.stringify(v).substring(0, 60) + (JSON.stringify(v).length > 60 ? '…' : '');
-            if (typeof v === 'boolean') display = v ? '✅ Yes' : '❌ No';
-            if (v === null || v === undefined) display = '—';
-            return `<div class="record-field"><span>${k}:</span><strong>${display}</strong></div>`;
+            const txt = formatCell(v);
+            return `<div class="record-field"><span>${escapeHtml(k)}:</span><strong>${escapeHtml(txt.length > 50 ? txt.slice(0, 50) + '…' : txt)}</strong></div>`;
           }).join('');
 
         const statusVal = r.verification_status || r.status || '';
@@ -674,10 +712,10 @@ PGSSLMODE="disable" # or require
         return `
           <div class="record-card">
             <div class="record-head">
-              <span class="record-id">${String(id).substring(0, 24)}</span>
-              ${statusVal ? `<span style="font-size:10px; font-weight:800; color:${statusColor};">${statusVal.toUpperCase()}</span>` : '<span style="font-size:10px; color:#3b82f6; font-weight:800;">RECORD</span>'}
+              <span class="record-id">${escapeHtml(String(id).substring(0, 24))}</span>
+              ${statusVal ? `<span style="font-size:10px; font-weight:800; color:${statusColor};">${escapeHtml(statusVal.toUpperCase())}</span>` : '<span style="font-size:10px; color:#3b82f6; font-weight:800;">RECORD</span>'}
             </div>
-            <div class="record-title">${name}</div>
+            <div class="record-title">${escapeHtml(name)}</div>
             ${details}
           </div>`;
       }).join('');
@@ -685,19 +723,22 @@ PGSSLMODE="disable" # or require
 
     function switchDisplayMode(mode) {
       currentDisplayMode = mode;
+      document.getElementById('btnTableView').classList.toggle('active', mode === 'table');
       document.getElementById('btnCardsView').classList.toggle('active', mode === 'cards');
       document.getElementById('btnJsonView').classList.toggle('active', mode === 'json');
-      document.getElementById('cardsContainer').style.display = mode === 'cards' ? 'grid' : 'none';
+      document.getElementById('tableContainer').style.display = mode === 'table' ? 'block' : 'none';
+      document.getElementById('cardsContainer').style.display = mode === 'cards' ? 'grid'  : 'none';
       document.getElementById('jsonContainer').style.display  = mode === 'json'  ? 'block' : 'none';
     }
 
-    function refreshCurrentTable() { loadTableData(currentTableKey); }
+    function refreshCurrentTable() {
+      loadAllCounts();
+      loadTableData(currentTableKey);
+    }
 
-    // ── Init ──
     checkHealth();
     loadAllCounts();
     loadTableData('stores');
   </script>
-<script src="assets/js/api-client.js"></script>
 </body>
 </html>
