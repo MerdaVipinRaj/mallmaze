@@ -1571,6 +1571,31 @@ const routes = {
     }
     send(res, 200, { ok: true, service: "mallmaze-api", database: dbStatus, time: new Date().toISOString() });
   },
+  "GET /api/db/overview": async (_req, res) => {
+    const db = await readDb();
+    const tables = ["stores", "products", "orders", "users", "stock_events", "delivery_jobs", "reservations", "support_tickets", "feedback", "scan_receipts"];
+    const counts = {};
+    for (const t of tables) counts[t] = Array.isArray(db[t]) ? db[t].length : 0;
+    send(res, 200, { ok: true, engine: usePostgres() ? "postgresql" : "local-json", counts });
+  },
+  "GET /api/db/table": async (_req, res, parsed) => {
+    const allowed = new Set(["stores", "products", "orders", "users", "stock_events", "delivery_jobs", "reservations", "support_tickets", "feedback", "scan_receipts"]);
+    const name = String(parsed.searchParams.get("name") || "stores").trim();
+    if (!allowed.has(name)) return send(res, 400, { error: `Unknown table: ${name}` });
+    const db = await readDb();
+    const rawRows = Array.isArray(db[name]) ? db[name] : [];
+    const rows = rawRows.slice(0, 200).map((row) => {
+      if (!row || typeof row !== "object") return row;
+      const copy = { ...row };
+      delete copy.password_hash;
+      delete copy.otp_hash;
+      if (copy.bank && typeof copy.bank === "object") {
+        copy.bank = { beneficiary_name: copy.bank.beneficiary_name || "", ifsc_code: copy.bank.ifsc_code || "" };
+      }
+      return copy;
+    });
+    send(res, 200, { ok: true, table: name, count: rawRows.length, rows });
+  },
   "GET /api/version": async (_req, res) => send(res, 200, { ok: true, service: "mallmaze-api", version: "2.1.0", branch: "master", time: new Date().toISOString() }),
   "GET /api/catalog": async (_req, res, parsed) => {
     send(res, 200, await catalogResponse({
@@ -1768,12 +1793,11 @@ const routes = {
       if (access.error) return send(res, access.status, { error: access.error });
     }
     const hasBankInput = Boolean(body.account_number || body.ifsc_code || body.beneficiary_name || body.bank);
-    const bankChanged = hasBankInput || !existing?.payout_account_ref;
-    if (bankChanged) {
+    if (hasBankInput) {
       try {
         await provisionStoreBankAccount(store, body, gate.user);
       } catch (error) {
-        return send(res, 400, { error: error.message || "Bank details are required for automated payouts" });
+        return send(res, 400, { error: error.message || "Bank details are invalid" });
       }
     } else if (existing) {
       store.bank = existing.bank;
