@@ -1788,7 +1788,7 @@ const routes = {
     const store = normalizeStorePayload(body);
     const uid = gate.user.sub || gate.user.id;
     if (!store.owner_user_id) store.owner_user_id = String(uid);
-    if (store.id) {
+    if (existing) {
       const access = requireShopAccess(req, db, store.id);
       if (access.error) return send(res, access.status, { error: access.error });
     }
